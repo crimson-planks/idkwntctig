@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>idkwhatnametocallthisincrementalgame</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <p>${{visual.money}}</p>
+        <button v-on:click="ClickGainMoney(1)">Click to gain money</button>
+        <div id="autobuyer-list-div">
+            <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
+                <h4 class="autobuyer-text-div autobuyer-name-div center">Autoclicker</h4>
+                <span class="autobuyer-text-div">Amount: {{autobuyer.amount}}</span>
+                <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: ${{autobuyer.cost}}</span>
+                <span>Interval:&nbsp;{{autobuyer.interval}}</span>
+                <span class="autobuyer-text-div autobuyer-button pointer-cursor">Upgrade: ${{autobuyer.intervalCost}}</span>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="js/vue.global.js"></script>
+<script src="js/jquery-3.6.1.min.js"></script>
+<script src="js/break_eternity.js"></script>
+<script src="js/decimal.js"></script>
+<script src="js/format.js"></script>
+<script src="js/buy.js"></script>
+<script src="js/autobuyer.js"></script>
+<script src="js/components/autobuyer.js"></script>
+<script src="js/buy.js"></script>
+<script src="js/unlock.js"></script>
+<script src="js/player.js"></script>
+<script src="js/init.js"></script>
+<script src="js/main.js"></script>
+<script src="js/save.js"></script>
+</html>

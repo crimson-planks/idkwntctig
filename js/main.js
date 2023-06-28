@@ -84,6 +84,11 @@ function TriggerLoop(){
         game.autobuyerArray[0] = autobuyerArray[0];
         appThis.Update();
     }
+    if(game.money.gte(10000)) game.trigger.autobuyer1 = true;
+    if(game.trigger.autobuyer1){
+        game.autobuyerArray[1] = autobuyerArray[1];
+        appThis.Update();
+    }
 }
 function GameLoop(){
     game.autobuyerArray.forEach(autobuyer => {
@@ -93,4 +98,4 @@ function GameLoop(){
     game.lastUpdated=Date.now();
 }
 init();
-setInterval(GameLoop, 100);
+setInterval(GameLoop, 50);

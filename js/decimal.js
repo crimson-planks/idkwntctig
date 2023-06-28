@@ -12,3 +12,4 @@ Decimal.MagAbs=function(amount){
         return amount.abs();
     }
 }
+BigInt.cmp=function(a,b){if(a>b) return 1;if(a===b) return 0;else return -1;}

@@ -13,11 +13,11 @@
         <button v-on:click="ClickGainMoney(1)">Click to gain money</button>
         <div id="autobuyer-list-div">
             <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
-                <h4 class="autobuyer-text-div autobuyer-name-div center">Autoclicker</h4>
+                <h4 class="autobuyer-name-div center">Autoclicker</h4>
                 <span class="autobuyer-text-div">Amount: {{autobuyer.amount}}</span>
                 <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: ${{autobuyer.cost}}</span>
-                <span>Interval:&nbsp;{{autobuyer.interval}}</span>
-                <span class="autobuyer-text-div autobuyer-button pointer-cursor">Upgrade: ${{autobuyer.intervalCost}}</span>
+                <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}}</span>
+                <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="game.autobuyerArray[index].BuyInterval(1)">Upgrade: ${{autobuyer.intervalCost}}</span>
             </div>
         </div>
     </div>

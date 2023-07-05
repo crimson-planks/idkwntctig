@@ -1,4 +1,11 @@
 https://coolors.co/2b835d-c8d5b9-8fc0a9-6ad47a-504b43
 Color scheme: #2B835D, C8D5B9, 8FC9A9, #6AD47A, 504B43
+False Infinity
+Three prestige layers:
+Overflow (2.147e9)
+Infinity (1.8e308)
+Eternity (1e9e15)
+
 single generator, multiple autobuyers
-Deflation Upgrade: 
+Autoclicker Multiplier Upgrade by resetting.
+Deflation: Resets cost of autobuyers by x, but resets your matter & all autobuyers except your last one.

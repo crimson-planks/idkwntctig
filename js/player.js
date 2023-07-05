@@ -59,7 +59,7 @@ var autobuyerArray=[
         interval: 1000,
         cost: new Decimal(10),
         costIncrease: new Decimal(5),
-        intervalCost: new Decimal("1000"),
+        intervalCost: new Decimal("100"),
         intervalCostIncrease: new Decimal("10")
     }),
     new Autobuyer({
@@ -68,8 +68,8 @@ var autobuyerArray=[
         interval: 2000,
         cost: new Decimal(1000),
         costIncrease: new Decimal(2000),
-        intervalCost: new Decimal("1e4"),
-        intervalCostIncrease: new Decimal("10").sqrt()
+        intervalCost: new Decimal("100"),
+        intervalCostIncrease: new Decimal("10")
     }),
 
 ]

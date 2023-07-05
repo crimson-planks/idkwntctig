@@ -78,13 +78,15 @@ var app = Vue.createApp({
     }
 });
 app.mount("#app");
+function softReset(level){
+}
 function TriggerLoop(){
     if(game.money.gte(10)) game.trigger.autoclicker = true;
     if(game.trigger.autoclicker){
         game.autobuyerArray[0] = autobuyerArray[0];
         appThis.Update();
     }
-    if(game.money.gte(10000)) game.trigger.autobuyer1 = true;
+    if(game.money.gte(100)) game.trigger.autobuyer1 = true;
     if(game.trigger.autobuyer1){
         game.autobuyerArray[1] = autobuyerArray[1];
         appThis.Update();

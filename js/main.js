@@ -50,6 +50,9 @@ var app = Vue.createApp({
             });
             this.visual.autobuyerArray;
         },
+        ResetAutobuyerArray(){
+            this.visual.autobuyerArray=[]
+        },
         Test(){
             console.log(this)
         },
@@ -79,6 +82,21 @@ var app = Vue.createApp({
 });
 app.mount("#app");
 function softReset(level){
+    if(level===0){
+        game.money = game.defaultMoney;
+
+        game.trigger.autobuyer1 = false;
+        game.trigger.autoclicker = false;
+        game.autobuyerArray = [];
+        let i;
+        for(i in autobuyerArray){
+            let autobuyer = autobuyerArray[i];
+            console.log(autobuyer);
+            autobuyer.costIncrease=autobuyer.costIncrease.minus(1);
+        }
+    }
+    appThis.ResetAutobuyerArray()
+    appThis.Update();
 }
 function TriggerLoop(){
     if(game.money.gte(10)) game.trigger.autoclicker = true;

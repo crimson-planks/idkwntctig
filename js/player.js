@@ -1,5 +1,6 @@
 var game = {
     money: new Decimal(0),
+    defaultMoney: new Decimal(0),
     autobuyerArray: [],
     trigger:{
         autoclicker: false
@@ -52,6 +53,7 @@ game.notationOption = {
         smallDec: 3
     }
 };
+var defaultGame = jQuery.extend({},game)
 var autobuyerArray=[
     new Autobuyer({
         type: 0,

@@ -96,4 +96,10 @@ class Autobuyer{
             appThis.Update();
         }
     }
+    clone(){
+        return new Autobuyer({
+            type: this.type,
+            tier: this.
+        });
+    }
 }

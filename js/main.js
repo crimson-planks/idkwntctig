@@ -99,15 +99,17 @@ function softReset(level){
     appThis.Update();
 }
 function TriggerLoop(){
-    if(game.money.gte(10)) game.trigger.autoclicker = true;
-    if(game.trigger.autoclicker){
-        game.autobuyerArray[0] = autobuyerArray[0];
+    if(game.money.gte(10) && !game.trigger.autoclicker){
+        game.autobuyerArray[0] = autobuyerArray[0].clone();
         appThis.Update();
+        game.trigger.autoclicker = true;
     }
-    if(game.money.gte(100)) game.trigger.autobuyer1 = true;
-    if(game.trigger.autobuyer1){
-        game.autobuyerArray[1] = autobuyerArray[1];
+
+
+    if(game.money.gte(100) && !game.trigger.autobuyer1){
+        game.autobuyerArray[1] = autobuyerArray[1].clone();
         appThis.Update();
+        game.trigger.autobuyer1 = true;
     }
 }
 function GameLoop(){

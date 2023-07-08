@@ -99,7 +99,14 @@ class Autobuyer{
     clone(){
         return new Autobuyer({
             type: this.type,
-            tier: this.
+            tier: this.tier,
+            interval: this.interval,
+            cost: this.cost,
+            amount: this.amount,
+            bought: this.bought,
+            costIncrease: this.costIncrease,
+            intervalCost: this.intervalCost,
+            intervalCostIncrease: this.intervalCostIncrease,
         });
     }
 }

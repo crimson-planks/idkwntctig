@@ -68,8 +68,8 @@ var autobuyerArray=[
         type: 0,
         tier: 1,
         interval: 2000,
-        cost: new Decimal(1000),
-        costIncrease: new Decimal(2000),
+        cost: new Decimal(100),
+        costIncrease: new Decimal(20),
         intervalCost: new Decimal("100"),
         intervalCostIncrease: new Decimal("10")
     }),

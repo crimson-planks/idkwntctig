@@ -9,18 +9,19 @@
 </head>
 <body>
     <div id="app">
-        <p>{{visual.money}} MT</p>
+        <p>{{visual.matter}} MT</p>
         <button v-on:click="ClickGainMoney(1)">Click to get 1 matter</button>
         <div id="autobuyer-list-div">
             <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
                 <h4 class="autobuyer-name-div center">Autoclicker</h4>
                 <span class="autobuyer-text-div">Amount: {{autobuyer.amount}}</span>
                 <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}} MT</span>
-                <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}}</span>
-                <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="game.autobuyerArray[index].BuyInterval(1)">Upgrade: {{autobuyer.intervalCost}} MT</span>
+                <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
+                <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Upgrade: {{autobuyer.intervalCost}} MT</span>
+                <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
             </div>
         </div>
-        <button>Reset, but reduce cost increase by 1</button>
+        <button v-on:click="ClickSoftReset0Button">Reset, but reduce cost increase by 1<div>Cost: 1000 MT</div></button>
     </div>
 </body>
 <script src="js/vue.global.js"></script>

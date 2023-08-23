@@ -1,9 +1,10 @@
 var game = {
-    money: new Decimal(0),
+    matter: new Decimal(0),
     defaultMoney: new Decimal(0),
     autobuyerArray: [],
     trigger:{
-        autoclicker: false
+        autoclicker: false,
+        autobuyer1: false
     },
     notation: "scientific",
     lastSaved: Date.now(),
@@ -62,7 +63,8 @@ var autobuyerArray=[
         cost: new Decimal(10),
         costIncrease: new Decimal(5),
         intervalCost: new Decimal("100"),
-        intervalCostIncrease: new Decimal("10")
+        intervalCostIncrease: new Decimal("10"),
+        active: true
     }),
     new Autobuyer({
         type: 0,
@@ -71,7 +73,8 @@ var autobuyerArray=[
         cost: new Decimal(100),
         costIncrease: new Decimal(20),
         intervalCost: new Decimal("100"),
-        intervalCostIncrease: new Decimal("10")
+        intervalCostIncrease: new Decimal("10"),
+        active: true
     }),
 
 ]

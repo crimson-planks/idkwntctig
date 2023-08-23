@@ -11,14 +11,14 @@ function AddAutobuyer(id){
 function ClickAutobuyerBuyButton(autobuyer){
     autobuyer.BuyOnce();
 };
-function CanBuy(cost,money){
+function CanBuy(cost,matter){
     cost=new Decimal(cost);
-    money=new Decimal(money);
-    if(cost.gt(money)) return false;
+    matter=new Decimal(matter);
+    if(cost.gt(matter)) return false;
     else return true;
 }
 function ClickGainMoney(amount){
-    this.game.money=this.game.money.add(amount);
+    this.game.matter=this.game.matter.add(amount);
 }
 var appThis={}
 var app = Vue.createApp({
@@ -40,13 +40,14 @@ var app = Vue.createApp({
             this.Update();
         },
         Update(){
-            this.visual.money = FormatValue(game.money);
+            this.visual.matter = FormatValue(game.matter);
             this.game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
                 this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);
                 this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amount);
                 this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost);
+                this.visual.autobuyerArray[index].active=String(autobuyer.active)
             });
             this.visual.autobuyerArray;
         },
@@ -64,7 +65,18 @@ var app = Vue.createApp({
         },
         ClickAutobuyerBuyButton(autobuyer){
             ClickAutobuyerBuyButton(autobuyer);
+            this.Update();
+        },
+        ClickIntervalUpgradeButton(autobuyer){
+            autobuyer.BuyInterval(1);
+            this.Update();
+        },
+        ClickToggleButton(autobuyer){
+            autobuyer.Toggle()
             this.Update()
+        },
+        ClickSoftReset0Button(){
+            
         },
         mounted(){
             this.init();
@@ -83,7 +95,7 @@ var app = Vue.createApp({
 app.mount("#app");
 function softReset(level){
     if(level===0){
-        game.money = game.defaultMoney;
+        game.matter = game.defaultMoney;
 
         game.trigger.autobuyer1 = false;
         game.trigger.autoclicker = false;
@@ -99,14 +111,14 @@ function softReset(level){
     appThis.Update();
 }
 function TriggerLoop(){
-    if(game.money.gte(10) && !game.trigger.autoclicker){
+    if(game.matter.gte(10) && !game.trigger.autoclicker){
         game.autobuyerArray[0] = autobuyerArray[0].clone();
         appThis.Update();
         game.trigger.autoclicker = true;
     }
 
 
-    if(game.money.gte(100) && !game.trigger.autobuyer1){
+    if(game.matter.gte(100) && !game.trigger.autobuyer1){
         game.autobuyerArray[1] = autobuyerArray[1].clone();
         appThis.Update();
         game.trigger.autobuyer1 = true;

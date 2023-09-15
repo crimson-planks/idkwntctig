@@ -26,7 +26,7 @@ var app = Vue.createApp({
         appThis=this;
         return {
             game: game,
-            visual: []
+            visual: {}
         };
     },
     methods: {
@@ -41,6 +41,7 @@ var app = Vue.createApp({
         },
         Update(){
             this.visual.matter = FormatValue(game.matter);
+            this.visual.softReset0Cost = FormatValue(game.softReset0Cost)
             this.game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
@@ -49,7 +50,6 @@ var app = Vue.createApp({
                 this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost);
                 this.visual.autobuyerArray[index].active=String(autobuyer.active)
             });
-            this.visual.autobuyerArray;
         },
         ResetAutobuyerArray(){
             this.visual.autobuyerArray=[]
@@ -76,7 +76,8 @@ var app = Vue.createApp({
             this.Update()
         },
         ClickSoftReset0Button(){
-            
+            softReset(0);
+            this.Update();
         },
         mounted(){
             this.init();
@@ -93,35 +94,31 @@ var app = Vue.createApp({
     }
 });
 app.mount("#app");
-function softReset(level){
-    if(level===0){
-        game.matter = game.defaultMoney;
-
-        game.trigger.autobuyer1 = false;
-        game.trigger.autoclicker = false;
-        game.autobuyerArray = [];
-        let i;
-        for(i in autobuyerArray){
-            let autobuyer = autobuyerArray[i];
-            console.log(autobuyer);
-            autobuyer.costIncrease=autobuyer.costIncrease.minus(1);
-        }
-    }
-    appThis.ResetAutobuyerArray()
-    appThis.Update();
-}
 function TriggerLoop(){
-    if(game.matter.gte(10) && !game.trigger.autoclicker){
+    if(game.matter.gte(10) && !game.trigger.autobuyer[0]){
         game.autobuyerArray[0] = autobuyerArray[0].clone();
         appThis.Update();
-        game.trigger.autoclicker = true;
+        game.trigger.autobuyer[0] = true;
     }
 
 
-    if(game.matter.gte(100) && !game.trigger.autobuyer1){
+    if(game.matter.gte(100) && !game.trigger.autobuyer[1]){
         game.autobuyerArray[1] = autobuyerArray[1].clone();
         appThis.Update();
-        game.trigger.autobuyer1 = true;
+        game.trigger.autobuyer[1] = true;
+    }
+
+    if(game.matter.gte("1e8") && !game.trigger.autobuyer[2]){
+        game.autobuyerArray[2] = autobuyerArray[2].clone();
+        appThis.Update();
+        game.trigger.autobuyer[2] = true;
+    }
+
+    if(game.matter.gte(OVERFLOW) && !game.breakOverflow && !game.trigger.overflowForced){
+        game.trigger.overflowForced = true;
+    }
+    if(game.trigger.overflowForced){
+        softResetForced(1)
     }
 }
 function GameLoop(){

@@ -45,6 +45,8 @@ class Autobuyer{
         return new Decimal(0);
     }
     GetMaxBuy(money){
+        //quadratic formula breaks when costIncrease==0
+        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor()
         if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
         let a = this.costIncrease.div(2);
         let b = this.cost.sub(a);
@@ -78,7 +80,7 @@ class Autobuyer{
         if(cost.gt(game.matter)) return;
         game.matter=game.matter.minus(this.getBuyIntervalCost(buyAmount))
         this.intervalCost=this.intervalCost.mul(this.intervalCostIncrease.pow(buyAmount))
-        this.interval=this.interval.div(Decimal.pow(2,buyAmount))
+        this.interval=this.interval.div(Decimal.pow(1.5,buyAmount))
         
     }
     Toggle(){
@@ -117,6 +119,7 @@ class Autobuyer{
             costIncrease: this.costIncrease,
             intervalCost: this.intervalCost,
             intervalCostIncrease: this.intervalCostIncrease,
+            active: this.active
         });
     }
 }

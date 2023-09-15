@@ -1,11 +1,16 @@
+const OVERFLOW = new Decimal(2147483647);
+const INFINITY = new Decimal(2).pow()
 var game = {
     matter: new Decimal(0),
     defaultMoney: new Decimal(0),
+    softReset0Cost: new Decimal(1000),
+    reducedCost: new Decimal(1),
     autobuyerArray: [],
     trigger:{
-        autoclicker: false,
-        autobuyer1: false
+        autobuyer: Array(3),
+        overflowForced: false
     },
+    breakOverflow: false,
     notation: "scientific",
     lastSaved: Date.now(),
     lastUpdated: Date.now()
@@ -70,10 +75,20 @@ var autobuyerArray=[
         type: 0,
         tier: 1,
         interval: 2000,
-        cost: new Decimal(100),
-        costIncrease: new Decimal(20),
-        intervalCost: new Decimal("100"),
-        intervalCostIncrease: new Decimal("10"),
+        cost: new Decimal(200),
+        costIncrease: new Decimal(500),
+        intervalCost: new Decimal("1000"),
+        intervalCostIncrease: new Decimal("100"),
+        active: true
+    }),
+    new Autobuyer({
+        type: 0,
+        tier: 2,
+        interval: 4000,
+        cost: new Decimal("1e8"),
+        costIncrease: new Decimal("1e6"),
+        intervalCost: new Decimal("1e8"),
+        intervalCostIncrease: new Decimal("1000"),
         active: true
     }),
 

@@ -21,7 +21,7 @@
                 <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
             </div>
         </div>
-        <button v-on:click="ClickSoftReset0Button">Reset, but reduce cost increase by 1<div>Cost: 1000 MT</div></button>
+        <button v-on:click="ClickSoftReset0Button()">Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}} MT</div></button>
     </div>
 </body>
 <script src="js/vue.global.js"></script>
@@ -32,10 +32,11 @@
 <script src="js/buy.js"></script>
 <script src="js/autobuyer.js"></script>
 <script src="js/components/autobuyer.js"></script>
-<script src="js/buy.js"></script>
 <script src="js/unlock.js"></script>
 <script src="js/player.js"></script>
 <script src="js/init.js"></script>
 <script src="js/main.js"></script>
 <script src="js/save.js"></script>
+<script src="js/reset.js"></script>
+<script src="js/dev.js"></script>
 </html>

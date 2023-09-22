@@ -1,17 +1,27 @@
-const OVERFLOW = new Decimal(2147483647);
-const INFINITY = new Decimal(2).pow()
+const OVERFLOW = new Decimal(Math.pow(2,31));
+const INFINITY = new Decimal(Number.MAX_VALUE)
+const ETERNITY  = new Decimal("1e9e15")
+const VERSION = "0.0.1"
 var game = {
     matter: new Decimal(0),
-    defaultMoney: new Decimal(0),
+    defaultMatter: new Decimal(0),
     softReset0Cost: new Decimal(1000),
-    reducedCost: new Decimal(1),
+    defaultSoftReset0Cost: new Decimal(1000),
+    reducedCost: new Decimal(0),
     autobuyerArray: [],
     trigger:{
         autobuyer: Array(3),
         overflowForced: false
     },
-    breakOverflow: false,
+    statistics:{
+        overflow: new Decimal(0)
+    },
+    isBreakOverflow: false,
+    overflowPoint: new Decimal(),
     notation: "scientific",
+    isDevMode: false,
+    createdVersion: VERSION,
+    currentVersion: VERSION,
     lastSaved: Date.now(),
     lastUpdated: Date.now()
 };
@@ -85,7 +95,7 @@ var autobuyerArray=[
         type: 0,
         tier: 2,
         interval: 4000,
-        cost: new Decimal("1e8"),
+        cost: new Decimal("1e7"),
         costIncrease: new Decimal("1e6"),
         intervalCost: new Decimal("1e8"),
         intervalCostIncrease: new Decimal("1000"),

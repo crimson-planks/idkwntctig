@@ -80,7 +80,7 @@ class Autobuyer{
         if(cost.gt(game.matter)) return;
         game.matter=game.matter.minus(this.getBuyIntervalCost(buyAmount))
         this.intervalCost=this.intervalCost.mul(this.intervalCostIncrease.pow(buyAmount))
-        this.interval=this.interval.div(Decimal.pow(1.5,buyAmount))
+        this.interval=this.interval.div(Decimal.pow(2,buyAmount))
         
     }
     Toggle(){
@@ -121,5 +121,20 @@ class Autobuyer{
             intervalCostIncrease: this.intervalCostIncrease,
             active: this.active
         });
+    }
+    toStringifiableObject(){
+        return {
+            _type: "Autobuyer",
+            type: this.type,
+            tier: this.tier,
+            interval: this.interval,
+            cost: this.cost,
+            amount: this.amount,
+            bought: this.bought,
+            costIncrease: this.costIncrease,
+            intervalCost: this.intervalCost,
+            intervalCostIncrease: this.intervalCostIncrease,
+            active: this.active
+        }
     }
 }

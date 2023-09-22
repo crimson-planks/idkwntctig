@@ -4,6 +4,8 @@ const emojiList=["\ud83c\udf4e","\ud83e\udde0","\ud83d\udc31","\ud83e\udd41","\u
 const standardList=["k","M","B","T","Qa","Qt","Sx","Sp","Oc","No"];
 const MAX_ECOUNT_CAL=6;
 const MAX_BRACKET_CAL=12;
+//change this to change dependencies
+const objectThatHasTheNotationOption = game
 function RepeatArr(func,n){
     let arr=Array(n)
     for(let i=0;i<n;i++){
@@ -124,15 +126,15 @@ function calEcountAndMnumber(amount,base=10,powMaxExp=new Decimal(1e9)){
 }
 function GetOption(property){
     let notationOption;
-    ({notationOption}=game)
-    const tmpOption={...{notation: game.notation}, ...property};
+    ({notationOption}=objectThatHasTheNotationOption)
+    const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
     let optionName=tmpOption.notation;
     if(notationOption[optionName]===undefined){
         if(["letters","emoji"].includes(notationOption[optionName])) optionName="letters"
         else optionName="general";
     }
     let option={...(notationOption["general"]), ...(notationOption[optionName]), ...property};
-    if([undefined,"_same"].includes(option.notation)) option.notation=game.notation;
+    if([undefined,"_same"].includes(option.notation)) option.notation=objectThatHasTheNotationOption.notation;
     return option;
 }
 function calSubNotation(option){
@@ -380,11 +382,11 @@ function RomanNumeralsUnit(n,property){
 }
 function FormatValue(amount, property={}){
     let notationOption;
-    ({notationOption}=game);
+    ({notationOption}=objectThatHasTheNotationOption);
     if(property.notation===undefined){
-        property.notation=game.notation;
+        property.notation=objectThatHasTheNotationOption.notation;
     }
-    const tmpOption={...{notation: game.notation}, ...property};
+    const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
     let optionName=tmpOption.notation;
     if(notationOption[optionName]===undefined){
         if(["emoji"].includes(notationOption[optionName])) optionName="letters";
@@ -399,6 +401,10 @@ function FormatValue(amount, property={}){
     //code used by many formats
     let powMaxExp=Decimal.pow(option.base,option.maxExp);
     amount=new Decimal(amount);
+
+    if(!objectThatHasTheNotationOption.isBreakOverflow && amount.gt(2147483647)){
+        return "Error: Overflow"
+    }
     
     if(Decimal.isNaN(amount)){
         return "NaN";

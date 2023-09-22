@@ -2,29 +2,36 @@ function canSoftReset(level){
     if(level===0){
         return game.matter.gte(game.softReset0Cost)
     }
+    if(level===1){
+        return game.matter.gte(OVERFLOW)
+    }
 }
 function softReset(level){
     if(canSoftReset(level)) softResetForced(level)
 }
 function softResetForced(level){
     if(level>=0){
-        game.matter = game.defaultMoney;
-        for(i in game.trigger.autobuyer){
+        game.autobuyerArray = [];
+        //for(let i in autobuyerArray){
+        //    //let autobuyer = autobuyerArray[i];
+        //}
+
+        game.matter = game.defaultMatter;
+        for(let i in game.trigger.autobuyer){
             game.trigger.autobuyer[i]=false;
         }
-
-        game.autobuyerArray = [];
-        game.reducedCost = game.reducedCost.add(1);
-        let i;
-        for(i in autobuyerArray){
-            let autobuyer = autobuyerArray[i];
-        }
+    }
+    if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10)
-        if(autobuyerArray[0].costIncrease.eq(0)) game.softReset0Cost=new Decimal("1e50")
+        game.reducedCost = game.reducedCost.add(1);
+        if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50")
     }
     if(level>=1){
-        
-        
+        game.softReset0Cost = game.defaultSoftReset0Cost;
+        game.trigger.overflowForced = false;
+    }
+    if(level===1){
+        game.overflowPoint=game.overflowPoint.add(1)
     }
     appThis.ResetAutobuyerArray()
     appThis.Update();

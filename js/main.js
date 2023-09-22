@@ -42,6 +42,7 @@ var app = Vue.createApp({
         Update(){
             this.visual.matter = FormatValue(game.matter);
             this.visual.softReset0Cost = FormatValue(game.softReset0Cost)
+            this.visual.overflowForced = game.trigger.overflowForced
             this.game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
@@ -79,6 +80,10 @@ var app = Vue.createApp({
             softReset(0);
             this.Update();
         },
+        ClickSoftReset1Button(){
+            softReset(1);
+            this.Update();
+        },
         mounted(){
             this.init();
             console.log("app mounted")
@@ -97,6 +102,7 @@ app.mount("#app");
 function TriggerLoop(){
     if(game.matter.gte(10) && !game.trigger.autobuyer[0]){
         game.autobuyerArray[0] = autobuyerArray[0].clone();
+        game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost)
         appThis.Update();
         game.trigger.autobuyer[0] = true;
     }
@@ -104,21 +110,24 @@ function TriggerLoop(){
 
     if(game.matter.gte(100) && !game.trigger.autobuyer[1]){
         game.autobuyerArray[1] = autobuyerArray[1].clone();
+        game.autobuyerArray[1].costIncrease = game.autobuyerArray[1].costIncrease.minus(game.reducedCost)
         appThis.Update();
         game.trigger.autobuyer[1] = true;
     }
 
-    if(game.matter.gte("1e8") && !game.trigger.autobuyer[2]){
+    if(game.matter.gte("1e7") && !game.trigger.autobuyer[2]){
         game.autobuyerArray[2] = autobuyerArray[2].clone();
+        game.autobuyerArray[2].costIncrease = game.autobuyerArray[2].costIncrease.minus(game.reducedCost)
         appThis.Update();
         game.trigger.autobuyer[2] = true;
     }
 
-    if(game.matter.gte(OVERFLOW) && !game.breakOverflow && !game.trigger.overflowForced){
+    if(game.matter.gte(OVERFLOW) && !game.isBreakOverflow && !game.trigger.overflowForced){
         game.trigger.overflowForced = true;
+        appThis.Update();
     }
     if(game.trigger.overflowForced){
-        softResetForced(1)
+        //softResetForced(1)
     }
 }
 function GameLoop(){

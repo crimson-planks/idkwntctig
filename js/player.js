@@ -14,6 +14,7 @@ var game = {
         overflowForced: false
     },
     statistics:{
+        deflation: new Decimal(0),
         overflow: new Decimal(0)
     },
     isBreakOverflow: false,

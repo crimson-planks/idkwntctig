@@ -1,3 +1,4 @@
+import Decimal from "./break_eternity.esm";
 class Autobuyer{
     constructor(props){
         this.type = props.type
@@ -36,7 +37,7 @@ class Autobuyer{
         return CanBuy(this.GetBuyCost(amount), game.matter);
     }
     CanBuyInterval(amount){
-        return ci.sumOfExponential()
+        return costIncrease.sumOfExponential()
     }
     get getPerSecond(){
         return this.amount.mul(1000).div(this.interval);
@@ -71,10 +72,10 @@ class Autobuyer{
         return true;
     }
     getBuyIntervalCost(amount){
-        return ci.sumOfExponential(this.intervalCost,this.intervalCostIncrease,amount);
+        return costIncrease.sumOfExponential(this.intervalCost,this.intervalCostIncrease,amount);
     }
     BuyInterval(amount){
-        const maxAmount = ci.inverseSumOfExponential(this.intervalCost,this.intervalCostIncrease, game.matter).floor();
+        const maxAmount = costIncrease.inverseSumOfExponential(this.intervalCost,this.intervalCostIncrease, game.matter).floor();
         const buyAmount = Decimal.min(maxAmount,amount);
         let cost = this.getBuyIntervalCost(buyAmount)
         if(cost.gt(game.matter)) return;

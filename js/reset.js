@@ -29,6 +29,7 @@ function softResetForced(level){
     if(level>=1){
         game.softReset0Cost = game.defaultSoftReset0Cost;
         game.trigger.overflowForced = false;
+        game.reducedCost = new Decimal(0);
     }
     if(level===1){
         game.overflowPoint=game.overflowPoint.add(1)

@@ -1,5 +1,16 @@
-//costIncrease
-var ci={
+import Decimal from "./break_eternity.esm.js";
+
+/** 
+ * object containing various summation functions
+*/
+var costIncrease={
+    /**
+     * 
+     * @param {Decimal} start 
+     * @param {Decimal} buyAmount 
+     * @param {Decimal} increase 
+     * @returns 
+     */
     sumOfLinear(start,buyAmount,increase){
         return start.mul(buyAmount)
     },
@@ -11,11 +22,11 @@ var ci={
     },
     sumOfExponential(start,increase,buyAmount){
         //return sum
-        return ci.infiniteSumOf1divNExp(increase).mul(Decimal.pow(increase,buyAmount).sub(1)).mul(start);
+        return costIncrease.infiniteSumOf1divNExp(increase).mul(Decimal.pow(increase,buyAmount).sub(1)).mul(start);
     },
     inverseSumOfExponential(start,increase,sum){
         //return buyAmount
-        return Decimal.div(sum,start).div(ci.infiniteSumOf1divNExp(increase)).add(1).log(increase);
+        return Decimal.div(sum,start).div(costIncrease.infiniteSumOf1divNExp(increase)).add(1).log(increase);
     },
 }
 /*

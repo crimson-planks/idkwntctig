@@ -28,6 +28,10 @@
             <p>The simulation overflowed by the excess of matter</p>
             <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
         </div>
+        <div id="overflow-div">
+            Overflow Points: {{visual.overflowPoint}}
+        </div>
+        <p id="version-p">Version: {{visual.version}}</p>
     </div>
 </body>
 <script src="js/vue.global.js"></script>
@@ -37,9 +41,7 @@
 <script src="js/autobuyer.js"></script>
 <script src="js/player.js"></script>
 <script src="js/format.js"></script>
-<script src="js/buy.js"></script>
-<script src="js/components/autobuyer.js"></script>
-<script src="js/unlock.js"></script>
+<script type="module" src="js/buy.js"></script>
 <script src="js/init.js"></script>
 <script src="js/main.js"></script>
 <script src="js/save.js"></script>

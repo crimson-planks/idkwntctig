@@ -32,7 +32,8 @@ var app = Vue.createApp({
     methods: {
         init(){
             console.log("app init");
-            this.visual.autobuyerArray=[]
+            this.visual.autobuyerArray=[];
+            this.visual.version = VERSION;
             this.Update();
         },
         ClickGainMoney(amount){
@@ -43,6 +44,7 @@ var app = Vue.createApp({
             this.visual.matter = FormatValue(game.matter);
             this.visual.softReset0Cost = FormatValue(game.softReset0Cost)
             this.visual.overflowForced = game.trigger.overflowForced
+            this.visual.overflowPoint = game.overflowPoint
             this.game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);

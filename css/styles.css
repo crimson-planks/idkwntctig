@@ -42,3 +42,8 @@
     margin: auto;
     float:none
 }
+#version-p {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+}

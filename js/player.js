@@ -103,4 +103,4 @@ var autobuyerArray=[
         active: true
     }),
 
-]
+];

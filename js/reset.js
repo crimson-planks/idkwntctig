@@ -1,3 +1,4 @@
+
 function canSoftReset(level){
     if(level===0){
         return game.matter.gte(game.softReset0Cost)
@@ -24,6 +25,7 @@ function softResetForced(level){
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10)
         game.reducedCost = game.reducedCost.add(1);
+        game.statistics.deflation = game.statistics.deflation.add(1)
         if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50")
     }
     if(level>=1){

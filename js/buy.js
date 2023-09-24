@@ -1,5 +1,3 @@
-import Decimal from "./break_eternity.esm.js";
-
 /** 
  * object containing various summation functions
 */

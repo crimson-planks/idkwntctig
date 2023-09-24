@@ -1,4 +1,3 @@
-import Decimal from "./break_eternity.esm";
 class Autobuyer{
     constructor(props){
         this.type = props.type

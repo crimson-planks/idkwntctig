@@ -52,6 +52,6 @@ function internal_ConvertToUsableObject(object){
 function ConvertToUsableObject(stringifiableObject){
     return internal_ConvertToUsableObject(stringifiableObject)
 }
-function save(){
-    console.log(ConvertToStringifiableObject(game))
+function save(object){
+    console.log(ConvertToStringifiableObject(object))
 }

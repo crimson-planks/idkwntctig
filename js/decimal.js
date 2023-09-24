@@ -1,4 +1,7 @@
+
+
 Decimal.MagAbs=function(amount){
+
     if(amount.eq(0)) return amount;
     if(amount.abs().lt(1)){
         if(amount.layer==0){

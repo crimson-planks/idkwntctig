@@ -1,5 +1,33 @@
-class Autobuyer{
-    constructor(props){
+import Decimal, { DecimalSource } from './break_eternity';
+import { game } from './player';
+import { CanBuy , costIncrease} from './buy';
+import { ClickGainMoney , appThis} from './main';
+interface AutobuyerObject{
+    type: number;
+    tier: number;
+    interval: DecimalSource;
+    cost: DecimalSource;
+    amount: DecimalSource;
+    bought: DecimalSource;
+    costIncrease: DecimalSource;
+    intervalCost: DecimalSource;
+    intervalCostIncrease: DecimalSource;
+    active: boolean;
+    timer: number;
+}
+export class Autobuyer{
+    type: number;
+    tier: number;
+    interval: Decimal;
+    cost: Decimal;
+    amount: Decimal;
+    bought: Decimal;
+    costIncrease: Decimal;
+    intervalCost: Decimal;
+    intervalCostIncrease: Decimal;
+    active: boolean;
+    timer: number;
+    constructor(props: AutobuyerObject){
         this.type = props.type
         this.tier = props.tier;
         this.interval = new Decimal(props.interval);
@@ -10,12 +38,11 @@ class Autobuyer{
         this.intervalCost = new Decimal(props.intervalCost);
         this.intervalCostIncrease= new Decimal(props.intervalCostIncrease);
         this.active = props.active;
-        if(this.active===undefined) this.active=true
 
         //time in milliseconds
-        this.timer = 0;
+        this.timer = Number(props?.timer);
     }
-    CanAutoBuy(amount){
+    CanAutoBuy(amount: Decimal){
         if(this.type===0){
             if(this.tier===0){
                 return true;
@@ -29,24 +56,24 @@ class Autobuyer{
     get CanBuyOnce(){
         return CanBuy(this.cost, game.matter);
     }
-    GetBuyCost(amount){
+    GetBuyCost(amount: DecimalSource){
         return this.cost.mul(amount).plus(this.costIncrease.mul(amount).div(2).mul(Decimal.sub(amount,1)));
     }
-    CanBuy(amount){
+    CanBuy(amount: DecimalSource){
         return CanBuy(this.GetBuyCost(amount), game.matter);
     }
-    CanBuyInterval(amount){
-        return costIncrease.sumOfExponential()
-    }
+    //CanBuyInterval(amount: DecimalSource){
+    //    return costIncrease.sumOfExponential()
+    //}
     get getPerSecond(){
         return this.amount.mul(1000).div(this.interval);
     }
     get LosePerSecond(){
         return new Decimal(0);
     }
-    GetMaxBuy(money){
+    GetMaxBuy(money: DecimalSource){
         //quadratic formula breaks when costIncrease==0
-        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor()
+        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return new Decimal(money).div(this.cost).floor()
         if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
         let a = this.costIncrease.div(2);
         let b = this.cost.sub(a);
@@ -61,7 +88,7 @@ class Autobuyer{
         this.amount=this.amount.add(1);
         return true;
     }
-    Buy(amount){
+    Buy(amount: DecimalSource){
         const maxBuy = this.GetMaxBuy(game.matter);
         if(maxBuy.lt(1)) return false;
         const buyAmount = Decimal.min(amount,maxBuy);
@@ -70,10 +97,10 @@ class Autobuyer{
         this.amount=this.amount.add(buyAmount);
         return true;
     }
-    getBuyIntervalCost(amount){
+    getBuyIntervalCost(amount: DecimalSource){
         return costIncrease.sumOfExponential(this.intervalCost,this.intervalCostIncrease,amount);
     }
-    BuyInterval(amount){
+    BuyInterval(amount: DecimalSource){
         const maxAmount = costIncrease.inverseSumOfExponential(this.intervalCost,this.intervalCostIncrease, game.matter).floor();
         const buyAmount = Decimal.min(maxAmount,amount);
         let cost = this.getBuyIntervalCost(buyAmount)
@@ -86,7 +113,7 @@ class Autobuyer{
     Toggle(){
         this.active=!this.active
     }
-    AutoBuy(amount){
+    AutoBuy(amount: DecimalSource){
         if(this.type===0){
             if(this.tier===0){
                 ClickGainMoney(this.amount.mul(amount));
@@ -100,9 +127,9 @@ class Autobuyer{
         if(!this.active) return;
         if(this.amount<=new Decimal(0)) return;
         this.timer+=Date.now()-game.lastUpdated;
-        if(this.timer>=this.interval){
-            let amount = Decimal.floor(Decimal.div(this.timer,this.interval));
-            this.timer = this.timer%this.interval;
+        if(Decimal.gte(this.timer, this.interval)){
+            let amount: Decimal = Decimal.div(this.timer,this.interval).floor();
+            this.timer = Decimal.minus(this.timer, amount.mul(this.interval)).toNumber();
             
             this.AutoBuy(amount);
             appThis.Update();
@@ -119,7 +146,8 @@ class Autobuyer{
             costIncrease: this.costIncrease,
             intervalCost: this.intervalCost,
             intervalCostIncrease: this.intervalCostIncrease,
-            active: this.active
+            active: this.active,
+            timer: this.timer,
         });
     }
     toStringifiableObject(){

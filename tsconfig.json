@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "module": "CommonJS",
+      "noImplicitAny": true,
+      "preserveConstEnums": true,
+      "sourceMap": true,
+      "allowJs": true,
+      "pretty": true,
+      "outDir": "./outjs",
+      "lib": ["ESNext", "DOM"]
+    },
+    "include": ["./ts/*"],
+    "exclude": [],
+}

@@ -1,4 +1,5 @@
-
+import Decimal, { DecimalSource } from "./break_eternity";
+import { game } from "./player"
 
 "use strict";
 const clickerHeroesList=["K","M","B","T","q","Q","s","S","O","N","d","U","D","!","@","#","$","%","^","&","*","[","}","\'","\"","/","|",":",";","<",">",",",".","\\","?","~","\xb1","a","A","\xe1","\xc1","\xe9","\xc9","\xed","\xcd","\xfa","\xda","\xe6","\xc6","\xd8","\xbf","\xb6","\u0192","\xa3","\u20a3","\u20bf","\u20ac","\u20b2","h",0,"j","J","p","P","w","\u20a9","v","V","y","\xa5","\xa4","\u2211","\xae","\u2020","\xa8","\u0131","\u03c0","\xdf","\u2202","\xa9","\u03bb","\u03a9","\u2248","\xe7","\u221a","\u222b","\u2122","\u2021","\u0130","\u220f","\u2206","\xc7","\u25ca","\xab","\xbb","\u2227","\u2229","\u22bb","\xf1","\xd1","C","\u0393","\u221e","\u03b1","\u03b3","\u03b4","\u03b5","\u03b6","\u03b8","\u03bb","\u03be","\u03c4","\u03c5","\u03c6","\u03c7","\u03c8","\u039e","\u03a6","\u2192","\u2190","\u2191","\u2193","\u272a","+","-","\xd7","\xf7","\u2573","\u2660","\u2665","\u2666","\u2663","\u24b6","\u24b7","\u24b8","\u24b9","\u24ba","\u24bb","\u24bc","\u24bd","\u24be","\u24bf","\u24c0","\u24c1","\u24c2","\u24c3","\u24c4","\u24c5","\u24c6","\u24c7","\u24c8","\u24c9","\u24ca","\u24cb","\u24cc","\u24cd","\u24ce","\u24cf","\u2070","\xb9","\xb2","\xb3","\u2074","\u2075","\u2076","\u2077","\u2078","\u2079","\u207a","\u207b","\u207c","\u207d","\u207e","\u2220","\u29a3","\xb0","\u27c2","\u2225","\u221f","\ud83c\udd30","\ud83c\udd31","\ud83c\udd32","\ud83c\udd33","\ud83c\udd34","\ud83c\udd35","\ud83c\udd36","\ud83c\udd37","\ud83c\udd38","\ud83c\udd39","\ud83c\udd3a","\ud83c\udd3b","\ud83c\udd3c","\ud83c\udd3d","\ud83c\udd3e","\ud83c\udd3f","\ud83c\udd40","\ud83c\udd41","\ud83c\udd42","\ud83c\udd43","\ud83c\udd44","\ud83c\udd45","\ud83c\udd46","\ud83c\udd47","\ud83c\udd48","\ud83c\udd49",]
@@ -6,25 +7,74 @@ const emojiList=["\ud83c\udf4e","\ud83e\udde0","\ud83d\udc31","\ud83e\udd41","\u
 const standardList=["k","M","B","T","Qa","Qt","Sx","Sp","Oc","No"];
 const MAX_ECOUNT_CAL=6;
 const MAX_BRACKET_CAL=12;
-//change this to change dependencies
+const BigIntCmp=function(a: bigint | number,b: bigint | number){if(a>b) return 1;if(a===b) return 0;else return -1;}
+const DecimalMagAbs=function(amount: Decimal): Decimal{
+
+    if(amount.eq(0)) return amount;
+    if(amount.abs().lt(1)){
+        if(amount.layer==0){
+            return amount.abs().recip();
+        }
+        else{
+            return Decimal.fromComponents(1,amount.layer,Math.abs(amount.mag))
+        }
+    }
+    else{
+        return amount.abs();
+    }
+}
+const DecimalSourceToNumber = function(value: DecimalSource){
+    if(value instanceof Decimal) return value.toNumber();
+    return Number(value);
+}
+/**
+ * change this to change dependencies
+ * */
 const objectThatHasTheNotationOption = game
-function RepeatArr(func,n){
+export interface NotationOption{
+    dec?: number;
+    smallDec?: number;
+    maxBeforeNotate?: number,
+    maxBeforeNegativePowerNotate?: number,
+    subMaxBeforeNotate?: number,
+    subMaxBeforeNegativePowerNotate?: number,
+    maxExp?: number,
+    expDec?: number,
+    maxNotatedLayer?: number,
+    customNegative?: boolean,
+    negativeSign?: string,
+    customNegativeExp?: boolean,
+    extraDigit?: number,
+    hExpDec?: number,
+    powerTower?: boolean,
+    base?: number,
+    htmlSafe?: true,
+    maxFullShow?: number,
+    show?: number,
+    maxNotatedBracketCount?: number,
+    subNotationArray?: (Notation)[],
+    subNotation?: Notation
+    notation?: Notation,
+    altFractions?: boolean
+}
+export type Notation = "scientific"|"engineering"|"engineering-alt"|"logarithm"|"letters"|"emoji"|"seximal"|"standard"|"inequality"|"general"|"_same"|"roman"
+function RepeatArr(func: Function,n: number){
     let arr=Array(n)
     for(let i=0;i<n;i++){
         arr[i]=func(i);
     }
     return arr;
 }
-const FormatWithCommas= (num)=>Intl.NumberFormat('en-US').format(num);
+const FormatWithCommas= (num: number)=>Intl.NumberFormat('en-US').format(num);
 
-const calLetterId = function(n,property){
+const calLetterId = function(n: DecimalSource,property?: NotationOption){
     n=new Decimal(n);
     let option=GetOption(property);
     let power=n.abs().log(option.base).abs().div(3).floor().mul(3);
     return power.mul(power.sign).div(3).floor();
 }
 
-const getStandardUnit=function(n,isPart=false,isNoThousand=false){
+const getStandardUnit=function(n: number,isPart=false,isNoThousand=false){
     const smallArr=["k","M","B","T","Qa","Qt","Sx","Sp","Oc","No"];
     if(isNoThousand){
         smallArr[0]='';
@@ -38,7 +88,7 @@ const getStandardUnit=function(n,isPart=false,isNoThousand=false){
     if(!isPart&&n<10) return smallArr[n];
     return standardArr[0][n%10]+standardArr[1][Math.floor(n/10)%10]+standardArr[2][Math.floor(n/100)%10];
 }
-const getStandardClass2=function(n){
+const getStandardClass2=function(n: number){
     const smallArr=["","Mi","Mc","Na","Pc","Fm","At","Zp","Yc","Xn","Vc"]
     const standardArr=[
         ["","Me","Due","Tr","Tt","Pt","Hx","Hp","Ote","En"],
@@ -53,10 +103,10 @@ const getStandardClass2=function(n){
     }
     return oneStr+standardArr[1][Math.floor(n/10)%10]+standardArr[2][Math.floor(n/100)%10];
 }
-const FormatStandard=function(n,property){
+const FormatStandard=function(n: DecimalSource,property?: NotationOption){
     let option=GetOption(property);
     n=new Decimal(n).floor();
-    if(n.lte(999)) return getStandardUnit(n);
+    if(n.lte(999)) return getStandardUnit(DecimalSourceToNumber(n));
     if(n.gte("1e2999")) return "Format Error";
     let rsltStr="";
     let maxShow;
@@ -71,25 +121,25 @@ const FormatStandard=function(n,property){
     while(n.gte(1)){
         let tmpStr="";
         part=n.sub(n.div(1000).floor().mul(1000)).floor();
-        if(class2Id!==0||part.eq(1)){
-            tmpStr+=getStandardUnit(part,true);
+        if(class2Id!==Decimal.dZero||part.eq(1)){
+            tmpStr+=getStandardUnit(DecimalSourceToNumber(part),true);
         }
-        if(class2Id===0){
-            tmpStr+=getStandardUnit(part,false,true);
+        if(class2Id===Decimal.dZero){
+            tmpStr+=getStandardUnit(DecimalSourceToNumber(part),false,true);
         }
-        if(!part.eq(0)) tmpStr+=getStandardClass2(class2Id)
-        tmpStr+=(class2Id===0||tmpStr==="" ? '' : '-')
+        if(!part.eq(0)) tmpStr+=getStandardClass2(DecimalSourceToNumber(class2Id))
+        tmpStr+=(class2Id===Decimal.dZero||tmpStr==="" ? '' : '-')
         rsltStr=tmpStr.concat(rsltStr);
         n=n.div(1000).floor();
         //console.log(`n: ${n}, part: ${part}`);
-        class2Id++;
+        class2Id=class2Id.add(1);
     }
     if(rsltStr[rsltStr.length-1]=='-') rsltStr=rsltStr.slice(0,-1);{}
     return rsltStr;
 }
-function calEcountAndMnumber(amount,base=10,powMaxExp=new Decimal(1e9)){
+function calEcountAndMnumber(amount: DecimalSource,base=10,powMaxExp=new Decimal(1e9)){
     let isExpNegative=false;
-    const calFinalmNumber=(mNumber)=>isExpNegative?Decimal.minus(0,mNumber):mNumber
+    const calFinalmNumber=(mNumber: DecimalSource)=>isExpNegative?Decimal.minus(0,mNumber):mNumber
     let logbase=Math.log(base);
     amount=new Decimal(amount).abs();
     if(amount.absLog10().lt(0)){
@@ -120,59 +170,58 @@ function calEcountAndMnumber(amount,base=10,powMaxExp=new Decimal(1e9)){
         let calResult=calEcountAndMnumber(tmpAmount,base,powMaxExp);
         //console.log(calResult);
         eCount=calResult.eCount+reducedAmount;
-        mNumber=calResult.mNumber;
+        mNumber=new Decimal(calResult.mNumber);
         
     }
     return {eCount: eCount,mNumber: calFinalmNumber(mNumber)};
     //return amount.slog(base,5).minus(powMaxExp.slog(base,5)).floor().toNumber()
 }
-function GetOption(property){
+function GetOption(property?: NotationOption){
     let notationOption;
     ({notationOption}=objectThatHasTheNotationOption)
     const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
     let optionName=tmpOption.notation;
-    if(notationOption[optionName]===undefined){
+    /*if(notationOption[optionName]===undefined){
         if(["letters","emoji"].includes(notationOption[optionName])) optionName="letters"
         else optionName="general";
-    }
-    let option={...(notationOption["general"]), ...(notationOption[optionName]), ...property};
+    }*/
+    let option: NotationOption={...(notationOption["general"]), ...(notationOption[optionName]), ...property};
     if([undefined,"_same"].includes(option.notation)) option.notation=objectThatHasTheNotationOption.notation;
     return option;
 }
-function calSubNotation(option){
+function calSubNotation(option: NotationOption){
     option.subNotation=option.subNotationArray[0];
     option.subNotationArray=option.subNotationArray.slice(1);
     if(option.subNotation==="_same") option.subNotation=option.notation;
     if(option.subNotationArray===undefined||option.subNotationArray.length===0) option.subNotationArray=["_same"];
     return option;
 }
-function ConsecutiveCharacter(chr,n){
+function ConsecutiveCharacter(chr: string,n: number){
     //f("M",3)=["","M","MM","MMM"];
     let rarr=(RepeatArr(
-        (i)=>[RepeatArr(
+        (i: number)=>[RepeatArr(
             ()=>chr,i)],n));
     rarr.forEach(function(value,index){
         let rslt="";
-        value.forEach(function(value){
+        value.forEach(function(value: any){
             rslt+=value;
         });
         rarr[index]=rslt;
     });
     return rarr;
 }
-function ArrToInequality(arr){
+function ArrToInequality(arr: number[] | string){
     //console.log(arr);
     if(typeof arr==="string"){
-        arr=arr.split('');
-        arr=arr.map(value=>+value)
+        arr=arr.split('').map(value=>+value);
     }
     let rsltarr=Array(arr.length);
     arr.forEach(function(value,index,array){
-        if(index!==array.length-1) rsltarr[index]=BigInt.cmp(array[index],array[index+1]);
+        if(index!==array.length-1) rsltarr[index]=BigIntCmp(array[index],array[index+1]);
     });
     return rsltarr;
 }
-function calLetterBracketAndMnumber(letterId,strLen,property){
+function calLetterBracketAndMnumber(letterId: DecimalSource,strLen: number,property: NotationOption){
     function _print(){
         return;
         console.log(`n: ${letterId}, mNumber: ${mNumber}, bracketCount: ${bracketCount}`);
@@ -183,8 +232,8 @@ function calLetterBracketAndMnumber(letterId,strLen,property){
     let powMaxExp=Decimal.pow(option.base,option.maxExp);
     let bracketCount=0;
     let mNumber=Decimal.dNaN;
-    const getRsltLen= (x,m) => Decimal.log(Decimal.minus(m,1).mul(x).plus(1),m);
-    const getSkippedAmount= (n,strLen) => getRsltLen(n,strLen).floor().minus(option.show);
+    const getRsltLen= (x: DecimalSource,m: number) => Decimal.log(Decimal.minus(m,1).mul(x).plus(1),m);
+    const getSkippedAmount= (n: DecimalSource,strLen: number) => getRsltLen(n,strLen).floor().minus(option.show);
     if(letterId.layer>MAX_BRACKET_CAL){
         let tmpLayer=MAX_BRACKET_CAL-2+((letterId.layer-MAX_BRACKET_CAL)%2);
         let reducedLayer=letterId.layer-tmpLayer;
@@ -207,7 +256,7 @@ function calLetterBracketAndMnumber(letterId,strLen,property){
     return {bracketCount: bracketCount, mNumber: mNumber};
 }
 
-function FormatLetter(letterId,str,property){
+function FormatLetter(letterId: DecimalSource,str: string | string[],property?: NotationOption){
     function print(){
         return;
         console.log("n: "+letterId);
@@ -229,7 +278,7 @@ function FormatLetter(letterId,str,property){
     }
     const len=str.length;
     
-    const getRsltLen= (x,m) => Decimal.log(Decimal.minus(m,1).mul(x).plus(1),m);
+    const getRsltLen= (x: DecimalSource,m: number) => Decimal.log(Decimal.minus(m,1).mul(x).plus(1),m);
     const rsltLen = getRsltLen(letterId,len).floor();
     let skippedAmount=rsltLen.minus(option.show);
     let bracketCount;
@@ -245,7 +294,7 @@ function FormatLetter(letterId,str,property){
             resultString=`[${FormatValue(skippedAmount, { ...option, notation: option.subNotation, smallDec: 0 })}]`
         }
         while(letterId.gt(0)){
-            resultString=str[(letterId-1)%len]+resultString;
+            resultString=str[(DecimalSourceToNumber(letterId)-1)%len]+resultString;
             letterId=letterId.minus(1).div(len).floor();
             //console.log(n.toString());
         }
@@ -269,7 +318,7 @@ function FormatLetter(letterId,str,property){
     }
     return "Format Error";
 }
-function GetDefaultBaseStr(base){
+function GetDefaultBaseStr(base: number){
     let chrArr;
     if(base==64){
         chrArr="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
@@ -279,9 +328,7 @@ function GetDefaultBaseStr(base){
     }
     return chrArr;
 }
-function IntegerToBase(n,base,chrArr,isArr=false){
-    n=BigInt(n);
-    base=BigInt(base);
+function IntegerToBase(n: number,base: number,chrArr: string[],isArr=false): any{
     let isNegative=false;
     if(!(["string","object"].includes(typeof chrArr))) chrArr=GetDefaultBaseStr(base);
     if(chrArr.length<base){
@@ -291,13 +338,13 @@ function IntegerToBase(n,base,chrArr,isArr=false){
         isNegative=true;
         n=-n;
     }
-    let tmpString="";
-    if(isArr) tmpString=[];
-    if(n===0n) return isArr?[0]:"0"
+    let tmpString: string | number[] = "";
+    if(n===0) return isArr?[0]:"0"
     if(isArr){
+        tmpString=[];
         while(n>0){
             tmpString=[n%base].concat(tmpString);
-            n=n/base
+            n=n/base;
         }
     }
     else while(n>0){
@@ -307,7 +354,7 @@ function IntegerToBase(n,base,chrArr,isArr=false){
     if(isArr) return tmpString;
     return (isNegative?'-':'')+tmpString;
 }
-function NumberToBaseArr(n,base=10,digits=20,minDigit,chrArr){
+function NumberToBaseArr(n: number,base=10,digits=20,minDigit?: number,chrArr?: string[]){
     if(minDigit===undefined) minDigit=digits;
     if(digits<0||digits>20) throw RangeError("must be 0<=digits<=20");
     if(minDigit<0||minDigit>20) throw RangeError("must be 0<=minDigit<=20");
@@ -326,7 +373,7 @@ function NumberToBaseArr(n,base=10,digits=20,minDigit,chrArr){
     remainderArr=tmpArr.concat(remainderArr).slice(-digits);
     return [wholeArr,remainderArr];
 }
-function NumberToBase(n,base=10,digits=20,minDigit,chrArr){
+function NumberToBase(n: number,base=10,digits=20,minDigit?: number,chrArr?: string[]){
     let isNegative=false;
     if(n<0) {
         isNegative=true;
@@ -340,19 +387,19 @@ function NumberToBase(n,base=10,digits=20,minDigit,chrArr){
     if(digits===0) return (isNegative?'-':'')+IntegerToBase(Math.round(n),base,chrArr);
     let rsltArr=NumberToBaseArr(n,base,digits,minDigit,chrArr);
     let rsltStr="";
-    rsltArr[0].forEach(function(value){
+    rsltArr[0].forEach(function(value: number){
         rsltStr=rsltStr.concat(chrArr[value]);
     });
     rsltStr+='.';
-    rsltArr[1].forEach(function(value){
+    rsltArr[1].forEach(function(value: number){
         rsltStr=rsltStr.concat(chrArr[value]);
     });
     if(isNegative) rsltStr='-'.concat(rsltStr);
     return rsltStr;
 }
-function RomanNumeralsUnit(n,property){
+function RomanNumeralsUnit(n: DecimalSource,property: NotationOption){
     let option=GetOption({...property,notation: "roman"});
-    if(n.constructor===new Decimal().constructor) n=n.toNumber();
+    n = DecimalSourceToNumber(n);
     if(n>3999+11/12){
         return "Format Error"
     }
@@ -382,17 +429,16 @@ function RomanNumeralsUnit(n,property){
     rslt+=subPrefixes[remainder];
     return rslt;
 }
-function FormatValue(amount, property={}){
+function FormatValue(amount: DecimalSource, property: NotationOption={}): string{
     let notationOption;
     ({notationOption}=objectThatHasTheNotationOption);
     if(property.notation===undefined){
         property.notation=objectThatHasTheNotationOption.notation;
     }
     const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
-    let optionName=tmpOption.notation;
+    let optionName: Notation=tmpOption.notation;
     if(notationOption[optionName]===undefined){
-        if(["emoji"].includes(notationOption[optionName])) optionName="letters";
-        else optionName="general";
+        optionName="general";
     }
     let option=GetOption(property);
     //if(option.htmlSafe){
@@ -456,15 +502,15 @@ function FormatValue(amount, property={}){
     power=power.minus(option.extraDigit);
     if(["scientific","engineering","engineering-alt","logarithm","letters","emoji","seximal","standard"].includes(option.notation)){
         if(amount.eq(0)||power.abs().lessThan(power.sign===-1 ? option.maxBeforeNegativePowerNotate : option.maxBeforeNotate))
-            return NumberToBase(amount,option.base,option.smallDec)
+            return NumberToBase(amount.toNumber(),option.base,option.smallDec)
     }
     //notations with the same code beyond ee9
     if(["scientific","engineering","engineering-alt","logarithm"].includes(option.notation)){
 
         //console.log(power);
 
-        if(Decimal.MagAbs(amount).lessThan(Decimal.pow(option.base,powMaxExp))){
-            function calExpStr(power){
+        if(DecimalMagAbs(amount).lessThan(Decimal.pow(option.base,powMaxExp))){
+            const calExpStr = function(power: DecimalSource){
                 return FormatValue(power,{
                     ...option,
                     notation: option.subNotation,
@@ -482,7 +528,7 @@ function FormatValue(amount, property={}){
                 
                 let mantissa=amount.div(Decimal.pow(option.base,power));
                 //console.log(`amount: ${amount.toString()} power: ${power.toString()} mantissa: ${mantissa.toString()}`)
-                return `${NumberToBase(mantissa,option.base,option.dec)}e${calExpStr(power)}`;
+                return `${NumberToBase(mantissa.toNumber(),option.base,option.dec)}e${calExpStr(power)}`;
             }
             if(option.notation==="engineering"){
                 //console.log(power)
@@ -491,23 +537,23 @@ function FormatValue(amount, property={}){
                 if(power.lte(0)) power=power.add(-3);
 
                 let mantissa=amount.div(Decimal.pow(option.base,power));
-                return `${NumberToBase(mantissa,option.base,option.dec)}e${calExpStr(power)}`;
+                return `${NumberToBase(mantissa.toNumber(),option.base,option.dec)}e${calExpStr(power)}`;
             }
             if(option.notation==="engineering-alt"){
                 power=power.floor();
-                let rpower=power;
+                let rpower: any=power;
 
                 power=power.add(power.sign===1 ? 2 : 0).div(3).floor().mul(3).minus(option.extraDigit);
 
                 rpower=rpower.minus(power).toNumber();
                 let mantissa=amount.div(Decimal.pow(10,power));
-                return `${NumberToBase(mantissa,option.base,option.dec-rpower+(power.sign===-1))}e${calExpStr(power)}`;
+                return `${NumberToBase(mantissa.toNumber(),option.base,option.dec-rpower+Number(power.sign===-1))}e${calExpStr(power)}`;
             }
             if(option.notation==="logarithm"){
                 return `e${calExpStr(power)}`
             }
         }
-        else if(Decimal.MagAbs(amount).lessThan(Decimal.fromComponents(1,option.maxNotatedLayer,powMaxExp))){
+        else if(DecimalMagAbs(amount).lessThan(Decimal.fromComponents(1,option.maxNotatedLayer,powMaxExp.toNumber()))){
             return eString+FormatValue(mNumber,{...option, notation: option.subNotation,dec: option.expDec});
         }
         else{
@@ -523,7 +569,7 @@ function FormatValue(amount, property={}){
         let letterStr="";
         if(power.abs().lt(powMaxExp)){
             mantissa=amount.div(Decimal.pow(10,power));
-            mantissaStr=NumberToBase(mantissa,option.base,option.dec);
+            mantissaStr=NumberToBase(mantissa.toNumber(),option.base,option.dec);
         }
         if(option.notation==="letters"){
             letterStr=FormatLetter(letterId,"abcdefghijklmnopqrstuvwxyz",option);
@@ -543,7 +589,7 @@ function FormatValue(amount, property={}){
         wordStr+=power.lt(0)?'th':''
         if(power.abs().lt("100000000000")){
             mantissa=amount.div(Decimal.pow(10,power));
-            mantissaStr=NumberToBase(mantissa,option.base,option.dec);
+            mantissaStr=NumberToBase(mantissa.toNumber(),option.base,option.dec);
         }
         if(wordStr!="") return mantissaStr+" "+wordStr;
     }
@@ -552,9 +598,9 @@ function FormatValue(amount, property={}){
         if(power.lte(0)) power=power.add(-4);
         let id=power.div(4);
         let mantissa=amount.div(Decimal.pow(option.base,power));
-        let powerStr=NumberToBase(id,option.base,0,0,["N","U","B","T","Q","P"]);
+        let powerStr=NumberToBase(id.toNumber(),option.base,0,0,["N","U","B","T","Q","P"]);
         
-        return `${NumberToBase(mantissa,option.base,option.dec)} ${powerStr}`
+        return `${NumberToBase(mantissa.toNumber(),option.base,option.dec)} ${powerStr}`
     }
     if(option.notation==="inequality"){
         const convertTable={
@@ -562,7 +608,7 @@ function FormatValue(amount, property={}){
             "0":"=",
             "1":">"
         }
-        const numArrToInequalityStrArr=function(numArr){
+        const numArrToInequalityStrArr=function(numArr: any[]){
             let tmpArr=numArr.map(function(value){
                 if(value.length<2) return [0].concat(value);
                 return value;
@@ -572,25 +618,25 @@ function FormatValue(amount, property={}){
             });
             let rsltArr=tmpArr.map(function(value){
                 let rsltStr=""
-                value=value.map(function(value){
+                value=value.map(function(value: "-1"|"0"|"1"){
                     rsltStr+=convertTable[value]
                 });
                 return rsltStr;
             });
             return rsltArr;
         };
-        function convertToInequality(n,dec){
-            let tmpArr=numArrToInequalityStrArr(NumberToBaseArr(n,option.base,dec));
+        var convertToInequality = function(n: Decimal,dec: number){
+            let tmpArr=numArrToInequalityStrArr(NumberToBaseArr(n.toNumber(),option.base,dec));
             let rsltStr;
             if(tmpArr[1]===undefined) rsltStr=tmpArr[0];
             else rsltStr=tmpArr[0]+'.'+tmpArr[1];
             return rsltStr;
         }
-        if(amount.eq(0)||Decimal.MagAbs(power).lt(amount.sign===-1?option.maxBeforeNegativePowerNotate:option.maxBeforeNotate)){
+        if(amount.eq(0)||DecimalMagAbs(power).lt(amount.sign===-1?option.maxBeforeNegativePowerNotate:option.maxBeforeNotate)){
             //ConvertToHTMLSafe
             return (convertToInequality(amount,option.smallDec));
         }
-        if(Decimal.MagAbs(amount).lessThan(Decimal.pow(option.base,powMaxExp))){
+        if(DecimalMagAbs(amount).lessThan(Decimal.pow(option.base,powMaxExp))){
             //ConvertToHTMLSafe
             return ('e'+convertToInequality(power,option.dec));
         }
@@ -599,7 +645,7 @@ function FormatValue(amount, property={}){
 }
 
 
-function FormatTime(amount){
+function FormatTime(amount: DecimalSource){
     const divArr=[
         60,
         60,
@@ -611,7 +657,7 @@ function FormatTime(amount){
         "hour",
         "day"
     ]
-    let dividedTimeArr=[]
+    let dividedTimeArr: any[]=[]
     let tmpAmount=amount;
     divArr.forEach(function(value,index){
         const tmpValue=tmpAmount%value;

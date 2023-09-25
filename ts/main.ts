@@ -1,4 +1,8 @@
-function AddAutobuyer(id){
+import { Autobuyer } from "./autobuyer";
+import { createApp } from "./vue.global";
+import Decimal, { DecimalSource } from "./break_eternity";
+import { VERSION, game } from "./player";
+function AddAutobuyer(id: number){
     const t = document.getElementById("autobuyer-template");
             const divElement = document.createElement("div")
             divElement.setAttribute("id",`autobuyer-div-${id}`)
@@ -8,20 +12,14 @@ function AddAutobuyer(id){
             });
             document.getElementById("autobuyer-list-div").appendChild(divElement);
 }
-function ClickAutobuyerBuyButton(autobuyer){
+function ClickAutobuyerBuyButton(autobuyer: Autobuyer){
     autobuyer.BuyOnce();
 };
-function CanBuy(cost,matter){
-    cost=new Decimal(cost);
-    matter=new Decimal(matter);
-    if(cost.gt(matter)) return false;
-    else return true;
-}
-function ClickGainMoney(amount){
+export function ClickGainMoney(amount: DecimalSource){
     this.game.matter=this.game.matter.add(amount);
 }
-var appThis={}
-var app = Vue.createApp({
+export var appThis: any={}
+var app = createApp({
     data(){
         appThis=this;
         return {
@@ -36,7 +34,7 @@ var app = Vue.createApp({
             this.visual.version = VERSION;
             this.Update();
         },
-        ClickGainMoney(amount){
+        ClickGainMoney(amount: DecimalSource){
             ClickGainMoney(amount);
             this.Update();
         },
@@ -45,7 +43,7 @@ var app = Vue.createApp({
             this.visual.softReset0Cost = FormatValue(game.softReset0Cost)
             this.visual.overflowForced = game.trigger.overflowForced
             this.visual.overflowPoint = game.overflowPoint
-            this.game.autobuyerArray.forEach((autobuyer, index) => {
+            this.game.autobuyerArray.forEach((autobuyer: Autobuyer, index: number) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
                 this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);

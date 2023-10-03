@@ -11,10 +11,10 @@
     <div id="app" style="display: none;">
         <p>{{visual.matter}} MT</p>
         <div id="pre-overflow-div" v-show="!visual.overflowForced">
-            <button v-on:click="ClickGainMoney(1)">Click to get 1 matter</button>
+            <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
             <div id="autobuyer-list-div">
                 <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
-                    <h4 class="autobuyer-name-div center">Autobuyer</h4>
+                    <h4 class="autobuyer-name-div center">{{autobuyer.name}}</h4>
                     <span class="autobuyer-text-div">Amount: {{autobuyer.amount}}</span>
                     <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}} MT</span>
                     <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
@@ -22,14 +22,17 @@
                     <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
                 </div>
             </div>
-            <button v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation</h4>Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}} MT</div></button>
+            <button v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}} MT</div></button>
         </div>
         <div id="overflow-forced-div" v-show="visual.overflowForced">
             <p>The simulation overflowed by the excess of matter</p>
             <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
         </div>
-        <div id="overflow-div">
+        <div id="overflow-div" v-if="visual.isOverflowed">
             Overflow Points: {{visual.overflowPoint}}
+            <div id="overflow-upgrade-div">
+                <button>Increase matter per click by 1<br>Cost: lorem ipsum</button>
+            </div>
         </div>
         <p id="version-p">Version: {{visual.version}}</p>
     </div>
@@ -39,10 +42,13 @@
 <script src="js/vue.global.js"></script>
 <script src="js/break_eternity.js"></script>
 <script src="js/jquery-3.6.1.min.js"></script>
+<script src="js/unit_test.js"></script>
 <script src="js/decimal.js"></script>
+<script src="js/upgrade.js"></script>
 <script src="js/autobuyer.js"></script>
 <script src="js/player.js"></script>
 <script src="js/format.js"></script>
+<script src="js/format.test.js"></script>
 <script src="js/buy.js"></script>
 <script src="js/init.js"></script>
 <script src="js/save.js"></script>

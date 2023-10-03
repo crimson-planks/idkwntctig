@@ -30,10 +30,12 @@ function softResetForced(level){
     }
     if(level>=1){
         game.softReset0Cost = game.defaultSoftReset0Cost;
+        game.statistics.deflation = new Decimal(0)
         game.trigger.overflowForced = false;
         game.reducedCost = new Decimal(0);
     }
     if(level===1){
+        game.statistics.overflow = game.statistics.overflow.add(1)
         game.overflowPoint=game.overflowPoint.add(1)
     }
     appThis.ResetAutobuyerArray()

@@ -1,3 +1,6 @@
+/**
+ * class representing an autobuyer
+ */
 class Autobuyer{
     constructor(props){
         this.type = props.type
@@ -5,7 +8,7 @@ class Autobuyer{
         this.interval = new Decimal(props.interval);
         this.cost = new Decimal(props.cost);
         this.amount = new Decimal(props.amount);
-        this.bought = new Decimal(props.bought);
+        this.manualBought = new Decimal(props.bought);
         this.costIncrease = new Decimal(props.costIncrease);
         this.intervalCost = new Decimal(props.intervalCost);
         this.intervalCostIncrease= new Decimal(props.intervalCostIncrease);
@@ -13,10 +16,10 @@ class Autobuyer{
         if(this.active===undefined) this.active=true
 
         //time in milliseconds
-        this.timer = 0;
+        this.timer = props.timer?props.timer:0;
     }
     CanAutoBuy(amount){
-        if(this.type===0){
+        if(this.type==="matter"){
             if(this.tier===0){
                 return true;
             }
@@ -54,20 +57,23 @@ class Autobuyer{
         //quadratic formula
         return Decimal.neg(b).add(b.pow(2).sub(a.mul(c).mul(4)).pow(0.5)).div(this.costIncrease).floor();
     }
-    BuyOnce(){
+    BuyOnce(isManual = true){
         if(!this.CanBuyOnce) return false;
         game.matter=game.matter.minus(this.cost);
         this.cost=this.cost.add(this.costIncrease);
         this.amount=this.amount.add(1);
+        if(isManual) this.manualBought = this.manualBought.add(1);
         return true;
     }
-    Buy(amount){
+    //TODO: add ForcedBuy and use Buy as a wrapper function
+    Buy(amount, isManual = true){
         const maxBuy = this.GetMaxBuy(game.matter);
         if(maxBuy.lt(1)) return false;
         const buyAmount = Decimal.min(amount,maxBuy);
         game.matter=game.matter.minus(this.GetBuyCost(buyAmount));
         this.cost=this.cost.add(this.costIncrease.mul(buyAmount));
         this.amount=this.amount.add(buyAmount);
+        if(isManual) this.manualBought = this.manualBought.add(buyAmount);
         return true;
     }
     getBuyIntervalCost(amount){
@@ -84,15 +90,15 @@ class Autobuyer{
         
     }
     Toggle(){
-        this.active=!this.active
+        this.active=!this.active;
     }
     AutoBuy(amount){
-        if(this.type===0){
+        if(this.type==="matter"){
             if(this.tier===0){
                 ClickGainMoney(this.amount.mul(amount));
             }
             else{
-                game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount));
+                game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount),false);
             }
         }
     }
@@ -115,7 +121,7 @@ class Autobuyer{
             interval: this.interval,
             cost: this.cost,
             amount: this.amount,
-            bought: this.bought,
+            bought: this.manualBought,
             costIncrease: this.costIncrease,
             intervalCost: this.intervalCost,
             intervalCostIncrease: this.intervalCostIncrease,
@@ -130,7 +136,7 @@ class Autobuyer{
             interval: this.interval,
             cost: this.cost,
             amount: this.amount,
-            bought: this.bought,
+            bought: this.manualBought,
             costIncrease: this.costIncrease,
             intervalCost: this.intervalCost,
             intervalCostIncrease: this.intervalCostIncrease,

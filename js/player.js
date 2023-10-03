@@ -8,6 +8,7 @@ var game = {
     softReset0Cost: new Decimal(1000),
     defaultSoftReset0Cost: new Decimal(1000),
     reducedCost: new Decimal(0),
+    clickGain: new Decimal(1),
     autobuyerArray: [],
     trigger:{
         autobuyer: Array(3),
@@ -73,7 +74,7 @@ game.notationOption = {
 var defaultGame = jQuery.extend({},game)
 var autobuyerArray=[
     new Autobuyer({
-        type: 0,
+        type: "matter",
         tier: 0,
         interval: 1000,
         cost: new Decimal(10),
@@ -83,7 +84,7 @@ var autobuyerArray=[
         active: true
     }),
     new Autobuyer({
-        type: 0,
+        type: "matter",
         tier: 1,
         interval: 2000,
         cost: new Decimal(200),
@@ -93,7 +94,7 @@ var autobuyerArray=[
         active: true
     }),
     new Autobuyer({
-        type: 0,
+        type: "matter",
         tier: 2,
         interval: 4000,
         cost: new Decimal("1e7"),
@@ -104,3 +105,6 @@ var autobuyerArray=[
     }),
 
 ];
+var upgradeArray = {
+    
+}

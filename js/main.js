@@ -18,7 +18,7 @@ function CanBuy(cost,matter){
     else return true;
 }
 function ClickGainMoney(amount){
-    this.game.matter=this.game.matter.add(amount);
+    this.game.matter=this.game.matter.add(Decimal.mul(amount,game.clickGain));
 }
 var appThis={}
 var app = Vue.createApp({
@@ -33,6 +33,7 @@ var app = Vue.createApp({
         init(){
             console.log("app init");
             this.visual.autobuyerArray=[];
+            this.visual.statistics={}
             this.visual.version = VERSION;
             this.Update();
         },
@@ -42,9 +43,12 @@ var app = Vue.createApp({
         },
         Update(){
             this.visual.matter = FormatValue(game.matter);
-            this.visual.softReset0Cost = FormatValue(game.softReset0Cost)
-            this.visual.overflowForced = game.trigger.overflowForced
-            this.visual.overflowPoint = game.overflowPoint
+            this.visual.softReset0Cost = FormatValue(game.softReset0Cost);
+            this.visual.overflowForced = game.trigger.overflowForced;
+            this.visual.overflowPoint = game.overflowPoint;
+            this.visual.isOverflowed = game.statistics.overflow.gt(0);
+            this.visual.clickGain = game.clickGain;
+            this.visual.deflation = FormatValue(game.statistics.deflation, {smallDec: 0});
             this.game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
@@ -52,6 +56,7 @@ var app = Vue.createApp({
                 this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amount);
                 this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost);
                 this.visual.autobuyerArray[index].active=String(autobuyer.active)
+                this.visual.autobuyerArray[index].name= (index===0)?"Autoclicker":"Autobuyer "+String(index)
             });
         },
         ResetAutobuyerArray(){

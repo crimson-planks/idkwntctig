@@ -47,3 +47,8 @@
     left: 0;
     bottom: 0;
 }
+#overflow-upgrade-div{
+    display: grid;
+    grid-template-columns: repeat(3, 161px);
+    grid-template-rows: repeat(2, 100px);
+}

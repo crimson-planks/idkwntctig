@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathml test</title>
+</head>
+<body>
+    <div id="app">
+        <math display="inline">
+            <mrow>
+                <mfrac>
+                    <mn>2</mn>
+                    <mi>{{asdf}}</mi>
+                </mfrac>
+            </mrow>
+        </math>
+    </div>
+</body>
+<script src="js/vue.global.js"></script>
+<script>
+var app = Vue.createApp({
+    data(){
+        return {
+            asdf: "4"
+        }
+    }
+})
+app.mount("#app");
+</script>
+</html>

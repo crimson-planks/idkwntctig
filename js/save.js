@@ -1,6 +1,3 @@
-function load(){
-
-}
 function internal_ConvertToStringifiableObject(object){
     if(object===null) return object
     if(object===undefined) return {_type: "undefined"}
@@ -10,7 +7,10 @@ function internal_ConvertToStringifiableObject(object){
         return object;
     }
     if(typeof object==="bigint") return {_type: "bigint" ,_data: object.toString()};
+    console.log("pass bigint")
+    console.log(typeof object)
     if(typeof object==="function") return {_type: "function", _data: object.toString()};
+    console.log("pass function")
     if(object instanceof Decimal){
         return {_type: "Decimal", sign: object.sign, mag: object.mag, layer: object.layer}
     }
@@ -19,6 +19,9 @@ function internal_ConvertToStringifiableObject(object){
     }
     if(object instanceof Array){
         return object.map(internal_ConvertToStringifiableObject)
+    }
+    if(object instanceof Function){
+        return {_type: "f", _data: object.toString()}
     }
     if(object instanceof Object){
         for(let element in object){
@@ -30,15 +33,16 @@ function internal_ConvertToStringifiableObject(object){
 }
 function ConvertToStringifiableObject(object){
     if(object instanceof Array) return internal_ConvertToStringifiableObject(ConvertToStringifiableObject(object.map([],object)))
-    if(object instanceof Object) return internal_ConvertToStringifiableObject($.extend({}, object))
+    if(typeof object === "object") return internal_ConvertToStringifiableObject($.extend({}, object))
     return internal_ConvertToStringifiableObject(object)
 }
 function internal_ConvertToUsableObject(object){
+    console.log(object)
     if(object._type === "undefined") return undefined;
     if(object._type === "Infinity") return Infinity;
     if(object._type === "NaN") return NaN;
     if(object._type === "bigint") return BigInt(object._data)
-    if(object._type === "function") return Function(object._data)
+    if(object._type === "function") return Function("return "+object._data)()
     if(object._type === "Decimal") return Decimal.fromComponents(object.sign,object.layer,object.mag)
     if(object instanceof Array) return object.map(internal_ConvertToObject)
     if(object instanceof Object){
@@ -51,6 +55,9 @@ function internal_ConvertToUsableObject(object){
 }
 function ConvertToUsableObject(stringifiableObject){
     return internal_ConvertToUsableObject(stringifiableObject)
+}
+function load(){
+
 }
 function save(object){
     console.log(ConvertToStringifiableObject(object))

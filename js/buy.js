@@ -18,6 +18,13 @@ var costIncrease={
     inverseInfiniteSumOf1divNExp(n){
         return Decimal.recip(n).add(1);
     },
+    /**
+     * 
+     * @param {Decimal} start 
+     * @param {Decimal} increase 
+     * @param {Decimal} buyAmount
+     * @returns {Decimal}
+     */
     sumOfExponential(start,increase,buyAmount){
         //return sum
         return costIncrease.infiniteSumOf1divNExp(increase).mul(Decimal.pow(increase,buyAmount).sub(1)).mul(start);

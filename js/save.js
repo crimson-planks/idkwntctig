@@ -69,8 +69,9 @@ function ConvertToUsableObject(stringifiableObject){
     return internal_ConvertToUsableObject(stringifiableObject);
 }
 function load(){
+    let loadedGame={}
     try{
-        let loadedGame = ConvertToUsableObject(JSON.parse(localStorage.getItem("FalseInfinitySave")));
+        loadedGame = ConvertToUsableObject(JSON.parse(localStorage.getItem("FalseInfinitySave")));
     }
     catch(SyntaxError){
         loadedGame={};

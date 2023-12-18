@@ -8,7 +8,11 @@ function canSoftReset(level){
     }
 }
 function softReset(level){
-    if(canSoftReset(level)) softResetForced(level)
+    if(canSoftReset(level)) {
+        softResetForced(level);
+        return true;
+    }
+    return false;
 }
 function softResetForced(level){
     if(level>=0){

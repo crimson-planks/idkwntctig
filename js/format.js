@@ -382,6 +382,11 @@ function RomanNumeralsUnit(n,property){
     rslt+=subPrefixes[remainder];
     return rslt;
 }
+/**
+ * 
+ * @param {Decimal} amount
+ * @returns 
+ */
 function FormatValue(amount, property={}){
     let notationOption;
     ({notationOption}=objectThatHasTheNotationOption);
@@ -444,7 +449,7 @@ function FormatValue(amount, property={}){
     }
     //console.log("mNumber: "+mNumber.toString());
     
-    //fix 9995 formatting to 10.00e3 -> formatting to 1.00e4
+    //fix 9995 formatting to 10.00e3 -> changed to it formatting to 1.00e4
     let power=amount.abs().log(option.base);
     let mantissa;
     //console.log("power: "+power.toString())
@@ -594,6 +599,9 @@ function FormatValue(amount, property={}){
             //ConvertToHTMLSafe
             return ('e'+convertToInequality(power,option.dec));
         }
+    }
+    if(option.notation=="roman"){
+        return "WorkInProgress"
     }
     return "Format Error";
 }

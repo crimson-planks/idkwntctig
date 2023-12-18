@@ -39,17 +39,21 @@ class Autobuyer{
         return CanBuy(this.GetBuyCost(amount), game.matter);
     }
     CanBuyInterval(amount){
-        return costIncrease.sumOfExponential()
+        return costIncrease.sumOfExponential();
     }
-    get getPerSecond(){
-        return this.amount.mul(1000).div(this.interval);
+    getPerSecond(){
+        let result=this.amount.mul(1000).div(this.interval);
+        if(this.type=="matter"&&this.tier==0) return result.mul(game.clickGain);
+        return result
     }
-    get LosePerSecond(){
-        return new Decimal(0);
+    getLosePerSecond(){
+        if(this.tier==0) return new Decimal(0);
+        return game.autobuyerArray[this.tier-1].GetBuyCost(this.getPerSecond())
+        //throw "NotImplemented"
     }
     GetMaxBuy(money){
         //quadratic formula breaks when costIncrease==0
-        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor()
+        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor();
         if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
         let a = this.costIncrease.div(2);
         let b = this.cost.sub(a);
@@ -83,11 +87,11 @@ class Autobuyer{
         const maxAmount = costIncrease.inverseSumOfExponential(this.intervalCost,this.intervalCostIncrease, game.matter).floor();
         const buyAmount = Decimal.min(maxAmount,amount);
         let cost = this.getBuyIntervalCost(buyAmount)
-        if(cost.gt(game.matter)) return;
-        game.matter=game.matter.minus(this.getBuyIntervalCost(buyAmount))
-        this.intervalCost=this.intervalCost.mul(this.intervalCostIncrease.pow(buyAmount))
-        this.interval=this.interval.div(Decimal.pow(2,buyAmount))
-        
+        if(buyAmount.lte(0)) return false;
+        game.matter=game.matter.minus(cost);
+        this.intervalCost=this.intervalCost.mul(this.intervalCostIncrease.pow(buyAmount));
+        this.interval=this.interval.div(Decimal.pow(2,buyAmount));
+        return true;
     }
     Toggle(){
         this.active=!this.active;
@@ -95,8 +99,8 @@ class Autobuyer{
     AutoBuy(amount){
         if(this.type==="matter"){
             if(this.tier===0){
-                ClickGainMoney(this.amount.mul(amount));
-            }
+                ClickGainMoney(this.amount.mul(amount).mul(game.clickGain));
+            } 
             else{
                 game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount),false);
             }
@@ -133,13 +137,13 @@ class Autobuyer{
             _type: "Autobuyer",
             type: this.type,
             tier: this.tier,
-            interval: this.interval,
-            cost: this.cost,
-            amount: this.amount,
-            bought: this.manualBought,
-            costIncrease: this.costIncrease,
-            intervalCost: this.intervalCost,
-            intervalCostIncrease: this.intervalCostIncrease,
+            interval: new Decimal(this.interval),
+            cost: new Decimal(this.cost),
+            amount: new Decimal(this.amount),
+            bought: new Decimal(this.manualBought),
+            costIncrease: new Decimal(this.costIncrease),
+            intervalCost: new Decimal(this.intervalCost),
+            intervalCostIncrease: new Decimal(this.intervalCostIncrease),
             active: this.active
         }
     }

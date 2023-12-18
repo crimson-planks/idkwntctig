@@ -1,3 +1,4 @@
+
 function internal_ConvertToStringifiableObject(object){
     if(object===null) return object
     if(object===undefined) return {_type: "undefined"}
@@ -7,58 +8,78 @@ function internal_ConvertToStringifiableObject(object){
         return object;
     }
     if(typeof object==="bigint") return {_type: "bigint" ,_data: object.toString()};
-    console.log("pass bigint")
-    console.log(typeof object)
+    //console.log("pass bigint")
+    //console.log(typeof object)
     if(typeof object==="function") return {_type: "function", _data: object.toString()};
-    console.log("pass function")
+    //console.log("pass function")
     if(object instanceof Decimal){
+        //console.log(object)
         return {_type: "Decimal", sign: object.sign, mag: object.mag, layer: object.layer}
     }
     if(object instanceof Autobuyer){
-        return object.toStringifiableObject()
+        return internal_ConvertToStringifiableObject(object.toStringifiableObject());
+    }
+    if(object instanceof Upgrade){
+        return internal_ConvertToStringifiableObject(object.toStringifiableObject());
     }
     if(object instanceof Array){
-        return object.map(internal_ConvertToStringifiableObject)
+        return object.map(ConvertToStringifiableObject)
     }
     if(object instanceof Function){
         return {_type: "f", _data: object.toString()}
     }
     if(object instanceof Object){
+        let newObject = {}
         for(let element in object){
-            object[element] = internal_ConvertToStringifiableObject(object[element])
+            newObject[element] = ConvertToStringifiableObject(object[element])
         }
-        return object
+        return newObject
     }
     return object
 }
 function ConvertToStringifiableObject(object){
-    if(object instanceof Array) return internal_ConvertToStringifiableObject(ConvertToStringifiableObject(object.map([],object)))
-    if(typeof object === "object") return internal_ConvertToStringifiableObject($.extend({}, object))
+    //if(object instanceof Array) return internal_ConvertToStringifiableObject(object.map(ConvertToStringifiableObject))
+    //if(typeof object === "object") return internal_ConvertToStringifiableObject($.extend({}, object))
     return internal_ConvertToStringifiableObject(object)
 }
 function internal_ConvertToUsableObject(object){
-    console.log(object)
+    //console.log(object)
     if(object._type === "undefined") return undefined;
     if(object._type === "Infinity") return Infinity;
     if(object._type === "NaN") return NaN;
     if(object._type === "bigint") return BigInt(object._data)
     if(object._type === "function") return Function("return "+object._data)()
     if(object._type === "Decimal") return Decimal.fromComponents(object.sign,object.layer,object.mag)
-    if(object instanceof Array) return object.map(internal_ConvertToObject)
+    if(object instanceof Array) return object.map(internal_ConvertToUsableObject)
     if(object instanceof Object){
+        let newObject = {};
         for(let element in object){
-            object[element] = internal_ConvertToUsableObject(object[element])
+            newObject[element] = internal_ConvertToUsableObject(object[element])
         }
-        return object
+        if(object._type === "Autobuyer"){
+            return new Autobuyer(newObject)
+        }
+        if(object._type === "Upgrade") return new Upgrade(newObject)
+        return newObject
     }
+
     return object
 }
 function ConvertToUsableObject(stringifiableObject){
-    return internal_ConvertToUsableObject(stringifiableObject)
+    return internal_ConvertToUsableObject(stringifiableObject);
 }
 function load(){
-
+    try{
+        let loadedGame = ConvertToUsableObject(JSON.parse(localStorage.getItem("FalseInfinitySave")));
+    }
+    catch(SyntaxError){
+        loadedGame={};
+    }
+    console.log(loadedGame)
+    game = $.extend({},defaultGame,loadedGame);
+    appThis.Update();
 }
-function save(object){
-    console.log(ConvertToStringifiableObject(object))
+function save(){
+    localStorage.setItem("FalseInfinitySave",JSON.stringify(ConvertToStringifiableObject(game)))
 }
+setInterval(save, 10000);

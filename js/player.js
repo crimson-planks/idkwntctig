@@ -1,18 +1,23 @@
 const OVERFLOW = new Decimal(Math.pow(2,31));
 const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
-const VERSION = "0.0.1"
+const VERSION = "0.0.2"
 var game = {
     matter: new Decimal(0),
+    matterPerSecond: new Decimal(),
+    loseMatterPerSecond: new Decimal(),
+    netMatterPerSecond: new Decimal(),
     defaultMatter: new Decimal(0),
     softReset0Cost: new Decimal(1000),
     defaultSoftReset0Cost: new Decimal(1000),
     reducedCost: new Decimal(0),
     clickGain: new Decimal(1),
-    autobuyerArray: [],
+    autobuyerArray: Array(),
+    upgrade: Object(),
     trigger:{
-        autobuyer: Array(3),
-        overflowForced: false
+        autobuyer: Array(3).fill(false),
+        overflowForced: false,
+        hasOverflown: false,
     },
     statistics:{
         deflation: new Decimal(0),
@@ -87,8 +92,8 @@ var autobuyerArray=[
         type: "matter",
         tier: 1,
         interval: 2000,
-        cost: new Decimal(200),
-        costIncrease: new Decimal(500),
+        cost: new Decimal(500),
+        costIncrease: new Decimal(100),
         intervalCost: new Decimal("1000"),
         intervalCostIncrease: new Decimal("100"),
         active: true
@@ -105,6 +110,16 @@ var autobuyerArray=[
     }),
 
 ];
-var upgradeArray = {
-    
+var upgradeObject = {
+    overflow:{
+        matterPerClick: new Upgrade({
+            type: "overflow",
+            id: "matterPerClick",
+            amount: new Decimal(),
+            cost: new Decimal(1),
+            costIncrease: new Decimal(1),
+            value: new Decimal()
+        }),
+        
+    }
 }

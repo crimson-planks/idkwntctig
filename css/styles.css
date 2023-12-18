@@ -27,6 +27,11 @@
     background-color: #6ad47a;
 
 }
+.cannot-buy-button{
+    border: solid #7f7f7f 5px;
+    background-color: #707070;
+
+}
 .autobuyer-text-div{
     float:left;
     width: 100%;
@@ -52,3 +57,12 @@
     grid-template-columns: repeat(3, 161px);
     grid-template-rows: repeat(2, 100px);
 }
+.tab-button{
+    cursor: pointer;
+}
+.tab-button:hover{
+    text-decoration: underline;
+}
+#tab-div > *:not(:last-child) {
+    margin-right: 30px; 
+} 

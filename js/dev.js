@@ -5,8 +5,8 @@ const dev={
     /**
      * Checks if the money is negative.
      */
-    checkIfMoneyIsNegative: function(){
-        if(game.matter.lt(0)) console.log("negative!!!")
+    checkIfMatterIsNegative: function(){
+        if(game.matter.lt(0)) console.log("matter is negative!!!")
     }
 }
-setInterval(dev.checkIfMoneyIsNegative, 50);
+dev.intervalCheckIfMatterIsNegative=setInterval(this.checkIfMatterIsNegative, 50)

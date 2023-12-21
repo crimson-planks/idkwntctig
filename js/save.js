@@ -76,11 +76,12 @@ function load(){
     catch(SyntaxError){
         loadedGame={};
     }
-    console.log(loadedGame)
+    //console.log(loadedGame)
     game = $.extend({},defaultGame,loadedGame);
     appThis.Update();
 }
 function save(){
     localStorage.setItem("FalseInfinitySave",JSON.stringify(ConvertToStringifiableObject(game)))
+    game.lastSaved = Date.now();
 }
 setInterval(save, 10000);

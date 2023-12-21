@@ -9,3 +9,4 @@ Eternity (1e9e15)
 single generator, multiple autobuyers
 Autoclicker Multiplier Upgrade by resetting.
 Deflation: Resets cost of autobuyers by x, but resets your matter & all autobuyers except your last one.
+Overflow:

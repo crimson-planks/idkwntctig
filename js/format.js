@@ -173,10 +173,6 @@ function ArrToInequality(arr){
     return rsltarr;
 }
 function calLetterBracketAndMnumber(letterId,strLen,property){
-    function _print(){
-        return;
-        console.log(`n: ${letterId}, mNumber: ${mNumber}, bracketCount: ${bracketCount}`);
-    }
     if(typeof property === "undefined") property={};
     letterId=new Decimal(letterId).abs();
     let option=GetOption(property);
@@ -208,12 +204,6 @@ function calLetterBracketAndMnumber(letterId,strLen,property){
 }
 
 function FormatLetter(letterId,str,property){
-    function print(){
-        return;
-        console.log("n: "+letterId);
-        console.log("skippedAmount: "+skippedAmount);
-        console.log("mNumber"+mNumber);
-    }
     letterId=new Decimal(letterId);
     if(str===undefined){
         str="abcdefghijklmnopqrstuvwxyz";
@@ -235,7 +225,6 @@ function FormatLetter(letterId,str,property){
     let bracketCount;
     let mNumber;
     ({bracketCount,mNumber}=calLetterBracketAndMnumber(letterId,len,option));
-    print();
     if(letterId.absLog10().lt(powMaxExp)){
         let isSkipped=rsltLen.gt(option.maxFullShow);
         //console.log("isSkipped: "+isSkipped+" maxfullshow: "+option.maxFullShow)

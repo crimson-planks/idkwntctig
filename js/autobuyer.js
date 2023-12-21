@@ -8,7 +8,7 @@ class Autobuyer{
         this.interval = new Decimal(props.interval);
         this.cost = new Decimal(props.cost);
         this.amount = new Decimal(props.amount);
-        this.manualBought = new Decimal(props.bought);
+        this.amountByType = props.amountByType ?? {};
         this.costIncrease = new Decimal(props.costIncrease);
         this.intervalCost = new Decimal(props.intervalCost);
         this.intervalCostIncrease= new Decimal(props.intervalCostIncrease);
@@ -29,7 +29,7 @@ class Autobuyer{
         }
         return false;
     }
-    get CanBuyOnce(){
+    CanBuyOnce(){
         return CanBuy(this.cost, game.matter);
     }
     GetBuyCost(amount){
@@ -51,6 +51,14 @@ class Autobuyer{
         return game.autobuyerArray[this.tier-1].GetBuyCost(this.getPerSecond())
         //throw "NotImplemented"
     }
+    UpdateAmount(){
+        let tmp=new Decimal(0);
+        Object.keys(this.amountByType).forEach((value)=>{
+            tmp=tmp.add(this.amountByType[value]);
+        });
+        this.amount=tmp;
+        return tmp;
+    }
     GetMaxBuy(money){
         //quadratic formula breaks when costIncrease==0
         if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor();
@@ -61,23 +69,23 @@ class Autobuyer{
         //quadratic formula
         return Decimal.neg(b).add(b.pow(2).sub(a.mul(c).mul(4)).pow(0.5)).div(this.costIncrease).floor();
     }
-    BuyOnce(isManual = true){
-        if(!this.CanBuyOnce) return false;
+    BuyOnce(type = "normal"){
+        if(!this.CanBuyOnce()) return false;
         game.matter=game.matter.minus(this.cost);
         this.cost=this.cost.add(this.costIncrease);
-        this.amount=this.amount.add(1);
-        if(isManual) this.manualBought = this.manualBought.add(1);
+        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0)).add(1);
+        this.UpdateAmount();
         return true;
     }
     //TODO: add ForcedBuy and use Buy as a wrapper function
-    Buy(amount, isManual = true){
+    Buy(amount, type = "normal"){
         const maxBuy = this.GetMaxBuy(game.matter);
         if(maxBuy.lt(1)) return false;
         const buyAmount = Decimal.min(amount,maxBuy);
         game.matter=game.matter.minus(this.GetBuyCost(buyAmount));
         this.cost=this.cost.add(this.costIncrease.mul(buyAmount));
-        this.amount=this.amount.add(buyAmount);
-        if(isManual) this.manualBought = this.manualBought.add(buyAmount);
+        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0)).add(buyAmount);
+        this.UpdateAmount();
         return true;
     }
     getBuyIntervalCost(amount){
@@ -102,7 +110,7 @@ class Autobuyer{
                 ClickGainMoney(this.amount.mul(amount).mul(game.clickGain));
             } 
             else{
-                game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount),false);
+                game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount));
             }
         }
     }
@@ -125,7 +133,7 @@ class Autobuyer{
             interval: this.interval,
             cost: this.cost,
             amount: this.amount,
-            bought: this.manualBought,
+            amountByType: jQuery.extend({},this.amountByType),
             costIncrease: this.costIncrease,
             intervalCost: this.intervalCost,
             intervalCostIncrease: this.intervalCostIncrease,
@@ -140,7 +148,7 @@ class Autobuyer{
             interval: new Decimal(this.interval),
             cost: new Decimal(this.cost),
             amount: new Decimal(this.amount),
-            bought: new Decimal(this.manualBought),
+            amountByType: this.amountByType,
             costIncrease: new Decimal(this.costIncrease),
             intervalCost: new Decimal(this.intervalCost),
             intervalCostIncrease: new Decimal(this.intervalCostIncrease),

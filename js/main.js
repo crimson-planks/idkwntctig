@@ -19,6 +19,7 @@ function CanBuy(cost,matter){
 }
 function ClickGainMoney(amount){
     game.matter=game.matter.add(amount);
+    game.statistics.matterProduced = (game?.statistics?.matterPerClick ?? new Decimal(0)).add(amount);
 }
 var appThis={}
 var app = Vue.createApp({
@@ -51,21 +52,28 @@ var app = Vue.createApp({
             this.visual.loseMatterPerSecond=FormatValue(game.loseMatterPerSecond);
             this.visual.netMatterPerSecond=FormatValue(game.netMatterPerSecond);
             this.visual.autobuyerArray=[];
+            this.visual.showFormula = true;
             game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
-                this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost);
+                this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost)+" MT";
                 this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);
-                this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amount, {smallDec: 0});
-                this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost);
+                this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amountByType["normal"], {smallDec: 0});
+                let showExtraAmount = true;
+                if(!autobuyer.amountByType["startAutoclicker"]) showExtraAmount = false;
+                else if(autobuyer.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
+                this.visual.autobuyerArray[index].showExtraAmount=showExtraAmount;
+                this.visual.autobuyerArray[index].extraAmount=FormatValue(autobuyer.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
+                this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost)+" MT";
                 this.visual.autobuyerArray[index].active=String(autobuyer.active)
                 this.visual.autobuyerArray[index].name= (index===0)?"Autoclicker":"Autobuyer "+String(index)
             });
-
+            this.visual.upgrade={}
+            this.visual.upgrade.overflow={}
             Object.keys(game?.upgrade?.overflow ?? {})?.forEach(key => {
                 //console.log(game.upgrade.overflow[key]);
                 this.visual.upgrade.overflow[key] = {};
                 this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
-                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost);
+                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost)+ "OP";
                 this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
             });
             this.visual.matter = FormatValue(game.matter);
@@ -74,10 +82,17 @@ var app = Vue.createApp({
             this.visual.overflowPoint = game.overflowPoint;
             this.visual.isOverflowed = game.statistics.overflow.gt(0);
             this.visual.clickGain = game.clickGain;
-            this.visual.deflation = FormatValue(game.statistics.deflation, {smallDec: 0});
+            this.visual.deflation = FormatValue(game.deflation, {smallDec: 0});
+
+            this.visual.statistics={};
+            this.visual.statistics.matterProduced = FormatValue(game?.statistics?.matterProduced);
+            this.visual.statistics.deflation = FormatValue(game?.statistics?.deflation, {smallDec: 0});
+            this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
+            this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
+            
         },
         ResetAutobuyerArray(){
-            this.visual.autobuyerArray=[]
+            this.visual.autobuyerArray=[];
         },
         Test(){
             console.log(this)
@@ -90,6 +105,9 @@ var app = Vue.createApp({
         },
         ChangeTab(tab){
             this.visual.currentTab=tab;
+        },
+        canSoftReset(level){
+            return canSoftReset(level);
         },
         ClickAutobuyerBuyButton(autobuyer){
             if(ClickAutobuyerBuyButton(autobuyer)) this.Update();
@@ -109,7 +127,11 @@ var app = Vue.createApp({
             this.Update();
         },
         ClickBuyUpgradeButton(type, id){
-            if(game.upgrade[type][id].BuyOnce()) this.Update();
+            if(game.upgrade[type][id].BuyOnce()) {
+
+                this.Update();
+            }
+
         },
         mounted(){
             this.init();
@@ -157,7 +179,7 @@ function TriggerInit(){
     }
 }
 function TriggerLoop(){
-    if(game.matter.gte(10) && !game.trigger.autobuyer[0]){
+    if((game.matter.gte(10) || game?.upgrade?.overflow?.startAutoclicker?.value?.gt(0)) && !game.trigger.autobuyer[0]){
         game.trigger.autobuyer[0] = true;
         game.autobuyerArray[0] = autobuyerArray[0].clone();
         game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost)
@@ -203,11 +225,14 @@ function UpdateDependentVariables(){
     game.matterPerSecond = new Decimal();
     if(game?.autobuyerArray[0]?.active) game.matterPerSecond = game.autobuyerArray[0].getPerSecond() ?? new Decimal(0);
     let tmp=new Decimal()
-    game.autobuyerArray.forEach((autobuyer,index) => {
+    game.autobuyerArray.forEach((autobuyer) => {
+        autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
     game.loseMatterPerSecond=tmp;
     game.netMatterPerSecond=game.matterPerSecond.sub(tmp);
+    //console.log(game?.autobuyerArray[0]?.amountByType)
+    if(game?.autobuyerArray[0]?.amountByType) game.autobuyerArray[0].amountByType["startAutoclicker"] = (game?.upgrade?.overflow?.startAutoclicker?.value)?.mul(10)?.mul(game.overflowPoint.add(1));
 }
 function GameLoop(){
     game.autobuyerArray.forEach(autobuyer => {

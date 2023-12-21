@@ -21,10 +21,13 @@ class Upgrade {
     CanBuy(amount,money) {
         return this.GetCostForMultipleBuys(amount).lte(money)
     }
+    UpdateAmount() {
+        let tmp=0;
+    }
     BuyOnceForced() {
         this.amount = this.amount.add(1);
         if(this.id==="matterPerClick") this.value = this.value.add(1);
-
+        if(this.id==="startAutoclicker") this.value = this.value.add(1);
         if(this.type==="matter") game.matter = game.matter.sub(this.cost);
         if(this.type==="overflow") game.overflowPoint = game.overflowPoint.sub(this.cost);
         if(this.type==="infinity");

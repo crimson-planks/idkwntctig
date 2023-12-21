@@ -22,19 +22,20 @@ function softResetForced(level){
         //}
 
         game.matter = game.defaultMatter;
-        for(let i in game.trigger.autobuyer){
-            game.trigger.autobuyer[i]=false;
-        }
+        game.trigger.autobuyer.forEach((value,index)=>{
+            game.trigger.autobuyer[index]=false;
+        });
     }
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10)
         game.reducedCost = game.reducedCost.add(1);
-        game.statistics.deflation = game.statistics.deflation.add(1)
+        game.deflation = game.deflation.add(1)
+        game.statistics.deflation = game.statistics.deflation.add(1);
         if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50")
     }
     if(level>=1){
         game.softReset0Cost = game.defaultSoftReset0Cost;
-        game.statistics.deflation = new Decimal(0)
+        game.deflation = new Decimal(0);
         game.trigger.overflowForced = false;
         game.reducedCost = new Decimal(0);
     }
@@ -42,6 +43,7 @@ function softResetForced(level){
         game.statistics.overflow = game.statistics.overflow.add(1)
         game.overflowPoint=game.overflowPoint.add(1)
     }
-    appThis.ResetAutobuyerArray()
+    appThis.ResetAutobuyerArray();
+    GameLoop();
     appThis.Update();
 }

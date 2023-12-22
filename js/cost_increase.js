@@ -48,6 +48,7 @@ var costIncrease={
      */
     sumOfExponential(start,increase,buyAmount){
         //return sum
+        if(Decimal.eq(increase,1)) return Decimal.mul(start,buyAmount);
         return costIncrease.infiniteSumOf1divNExp(increase).mul(Decimal.pow(increase,buyAmount).sub(1)).mul(start);
     },
     /**

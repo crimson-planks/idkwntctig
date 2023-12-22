@@ -29,14 +29,17 @@ class Autobuyer{
         }
         return false;
     }
-    CanBuyOnce(){
-        return CanBuy(this.cost, game.matter);
-    }
     GetBuyCost(amount){
         return this.cost.mul(amount).plus(this.costIncrease.mul(amount).div(2).mul(Decimal.sub(amount,1)));
     }
+    CanBuyOnce(){
+        return CanBuy(this.cost, game.matter);
+    }
     CanBuy(amount){
         return CanBuy(this.GetBuyCost(amount), game.matter);
+    }
+    CanBuyIntervalOnce(){
+        return CanBuy(this.intervalCost,game.matter);
     }
     CanBuyInterval(amount){
         return costIncrease.sumOfExponential();

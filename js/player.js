@@ -2,11 +2,14 @@ const OVERFLOW = new Decimal(Math.pow(2,31));
 const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
 const VERSION = "0.0.3"
-var game = {
-    matter: new Decimal(0),
+var variables={
     matterPerSecond: new Decimal(),
     loseMatterPerSecond: new Decimal(),
     netMatterPerSecond: new Decimal(),
+    playTime: 0,
+};
+var game = {
+    matter: new Decimal(0),
     defaultMatter: new Decimal(0),
     softReset0Cost: new Decimal(1000),
     defaultSoftReset0Cost: new Decimal(1000),

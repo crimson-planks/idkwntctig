@@ -27,7 +27,12 @@ var app = Vue.createApp({
         appThis=this;
         return {
             game: game,
-            visual: {}
+            visual: {
+                statistics:{},
+                upgrade: {
+                    overflow: {}
+                },
+            }
         };
     },
     methods: {
@@ -44,17 +49,45 @@ var app = Vue.createApp({
             ClickGainMoney(game.clickGain.mul(amount));
             this.Update();
         },
+        UpdateStatistics(){
+            this.visual.statistics.matterProduced = FormatValue(game?.statistics?.matterProduced);
+            this.visual.statistics.deflation = FormatValue(game?.statistics?.deflation, {smallDec: 0});
+            this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
+            this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
+            this.visual.statistics.playTime = FormatTime(variables.playTime/1000)
+        },
+        UpdateUpgrade(){
+            UpdateUpgrade();
+            Object.keys(game?.upgrade?.overflow ?? {})?.forEach(key => {
+                //console.log(game.upgrade.overflow[key]);
+                this.visual.upgrade.overflow[key] = {};
+                this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
+                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost)+ "OP";
+                this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
+                this.visual.upgrade.overflow[key].computedValue = FormatValue(game.upgrade.overflow[key].computedValue);
+            });
+        },
         Update(){
             //console.log("update")
             UpdateDependentVariables();
             this.game = game;
-            this.visual.matterPerSecond=FormatValue(game.matterPerSecond);
-            this.visual.loseMatterPerSecond=FormatValue(game.loseMatterPerSecond);
-            this.visual.netMatterPerSecond=FormatValue(game.netMatterPerSecond);
+            this.visual.matterPerSecond=FormatValue(variables.matterPerSecond);
+            this.visual.loseMatterPerSecond=FormatValue(variables.loseMatterPerSecond);
+            this.visual.netMatterPerSecond=FormatValue(variables.netMatterPerSecond);
             this.visual.autobuyerArray=[];
             this.visual.showFormula = true;
             game.autobuyerArray.forEach((autobuyer, index) => {
                 this.visual.autobuyerArray[index]={}
+                this.visual.autobuyerArray[index].buy={};
+                this.visual.autobuyerArray[index].buy.vue_class={};
+                this.visual.autobuyerArray[index].buy.vue_class["can-buy-button"] = autobuyer.CanBuyOnce();
+                this.visual.autobuyerArray[index].buy.vue_class["cannot-buy-button"] = !autobuyer.CanBuyOnce();
+                this.visual.autobuyerArray[index].interval_buy={};
+                this.visual.autobuyerArray[index].interval_buy.vue_class={};
+                this.visual.autobuyerArray[index].interval_buy.vue_class["can-buy-button"] = autobuyer.CanBuyIntervalOnce();
+                this.visual.autobuyerArray[index].interval_buy.vue_class["cannot-buy-button"] = !autobuyer.CanBuyIntervalOnce();
+
+
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost)+" MT";
                 this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);
                 this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amountByType["normal"], {smallDec: 0});
@@ -67,29 +100,15 @@ var app = Vue.createApp({
                 this.visual.autobuyerArray[index].active=String(autobuyer.active)
                 this.visual.autobuyerArray[index].name= (index===0)?"Autoclicker":"Autobuyer "+String(index)
             });
-            this.visual.upgrade={}
-            this.visual.upgrade.overflow={}
-            Object.keys(game?.upgrade?.overflow ?? {})?.forEach(key => {
-                //console.log(game.upgrade.overflow[key]);
-                this.visual.upgrade.overflow[key] = {};
-                this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
-                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost)+ "OP";
-                this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
-            });
+            this.UpdateStatistics();
+            this.UpdateUpgrade();
             this.visual.matter = FormatValue(game.matter);
             this.visual.softReset0Cost = FormatValue(game.softReset0Cost);
             this.visual.overflowForced = game.trigger.overflowForced;
             this.visual.overflowPoint = game.overflowPoint;
             this.visual.isOverflowed = game.statistics.overflow.gt(0);
             this.visual.clickGain = game.clickGain;
-            this.visual.deflation = FormatValue(game.deflation, {smallDec: 0});
-
-            this.visual.statistics={};
-            this.visual.statistics.matterProduced = FormatValue(game?.statistics?.matterProduced);
-            this.visual.statistics.deflation = FormatValue(game?.statistics?.deflation, {smallDec: 0});
-            this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
-            this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
-            
+            this.visual.deflation = FormatValue(game.deflation, {smallDec: 0});            
         },
         ResetAutobuyerArray(){
             this.visual.autobuyerArray=[];
@@ -135,11 +154,11 @@ var app = Vue.createApp({
         },
         mounted(){
             this.init();
-            console.log("app mounted")
+            console.log("app mounted");
         },
         created(){
             this.init();
-            console.log("app created")
+            console.log("app created");
         },
         GameLoop(){
             this.init();
@@ -213,26 +232,31 @@ function TriggerLoop(){
     
     if(game.statistics.overflow.gte(1) && !game.trigger.hasOverflown){
         game.trigger.hasOverflown = true;
-        game.upgrade.overflow = {}
+        game.upgrade.overflow = {};
         Object.keys(upgradeObject.overflow).forEach(key => {
             game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
         });
         appThis.Update();
     }
 }
+function UpdateUpgrade(){
+    Object.keys(game.upgrade.overflow).forEach(key => {
+        game.upgrade.overflow[key].UpdateValue();
+    });
+}
 function UpdateDependentVariables(){
     game.clickGain = new Decimal(1).add(game?.upgrade?.overflow?.matterPerClick?.value);
-    game.matterPerSecond = new Decimal();
-    if(game?.autobuyerArray[0]?.active) game.matterPerSecond = game.autobuyerArray[0].getPerSecond() ?? new Decimal(0);
+    variables.matterPerSecond = new Decimal();
+    if(game?.autobuyerArray[0]?.active) variables.matterPerSecond = game.autobuyerArray[0].getPerSecond() ?? new Decimal(0);
     let tmp=new Decimal()
     game.autobuyerArray.forEach((autobuyer) => {
         autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
-    game.loseMatterPerSecond=tmp;
-    game.netMatterPerSecond=game.matterPerSecond.sub(tmp);
-    //console.log(game?.autobuyerArray[0]?.amountByType)
-    if(game?.autobuyerArray[0]?.amountByType) game.autobuyerArray[0].amountByType["startAutoclicker"] = (game?.upgrade?.overflow?.startAutoclicker?.value)?.mul(10)?.mul(game.overflowPoint.add(1));
+    variables.loseMatterPerSecond=tmp;
+    variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
+
+    if(game.autobuyerArray[0]) game.autobuyerArray[0].amountByType["startAutoclicker"] = game.upgrade.overflow.startAutoclicker.computedValue;
 }
 function GameLoop(){
     game.autobuyerArray.forEach(autobuyer => {
@@ -241,6 +265,8 @@ function GameLoop(){
     UpdateDependentVariables();
     TriggerLoop();
     game.lastUpdated=Date.now();
+    variables.playTime = game.lastUpdated - game.createdTime;
+    appThis.UpdateStatistics();
 }
 init();
 setInterval(GameLoop, 50);

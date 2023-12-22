@@ -11,6 +11,7 @@ class Upgrade {
         this.cost = props.cost;
         this.costIncrease = props.costIncrease;
         this.value = props.value
+        this.computedValue = props.computedValue;
     }
     GetCostForMultipleBuys(amount){
         return costIncrease.sumOfLinear(this.cost,this.costIncrease,amount);
@@ -22,12 +23,25 @@ class Upgrade {
         return this.GetCostForMultipleBuys(amount).lte(money)
     }
     UpdateAmount() {
-        let tmp=0;
+        throw "NotImplemented"
+    }
+    UpdateValue() {
+        if(this.type==="overflow"){
+            if(this.id==="matterPerClick") {
+                this.value = this.amount;
+                this.computedValue = this.value;
+            }
+            if(this.id==="startAutoclicker") {
+                this.value = this.amount.mul(10);
+                this.computedValue = this.value.mul(game.overflowPoint.add(1));
+            }
+        }
     }
     BuyOnceForced() {
         this.amount = this.amount.add(1);
-        if(this.id==="matterPerClick") this.value = this.value.add(1);
-        if(this.id==="startAutoclicker") this.value = this.value.add(1);
+
+        this.UpdateValue();
+
         if(this.type==="matter") game.matter = game.matter.sub(this.cost);
         if(this.type==="overflow") game.overflowPoint = game.overflowPoint.sub(this.cost);
         if(this.type==="infinity");
@@ -41,16 +55,18 @@ class Upgrade {
         if(this.type==="overflow") currency = game.overflowPoint;
         if(this.type==="infinity");
         if(!this.CanBuyOnce(currency)) return false;
-        this.BuyOnceForced()
+        this.BuyOnceForced();
         return true;
         
     }
     BuyForced(amount){
         this.amount = this.amount.add(amount)
+
+        this.UpdateValue();
         if(this.type==="matter") game.matter = game.matter.sub(this.GetCostForMultipleBuys(amount));
         if(this.type==="overflow") game.overflowPoint = game.overflowPoint.sub(this.GetCostForMultipleBuys(amount));
         if(this.type==="infinity");
-        this.cost = this.cost.add(this.costIncrease.mul(amount))
+        this.cost = this.cost.add(this.costIncrease.mul(amount));
     }
     Buy(amount) {
         let currency = new Decimal();
@@ -72,7 +88,8 @@ class Upgrade {
             amount: this.amount,
             cost: this.cost,
             costIncrease: this.costIncrease,
-            value: this.value
+            value: this.value,
+            computedValue: this.computedValue
         }
     }
     clone(){

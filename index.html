@@ -26,9 +26,9 @@
                         <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
                             <h4 class="autobuyer-name-div center">{{autobuyer.name}}</h4>
                             <span class="autobuyer-text-div">Amount: {{autobuyer.amount}} <span v-if="autobuyer.showExtraAmount">+ {{autobuyer.extraAmount}}</span></span>
-                            <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}}</span>
+                            <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="autobuyer.buy.vue_class" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}}</span>
                             <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
-                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Interval Cost: {{autobuyer.intervalCost}}</span>
+                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="autobuyer.interval_buy.vue_class" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Interval Cost: {{autobuyer.intervalCost}}</span>
                             <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
                         </div>
                     </div>
@@ -39,15 +39,15 @@
                     <div id="overflow-upgrade-div">
                         <button v-on:click="ClickBuyUpgradeButton('overflow','matterPerClick')">
                             Increase matter per click by 1<br>
-                            Current: +{{visual?.upgrade?.overflow?.matterPerClick?.value}}<br>
+                            Current: +{{visual?.upgrade?.overflow?.matterPerClick?.computedValue}}<br>
                             Cost: {{visual?.upgrade?.overflow?.matterPerClick?.cost}}<br>
                             <span v-show="visual?.showFormula">Formula: Lorem ipsum 1</span>
                         </button>
                         <button v-on:click="ClickBuyUpgradeButton('overflow','startAutoclicker')">
                             Get extra autoclickers<br>
-                            Current: {{visual?.upgrade?.overflow?.startAutoclicker?.value}}*(overflow points)<br>
+                            Current: {{visual?.upgrade?.overflow?.startAutoclicker?.computedValue}}<br>
                             Cost: {{visual?.upgrade?.overflow?.startAutoclicker?.cost}}<br>
-                            <span v-show="visual?.showFormula">Formula: Lorem ipsum 2</span>
+                            <span v-show="visual?.showFormula">Formula: {{visual?.upgrade?.overflow?.startAutoclicker?.value}} * (overflow points)</span>
                         </button>
                         <button v-on:click="ClickBuyUpgradeButton('overflow','startAutoclicker')">
                             Get more overflow points depending of the speed of the last 3 overflows<br>
@@ -70,7 +70,7 @@
         </div>
         <div id="statistics-tab-div" v-show="visual.currentTab==='statistics'">
             <h4>Statistics</h4>
-            Play time: <br>
+            Play time: {{visual.statistics?.playTime}}<br>
             Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
             Current simulation time: <br>
             Deflation: {{visual.statistics?.deflation}}<br>

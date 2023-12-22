@@ -7,6 +7,7 @@ const dev={
      */
     checkIfMatterIsNegative: function(){
         if(game.matter.lt(0)) console.log("matter is negative!!!")
-    }
+    },
+    testDate: Date.now()
 }
 dev.intervalCheckIfMatterIsNegative=setInterval(this.checkIfMatterIsNegative, 50)

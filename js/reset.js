@@ -32,6 +32,7 @@ function softResetForced(level){
         game.deflation = game.deflation.add(1)
         game.statistics.deflation = game.statistics.deflation.add(1);
         if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50")
+        game.lastDeflationTime = Date.now()
     }
     if(level>=1){
         game.softReset0Cost = game.defaultSoftReset0Cost;
@@ -42,6 +43,7 @@ function softResetForced(level){
     if(level===1){
         game.statistics.overflow = game.statistics.overflow.add(1)
         game.overflowPoint=game.overflowPoint.add(1)
+        game.lastOverflowTime = Date.now()
     }
     appThis.ResetAutobuyerArray();
     GameLoop();

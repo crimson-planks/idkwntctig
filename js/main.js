@@ -19,7 +19,7 @@ function CanBuy(cost,matter){
 }
 function ClickGainMoney(amount){
     game.matter=game.matter.add(amount);
-    game.statistics.matterProduced = (game?.statistics?.matterPerClick ?? new Decimal(0)).add(amount);
+    game.statistics.matterProduced = (game?.statistics?.matterProduced ?? new Decimal(0)).add(amount);
 }
 var appThis={}
 var app = Vue.createApp({
@@ -51,10 +51,12 @@ var app = Vue.createApp({
         },
         UpdateStatistics(){
             this.visual.statistics.matterProduced = FormatValue(game?.statistics?.matterProduced);
+            this.visual.statistics.deflationTime = FormatTime(variables.deflationTime/1000);
+            this.visual.statistics.overflowTime = FormatTime(variables.overflowTime/1000);
             this.visual.statistics.deflation = FormatValue(game?.statistics?.deflation, {smallDec: 0});
             this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
             this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
-            this.visual.statistics.playTime = FormatTime(variables.playTime/1000)
+            this.visual.statistics.playTime = FormatTime(variables.playTime/1000);
         },
         UpdateUpgrade(){
             UpdateUpgrade();
@@ -240,7 +242,7 @@ function TriggerLoop(){
     }
 }
 function UpdateUpgrade(){
-    Object.keys(game.upgrade.overflow).forEach(key => {
+    Object.keys(game?.upgrade?.overflow ?? {}).forEach(key => {
         game.upgrade.overflow[key].UpdateValue();
     });
 }
@@ -256,7 +258,7 @@ function UpdateDependentVariables(){
     variables.loseMatterPerSecond=tmp;
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
 
-    if(game.autobuyerArray[0]) game.autobuyerArray[0].amountByType["startAutoclicker"] = game.upgrade.overflow.startAutoclicker.computedValue;
+    if(game.autobuyerArray[0]) game.autobuyerArray[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }
 function GameLoop(){
     game.autobuyerArray.forEach(autobuyer => {
@@ -266,6 +268,8 @@ function GameLoop(){
     TriggerLoop();
     game.lastUpdated=Date.now();
     variables.playTime = game.lastUpdated - game.createdTime;
+    variables.deflationTime = game.lastUpdated - game.lastDeflationTime;
+    variables.overflowTime = game.lastUpdated - game.lastOverflowTime;
     appThis.UpdateStatistics();
 }
 init();

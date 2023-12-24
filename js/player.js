@@ -7,6 +7,8 @@ var variables={
     loseMatterPerSecond: new Decimal(),
     netMatterPerSecond: new Decimal(),
     playTime: 0,
+    deflationTime: 0,
+    overflowTime: 0,
 };
 var game = {
     matter: new Decimal(0),
@@ -35,6 +37,8 @@ var game = {
     createdVersion: VERSION,
     currentVersion: VERSION,
     createdTime: Date.now(),
+    lastDeflationTime: Date.now(),
+    lastOverflowTime: Date.now(),
     lastSaved: Date.now(),
     lastUpdated: Date.now()
 };

@@ -72,9 +72,9 @@
             <h4>Statistics</h4>
             Play time: {{visual.statistics?.playTime}}<br>
             Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
-            Current simulation time: <br>
+            Current simulation time: {{visual.statistics?.overflowTime}}<br>
             Deflation: {{visual.statistics?.deflation}}<br>
-            <span v-if="true">Overflow: {{visual.statistics?.overflow}}<br></span>
+            <span v-if="visual.statistics?.showOverflow">Overflow: {{visual.statistics?.overflow}}<br></span>
         </div>
         <p id="version-p">Version: {{visual.version}}</p>
     </div>

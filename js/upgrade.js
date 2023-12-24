@@ -35,6 +35,9 @@ class Upgrade {
                 this.value = this.amount.mul(10);
                 this.computedValue = this.value.mul(game.overflowPoint.add(1));
             }
+            if(this.id==="overflowTimeMultiplier") {
+                this.value = this.amount;
+            }
         }
     }
     BuyOnceForced() {

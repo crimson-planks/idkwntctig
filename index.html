@@ -49,7 +49,7 @@
                             Cost: {{visual?.upgrade?.overflow?.startAutoclicker?.cost}}<br>
                             <span v-show="visual?.showFormula">Formula: {{visual?.upgrade?.overflow?.startAutoclicker?.value}} * (overflow points)</span>
                         </button>
-                        <button v-on:click="ClickBuyUpgradeButton('overflow','startAutoclicker')">
+                        <button v-on:click="ClickBuyUpgradeButton('overflow','overflowTimeMultiplier')">
                             Get more overflow points depending of the speed of the last 3 overflows<br>
                             Current: NOT IMPLEMENTED<br>
                             Cost: NOT IMPLEMENTED<br>
@@ -72,9 +72,12 @@
             <h4>Statistics</h4>
             Play time: {{visual.statistics?.playTime}}<br>
             Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
-            Current simulation time: {{visual.statistics?.overflowTime}}<br>
-            Deflation: {{visual.statistics?.deflation}}<br>
-            <span v-if="visual.statistics?.showOverflow">Overflow: {{visual.statistics?.overflow}}<br></span>
+            Deflation: {{visual.statistics?.deflation}} times<br>
+            <span v-if="visual.statistics?.showOverflow">
+                Current simulation time: {{visual.statistics?.overflowTime}}<br>
+                Overflow: {{visual.statistics?.overflow}}<br>
+                Fastest overflow time:<br>
+            </span>
         </div>
         <p id="version-p">Version: {{visual.version}}</p>
     </div>

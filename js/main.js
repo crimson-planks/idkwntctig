@@ -149,9 +149,9 @@ var app = Vue.createApp({
         },
         ClickBuyUpgradeButton(type, id){
             if(game.upgrade[type][id].BuyOnce()) {
-
                 this.Update();
             }
+            this.Update();
 
         },
         mounted(){

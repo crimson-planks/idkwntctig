@@ -47,13 +47,13 @@
                             Get extra autoclickers<br>
                             Current: {{visual?.upgrade?.overflow?.startAutoclicker?.computedValue}}<br>
                             Cost: {{visual?.upgrade?.overflow?.startAutoclicker?.cost}}<br>
-                            <span v-show="visual?.showFormula">Formula: {{visual?.upgrade?.overflow?.startAutoclicker?.value}} * (overflow points)</span>
+                            <span v-show="visual?.showFormula">Formula: {{visual?.upgrade?.overflow?.startAutoclicker?.value}} * 10 * (overflow points)</span>
                         </button>
                         <button v-on:click="ClickBuyUpgradeButton('overflow','overflowTimeMultiplier')">
                             Get more overflow points depending of the speed of the last 3 overflows<br>
-                            Current: NOT IMPLEMENTED<br>
-                            Cost: NOT IMPLEMENTED<br>
-                            <span v-show="visual?.showFormula">Formula: Lorem ipsum 3</span>
+                            Current: {{visual?.upgrade?.overflow?.overflowTimeMultiplier?.computedValue}}<br>
+                            Cost: {{visual?.upgrade?.overflow?.overflowTimeMultiplier?.cost}}<br>
+                            <span v-show="visual?.showFormula">Formula: 2^()</span>
                         </button>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
             <span v-if="visual.statistics?.showOverflow">
                 Current simulation time: {{visual.statistics?.overflowTime}}<br>
                 Overflow: {{visual.statistics?.overflow}}<br>
-                Fastest overflow time:<br>
+                Fastest overflow time:{{visual.statistics?.fastestOverflowTime}}<br>
             </span>
         </div>
         <p id="version-p">Version: {{visual.version}}</p>

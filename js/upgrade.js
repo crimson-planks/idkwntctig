@@ -7,7 +7,7 @@ class Upgrade {
     constructor(props) {
         this.type = props.type;
         this.id = props.id;
-        this.amount = props.amount;
+        this.amount = props.amount ?? new Decimal();
         this.cost = props.cost;
         this.costIncrease = props.costIncrease;
         this.value = props.value
@@ -37,6 +37,7 @@ class Upgrade {
             }
             if(this.id==="overflowTimeMultiplier") {
                 this.value = this.amount;
+                this.computedValue = Decimal.div(360,this.value);
             }
         }
     }

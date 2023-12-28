@@ -23,12 +23,13 @@ var game = {
     trigger:{
         autobuyer: Array(3).fill(false),
         overflowForced: false,
-        hasOverflown: false,
+        overflowReset: false,
     },
     statistics:{
         matterProduced: new Decimal(),
         deflation: new Decimal(0),
-        overflow: new Decimal(0)
+        overflow: new Decimal(0),
+        fastestOverflowTime: Infinity,
     },
     isBreakOverflow: false,
     overflowPoint: new Decimal(),
@@ -136,6 +137,14 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new Decimal(1),
             costIncrease: new Decimal(0),
+            value: new Decimal()
+        }),
+        overflowTimeMultiplier: new Upgrade({
+            type: "overflow",
+            id: "overflowTimeMultiplier",
+            amount: new Decimal(),
+            cost: new Decimal(1),
+            costIncrease: Decimal.dInf,
             value: new Decimal()
         })
     }

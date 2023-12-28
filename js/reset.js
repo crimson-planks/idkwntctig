@@ -41,9 +41,12 @@ function softResetForced(level){
         game.reducedCost = new Decimal(0);
     }
     if(level===1){
-        game.statistics.overflow = game.statistics.overflow.add(1)
-        game.overflowPoint=game.overflowPoint.add(1)
-        game.lastOverflowTime = Date.now()
+        game.statistics.overflow = game.statistics.overflow.add(1);
+        if(game.lastUpdated - game.lastOverflowTime < game.statistics.fastestOverflowTime) {
+            game.statistics.fastestOverflowTime = game.lastUpdated - game.lastOverflowTime;
+        }
+        game.overflowPoint=game.overflowPoint.add(1);
+        game.lastOverflowTime = Date.now();
     }
     appThis.ResetAutobuyerArray();
     GameLoop();

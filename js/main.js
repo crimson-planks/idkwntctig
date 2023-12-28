@@ -57,6 +57,7 @@ var app = Vue.createApp({
             this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
             this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
             this.visual.statistics.playTime = FormatTime(variables.playTime/1000);
+            this.visual.statistics.fastestOverflowTime = FormatTime(game.statistics.fastestOverflowTime/1000);
         },
         UpdateUpgrade(){
             UpdateUpgrade();
@@ -89,7 +90,6 @@ var app = Vue.createApp({
                 this.visual.autobuyerArray[index].interval_buy.vue_class["can-buy-button"] = autobuyer.CanBuyIntervalOnce();
                 this.visual.autobuyerArray[index].interval_buy.vue_class["cannot-buy-button"] = !autobuyer.CanBuyIntervalOnce();
 
-
                 this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost)+" MT";
                 this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);
                 this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amountByType["normal"], {smallDec: 0});
@@ -104,13 +104,13 @@ var app = Vue.createApp({
             });
             this.UpdateStatistics();
             this.UpdateUpgrade();
-            this.visual.matter = FormatValue(game.matter);
-            this.visual.softReset0Cost = FormatValue(game.softReset0Cost);
-            this.visual.overflowForced = game.trigger.overflowForced;
-            this.visual.overflowPoint = game.overflowPoint;
-            this.visual.isOverflowed = game.statistics.overflow.gt(0);
-            this.visual.clickGain = game.clickGain;
-            this.visual.deflation = FormatValue(game.deflation, {smallDec: 0});            
+            this.visual.matter = FormatValue(game?.matter);
+            this.visual.softReset0Cost = FormatValue(game?.softReset0Cost);
+            this.visual.overflowForced = game?.trigger?.overflowForced;
+            this.visual.overflowPoint = game?.overflowPoint;
+            this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
+            this.visual.clickGain = game?.clickGain;
+            this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});            
         },
         ResetAutobuyerArray(){
             this.visual.autobuyerArray=[];
@@ -169,76 +169,80 @@ var app = Vue.createApp({
     }
 });
 app.mount("#app");
-function TriggerInit(){
-    if(game.trigger.autobuyer[0]){
+var triggerObject = {
+    autobuyer0: function(){
         game.trigger.autobuyer[0] = true;
         game.autobuyerArray[0] = autobuyerArray[0].clone();
-        game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost)
+        game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost);
         appThis.Update();
-    }
-
-    if(game.trigger.autobuyer[1]){
+    },
+    autobuyer1: function(){
         game.trigger.autobuyer[1] = true;
         game.autobuyerArray[1] = autobuyerArray[1].clone();
-        game.autobuyerArray[1].costIncrease = game.autobuyerArray[1].costIncrease.minus(game.reducedCost)
+        game.autobuyerArray[1].costIncrease = game.autobuyerArray[1].costIncrease.minus(game.reducedCost);
         appThis.Update();
-    }
-
-    if(game.trigger.autobuyer[2]){
+    },
+    autobuyer2: function(){
         game.trigger.autobuyer[2] = true;
         game.autobuyerArray[2] = autobuyerArray[2].clone();
-        game.autobuyerArray[2].costIncrease = game.autobuyerArray[2].costIncrease.minus(game.reducedCost)
+        game.autobuyerArray[2].costIncrease = game.autobuyerArray[2].costIncrease.minus(game.reducedCost);
         appThis.Update();
-    }
-
-    if(game.trigger.overflowForced){
+    },
+    overflowForced: function(){
         game.trigger.overflowForced = true;
         game.autobuyerArray.forEach((autobuyer,index)=>{
             autobuyer.active=false;
         })
         appThis.Update();
-    }
-}
-function TriggerLoop(){
-    if((game.matter.gte(10) || game?.upgrade?.overflow?.startAutoclicker?.value?.gt(0)) && !game.trigger.autobuyer[0]){
-        game.trigger.autobuyer[0] = true;
-        game.autobuyerArray[0] = autobuyerArray[0].clone();
-        game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost)
-        appThis.Update();
-    }
-
-    if(game.matter.gte(500) && !game.trigger.autobuyer[1]){
-        game.trigger.autobuyer[1] = true;
-        game.autobuyerArray[1] = autobuyerArray[1].clone();
-        game.autobuyerArray[1].costIncrease = game.autobuyerArray[1].costIncrease.minus(game.reducedCost)
-        appThis.Update();
-    }
-
-    if(game.matter.gte("1e7") && !game.trigger.autobuyer[2]){
-        game.trigger.autobuyer[2] = true;
-        game.autobuyerArray[2] = autobuyerArray[2].clone();
-        game.autobuyerArray[2].costIncrease = game.autobuyerArray[2].costIncrease.minus(game.reducedCost)
-        appThis.Update();
-    }
-
-    if(game.matter.gte(OVERFLOW) && !game.isBreakOverflow){
-        game.trigger.overflowForced = true;
-        game.autobuyerArray.forEach((autobuyer,index)=>{
-            autobuyer.active=false;
-        })
-        appThis.Update();
-    }
-    //if(game.trigger.overflowForced){
-    //    //softResetForced(1)
-    //}
-    
-    if(game.statistics.overflow.gte(1) && !game.trigger.hasOverflown){
-        game.trigger.hasOverflown = true;
+    },
+    overflowReset(){
+        game.trigger.overflowReset = true;
         game.upgrade.overflow = {};
         Object.keys(upgradeObject.overflow).forEach(key => {
             game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
         });
         appThis.Update();
+    }
+}
+function TriggerInit(){
+    if(game.trigger.autobuyer[0]){
+       triggerObject.autobuyer0();
+    }
+
+    if(game.trigger.autobuyer[1]){
+        triggerObject.autobuyer1();
+    }
+
+    if(game.trigger.autobuyer[2]){
+        triggerObject.autobuyer2();
+    }
+
+    if(game.trigger.overflowForced){
+        triggerObject.overflowForced();
+    }
+
+    if(game.trigger.overflowReset){
+        triggerObject.overflowReset();
+    }
+}
+function TriggerLoop(){
+    if((game.matter.gte(10) || game?.upgrade?.overflow?.startAutoclicker?.value?.gt(0)) && !game.trigger.autobuyer[0]){
+        triggerObject.autobuyer0();
+    }
+
+    if(game.matter.gte(500) && !game.trigger.autobuyer[1]){
+        triggerObject.autobuyer1();
+    }
+
+    if(game.matter.gte("1e7") && !game.trigger.autobuyer[2]){
+        triggerObject.autobuyer2();
+    }
+
+    if(game.matter.gte(OVERFLOW) && !game.isBreakOverflow && !game.trigger.overflowForced){
+        triggerObject.overflowForced();
+    }
+    if(game?.statistics?.overflow?.gte(1) && !game.trigger.overflowReset){
+        triggerObject.overflowReset();
     }
 }
 function UpdateUpgrade(){

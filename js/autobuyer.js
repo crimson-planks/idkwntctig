@@ -12,8 +12,7 @@ class Autobuyer{
         this.costIncrease = new Decimal(props.costIncrease);
         this.intervalCost = new Decimal(props.intervalCost);
         this.intervalCostIncrease= new Decimal(props.intervalCostIncrease);
-        this.active = props.active;
-        if(this.active===undefined) this.active=true
+        this.active = props.active ?? true;
 
         //time in milliseconds
         this.timer = props.timer?props.timer:0;

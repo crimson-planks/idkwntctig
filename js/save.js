@@ -68,16 +68,31 @@ function internal_ConvertToUsableObject(object){
 function ConvertToUsableObject(stringifiableObject){
     return internal_ConvertToUsableObject(stringifiableObject);
 }
+function merge_deep(a,b){
+    //merge b into a
+    a = a ?? {};
+    console.log("a: ")
+    console.dir(a);
+    console.log("b: ")
+    console.dir(b);
+    Object.keys(b).forEach((index)=>{
+        //console.log(index);
+        a[index]=merge_deep(a[index],b[index]);
+    });
+    return a;
+}
 function load(){
-    let loadedGame={}
+    let loadedGame={};
     try{
         loadedGame = ConvertToUsableObject(JSON.parse(localStorage.getItem("FalseInfinitySave")));
     }
     catch(SyntaxError){
         loadedGame={};
     }
-    //console.log(loadedGame)
+    console.log(loadedGame);
+    console.log(defaultGame)
     game = $.extend({},defaultGame,loadedGame);
+    console.log(game)
     appThis.Update();
 }
 function save(){

@@ -9,11 +9,13 @@
 </head>
 <body>
     <div id="app" style="display: none;">
-        <div id="tab-div">
-            <span class="tab-button" v-on:click="ChangeTab('autobuyer')">Autobuyers</span>
-            <span class="tab-button" v-on:click="ChangeTab('option')">Options</span>
-            <span class="tab-button" v-on:click="ChangeTab('statistics')">Statistics</span>
-        </div>
+        <header>
+            <div id="tab-div">
+                <span class="tab-button" v-on:click="ChangeTab('autobuyer')">Autobuyers</span>
+                <span class="tab-button" v-on:click="ChangeTab('option')">Options</span>
+                <span class="tab-button" v-on:click="ChangeTab('statistics')">Statistics</span>
+            </div>
+        </header>
         <p>Matter: {{visual.matter}}</p>
         <p>Matter/second: {{visual.matterPerSecond}}</p>
         <p>Lose matter/second: {{visual.loseMatterPerSecond}}</p>

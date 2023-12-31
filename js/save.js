@@ -70,13 +70,8 @@ function ConvertToUsableObject(stringifiableObject){
 }
 function merge_deep(a,b){
     //merge b into a
-    a = a ?? {};
-    console.log("a: ")
-    console.dir(a);
-    console.log("b: ")
-    console.dir(b);
+    if(a?.constructor !== Object) return b;
     Object.keys(b).forEach((index)=>{
-        //console.log(index);
         a[index]=merge_deep(a[index],b[index]);
     });
     return a;

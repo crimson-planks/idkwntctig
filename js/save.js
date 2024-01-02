@@ -14,7 +14,11 @@ function internal_ConvertToStringifiableObject(object){
     //console.log("pass function")
     if(object instanceof Decimal){
         //console.log(object)
-        return {_type: "Decimal", sign: object.sign, mag: object.mag, layer: object.layer}
+        return {
+            _type: "Decimal", 
+            sign: internal_ConvertToStringifiableObject(object.sign), 
+            mag: internal_ConvertToStringifiableObject(object.mag), 
+            layer: internal_ConvertToStringifiableObject(object.layer)}
     }
     if(object instanceof Autobuyer){
         return internal_ConvertToStringifiableObject(object.toStringifiableObject());
@@ -49,7 +53,11 @@ function internal_ConvertToUsableObject(object){
     if(object._type === "NaN") return NaN;
     if(object._type === "bigint") return BigInt(object._data)
     if(object._type === "function") return Function("return "+object._data)()
-    if(object._type === "Decimal") return Decimal.fromComponents(object.sign,object.layer,object.mag)
+    if(object._type === "Decimal") return Decimal.fromComponents(
+        internal_ConvertToUsableObject(object.sign),
+        internal_ConvertToUsableObject(object.layer),
+        internal_ConvertToUsableObject(object.mag)
+        );
     if(object instanceof Array) return object.map(internal_ConvertToUsableObject)
     if(object instanceof Object){
         let newObject = {};
@@ -84,10 +92,13 @@ function load(){
     catch(SyntaxError){
         loadedGame={};
     }
-    console.log(loadedGame);
-    console.log(defaultGame)
-    game = $.extend({},defaultGame,loadedGame);
-    console.log(game)
+    //console.log(loadedGame);
+    //console.log(defaultGame);
+    let merged_obj = merge_deep({},defaultGame);
+    merged_obj = merge_deep(merged_obj,loadedGame);
+    //game = $.extend({},defaultGame,loadedGame);
+    game = merged_obj;
+    //console.log(game)
     appThis.Update();
 }
 function save(){

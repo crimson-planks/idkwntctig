@@ -27,17 +27,23 @@ class Upgrade {
     }
     UpdateValue() {
         if(this.type==="overflow"){
-            if(this.id==="matterPerClick") {
-                this.value = this.amount;
-                this.computedValue = this.value;
-            }
-            if(this.id==="startAutoclicker") {
-                this.value = this.amount.mul(10);
-                this.computedValue = this.value.mul(game.overflowPoint.add(1));
-            }
-            if(this.id==="overflowTimeMultiplier") {
-                this.value = this.amount;
-                this.computedValue = Decimal.div(360,this.value);
+            switch(this.id){
+                case "matterPerClick":
+                    this.value = this.amount;
+                    this.computedValue = this.value;
+                    break;
+                case "startAutoclicker":
+                    this.value = this.amount.mul(10);
+                    this.computedValue = this.value.mul(game.overflowPoint.add(1));
+                    break;
+                case "overflowTimeMultiplier":
+                    this.value = this.amount;
+                    if(game.statistics.fastestOverflowTime===0) {
+                        this.computedValue = new Decimal(360000);
+                        break;
+                    }
+                    this.computedValue = this.value.mul(Decimal.div(360000,game.statistics.fastestOverflowTime)).ceil();
+                    break;
             }
         }
     }

@@ -22,16 +22,19 @@
         <p>Net matter/second: {{visual.netMatterPerSecond}}</p>
         <div id="main-div">
             <div id="autobuyer-tab-div" v-show="visual.currentTab==='autobuyer'">
-                <div id="pre-overflow-div" v-show="!visual.overflowForced">
-                    <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
-                    <div id="autobuyer-list-div">
-                        <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
-                            <h4 class="autobuyer-name-div center">{{autobuyer.name}}</h4>
-                            <span class="autobuyer-text-div">Amount: {{autobuyer.amount}} <span v-if="autobuyer.showExtraAmount">+ {{autobuyer.extraAmount}}</span></span>
-                            <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="autobuyer.buy.vue_class" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}}</span>
-                            <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
-                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="autobuyer.interval_buy.vue_class" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Interval Cost: {{autobuyer.intervalCost}}</span>
-                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
+                <div>
+                    <div class="padding" style="min-width: 250px;"></div>
+                    <div id="pre-overflow-div" v-show="!visual.overflowForced">
+                        <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
+                        <div id="autobuyer-list-div">
+                            <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
+                                <h4 class="autobuyer-name-div center">{{autobuyer.name}}</h4>
+                                <span class="autobuyer-text-div">Amount: {{autobuyer.amount}} <span v-if="autobuyer.showExtraAmount">+ {{autobuyer.extraAmount}}</span></span>
+                                <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="autobuyer.buy.vue_class" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}}</span>
+                                <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
+                                <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="autobuyer.interval_buy.vue_class" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Interval Cost: {{autobuyer.intervalCost}}</span>
+                                <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -52,10 +55,10 @@
                             <span v-show="visual?.showFormula">Formula: {{visual?.upgrade?.overflow?.startAutoclicker?.value}} * 10 * (overflow points)</span>
                         </button>
                         <button v-on:click="ClickBuyUpgradeButton('overflow','overflowTimeMultiplier')">
-                            Get more overflow points depending of the speed of the last 3 overflows<br>
+                            Get more overflow points depending of the fastest overflow time<br>
                             Current: {{visual?.upgrade?.overflow?.overflowTimeMultiplier?.computedValue}}<br>
                             Cost: {{visual?.upgrade?.overflow?.overflowTimeMultiplier?.cost}}<br>
-                            <span v-show="visual?.showFormula">Formula: 2^()</span>
+                            <span v-show="visual?.showFormula">Formula: 360/overflow time (in seconds)</span>
                         </button>
                     </div>
                 </div>

@@ -2,7 +2,7 @@
 class Upgrade {
     /**
      * 
-     * @param {{type: string, id: string, amount: Decimal, cost: Decimal, costIncrease: Decimal, value: Decimal}} props 
+     * @param {{type: string, id: string, amount: Decimal, cost: Decimal, costIncrease: Decimal, value: Decimal, computedValue: Decimal}} props 
      */
     constructor(props) {
         this.type = props.type;
@@ -39,10 +39,14 @@ class Upgrade {
                 case "overflowTimeMultiplier":
                     this.value = this.amount;
                     if(game.statistics.fastestOverflowTime===0) {
-                        this.computedValue = new Decimal(360000);
+                        this.computedValue = new Decimal(1e7);
                         break;
                     }
-                    this.computedValue = this.value.mul(Decimal.div(360000,game.statistics.fastestOverflowTime)).ceil();
+                    this.computedValue = this.value.mul(Decimal.div(1e7,Decimal.add(1e4,game.statistics.fastestOverflowTime))).ceil();
+                    break;
+                case "startIntervalReducer":
+                    this.value = this.amount;
+                    this.computedValue = this.value;
                     break;
             }
         }
@@ -99,7 +103,7 @@ class Upgrade {
             cost: this.cost,
             costIncrease: this.costIncrease,
             value: this.value,
-            computedValue: this.computedValue
+            computedValue: this.computedValue,
         }
     }
     clone(){

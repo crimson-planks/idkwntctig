@@ -105,4 +105,3 @@ function save(){
     localStorage.setItem("FalseInfinitySave",JSON.stringify(ConvertToStringifiableObject(game)))
     game.lastSaved = Date.now();
 }
-setInterval(save, 10000);

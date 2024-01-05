@@ -43,6 +43,7 @@ function softResetForced(level){
     }
     if(level===1){
         game.statistics.overflow = game.statistics.overflow.add(1);
+        game.tab.overflow.unlocked = true;
         if(game.lastUpdated - game.lastOverflowTime < game.statistics.fastestOverflowTime) {
             game.statistics.fastestOverflowTime = game.lastUpdated - game.lastOverflowTime;
         }

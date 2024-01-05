@@ -1,36 +1,55 @@
-function AddAutobuyer(id){
-    const t = document.getElementById("autobuyer-template");
-            const divElement = document.createElement("div")
-            divElement.setAttribute("id",`autobuyer-div-${id}`)
-            divElement.setAttribute("class",`autobuyer-div`)
-            t.childNodes.forEach(node => {
-                divElement.appendChild(node.cloneNode(true))
-            });
-            document.getElementById("autobuyer-list-div").appendChild(divElement);
-}
+
 function ClickAutobuyerBuyButton(autobuyer){
     return autobuyer.BuyOnce();
 };
 function CanBuy(cost,matter){
-    cost=new Decimal(cost);
-    matter=new Decimal(matter);
+    cost = new Decimal(cost);
+    matter = new Decimal(matter);
     if(cost.gt(matter)) return false;
     else return true;
 }
-function ClickGainMoney(amount){
+function GainMoney(amount){
     game.matter=game.matter.add(amount);
     game.statistics.matterProduced = (game?.statistics?.matterProduced ?? new Decimal(0)).add(amount);
+}
+function ClickGainMoney(amount){
+    GainMoney(amount);
 }
 var appThis={}
 var app = Vue.createApp({
     data(){
         appThis=this;
         return {
-            game: game,
+            game,
+            input: {
+                notation: "scientific"
+            },
             visual: {
                 statistics:{},
+                notationArray,
+                tabOrder:["autobuyer","overflow","option","statistics"],
+                upgradeOrder: {
+                    overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","reduceStartInterval"]
+                },
                 upgrade: {
-                    overflow: {}
+                    overflow: {
+                        matterPerClick:{
+                            descriptionText: "Increase matter per click",
+                            formulaText: "(amount)"
+                        },
+                        startAutoclicker:{
+                            descriptionText: "Get extra autoclickers",
+                            formulaText: "(amount) * 10 * (overflow points)"
+                        },
+                        overflowTimeMultiplier:{
+                            descriptionText: "Get more overflow points depending of the fastest overflow time (see statistics)",
+                            formulaText: "ceil(1e7 / ((fastest overflow time(in milliseconds)) + 1e4))"
+                        },
+                        reduceStartInterval:{
+                            descriptionText: "Reduce the interval of all autobuyers(including autoclickers) that gets weaker as time passes, resetting on overflow",
+                            formulaText: "I haven't come up with a good formula for this, so if you have any suggestions, do a pull request."
+                        }
+                    }
                 },
             }
         };
@@ -39,7 +58,6 @@ var app = Vue.createApp({
         init(){
             console.log("app init");
             this.visual.autobuyerArray=[];
-            this.visual.upgrade={overflow: {}};
             this.visual.statistics={}
             this.visual.version = VERSION;
             this.visual.currentTab = "autobuyer"
@@ -54,7 +72,7 @@ var app = Vue.createApp({
             this.visual.statistics.deflationTime = FormatTime(variables.deflationTime/1000);
             this.visual.statistics.overflowTime = FormatTime(variables.overflowTime/1000);
             this.visual.statistics.deflation = FormatValue(game?.statistics?.deflation, {smallDec: 0});
-            this.visual.statistics.showOverflow = appThis?.game?.statistics?.overflow?.gt(0) ?? false;
+            this.visual.statistics.showOverflow = this?.game?.statistics?.overflow?.gt(0) ?? false;
             this.visual.statistics.overflow = FormatValue(game?.statistics?.overflow, {smallDec: 0});
             this.visual.statistics.playTime = FormatTime(variables.playTime/1000);
             this.visual.statistics.fastestOverflowTime = FormatTime(game.statistics.fastestOverflowTime/1000);
@@ -63,7 +81,7 @@ var app = Vue.createApp({
             UpdateUpgrade();
             Object.keys(game?.upgrade?.overflow ?? {})?.forEach(key => {
                 //console.log(game.upgrade.overflow[key]);
-                this.visual.upgrade.overflow[key] = {};
+                this.visual.upgrade.overflow[key] = this.visual.upgrade.overflow[key] ?? {};
                 this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
                 this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost)+ "OP";
                 this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
@@ -127,6 +145,9 @@ var app = Vue.createApp({
         ChangeTab(tab){
             this.visual.currentTab=tab;
         },
+        ChangeNotation(notation){
+            game.notation=notation;
+        },
         canSoftReset(level){
             return canSoftReset(level);
         },
@@ -166,9 +187,11 @@ var app = Vue.createApp({
             this.init();
             GameLoop(this)
         }
+    },
+    computed: {
+        
     }
 });
-app.mount("#app");
 var triggerObject = {
     autobuyer0: function(){
         game.trigger.autobuyer[0] = true;
@@ -264,10 +287,27 @@ function UpdateDependentVariables(){
 
     if(game.autobuyerArray[0]) game.autobuyerArray[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }
+function mountApp(){
+    try{
+        app.mount("#app");
+    }
+    catch(error){
+        const spanElement = document.createElement("span")
+        spanElement.appendChild(document.createTextNode("An error occured: "+String(error)));
+        spanElement.append(document.createElement("br"))
+        spanElement.append(document.createTextNode(String(error?.stack)))
+        document.body.insertBefore(spanElement,document.getElementById("app"));
+        throw error;
+    }
+}
+function InputLoop(){
+    game.notation = appThis.input.notation;
+}
 function GameLoop(){
     game.autobuyerArray.forEach(autobuyer => {
         autobuyer.Loop();
     });
+    InputLoop();
     UpdateDependentVariables();
     TriggerLoop();
     game.lastUpdated=Date.now();
@@ -276,5 +316,17 @@ function GameLoop(){
     variables.overflowTime = game.lastUpdated - game.lastOverflowTime;
     appThis.UpdateStatistics();
 }
+mountApp();
 init();
 setInterval(GameLoop, 50);
+setInterval(save, 10000);
+function keydownEvent(ev){
+    if(ev.code==="KeyM"){
+        
+    }
+    if(ev.code==="KeyO"){
+        softReset(1);
+    }
+}
+addEventListener("keydown",keydownEvent)
+console.log("game start")

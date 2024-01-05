@@ -20,6 +20,24 @@ var game = {
     deflation: new Decimal(),
     autobuyerArray: Array(),
     upgrade: Object(),
+    tab: {
+        autobuyer: {
+            name: "Autobuyers",
+            unlocked: true
+        },
+        overflow: {
+            name: "Overflow",
+            unlocked: false
+        },
+        option: {
+            name: "Options",
+            unlocked: true
+        },
+        statistics: {
+            name: "Statistics",
+            unlocked: true
+        }
+    },
     trigger:{
         autobuyer: Array(3).fill(false),
         overflowForced: false,
@@ -121,6 +139,9 @@ var autobuyerArray=[
     }),
 
 ];
+var notationArray = [
+    "scientific", "engineering"
+]
 var upgradeObject = {
     overflow:{
         matterPerClick: new Upgrade({
@@ -129,7 +150,7 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new Decimal(1),
             costIncrease: new Decimal(1),
-            value: new Decimal()
+            value: new Decimal(),
         }),
         startAutoclicker: new Upgrade({
             type: "overflow",
@@ -137,15 +158,15 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new Decimal(1),
             costIncrease: new Decimal(0),
-            value: new Decimal()
+            value: new Decimal(),
         }),
         overflowTimeMultiplier: new Upgrade({
             type: "overflow",
             id: "overflowTimeMultiplier",
             amount: new Decimal(),
-            cost: new Decimal(1),
+            cost: new Decimal(2),
             costIncrease: Decimal.dInf,
-            value: new Decimal()
+            value: new Decimal(),
         })
     }
 }

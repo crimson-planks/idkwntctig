@@ -228,11 +228,5 @@ const AutobuyerComponent = {
             this.visual.active=String(object.active);
             this.visual.name= (index===0)?"Autoclicker":"Autobuyer "+String(index);
         },
-        ClickBuyButton(){
-
-        },
-        ClickIntervalBuyButton(){
-
-        }
     }
 }

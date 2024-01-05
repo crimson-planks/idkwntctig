@@ -32,14 +32,7 @@
                 <div>
                     <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
                     <div id="autobuyer-list-div">
-                        <div class="autobuyer-div unselectable" v-for="(autobuyer, index) in visual.autobuyerArray">
-                            <h4 class="autobuyer-name-div center">{{autobuyer.name}}</h4>
-                            <span class="autobuyer-text-div">Amount: {{autobuyer.amount}} <span v-if="autobuyer.showExtraAmount">+ {{autobuyer.extraAmount}}</span></span>
-                            <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="autobuyer.buy.vue_class" v-on:click="ClickAutobuyerBuyButton(game.autobuyerArray[index])">Cost: {{autobuyer.cost}}</span>
-                            <span class="autobuyer-text-div">Interval:&nbsp;{{autobuyer.interval}} ms</span>
-                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="autobuyer.interval_buy.vue_class" v-on:click="ClickIntervalUpgradeButton(game.autobuyerArray[index])">Interval Cost: {{autobuyer.intervalCost}}</span>
-                            <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(game.autobuyerArray[index])"> Toggle: {{autobuyer.active}}</span>
-                        </div>
+                        <Autobuyer v-for="id in game.autobuyerArray" :object="game.autobuyerArray[id]"></Autobuyer>
                     </div>
                 </div>
                 <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}}</div></button>
@@ -47,6 +40,7 @@
         </div>
         <div id="overflow-tab-div" v-show="visual.currentTab==='overflow'">
             Overflow Points: {{visual.overflowPoint}}
+            <button id="overflow-button" :class="visual.overflow_button.vue_class">Overflow</button>
             <div id="overflow-upgrade-table-div">
                 <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
                     {{visual.upgrade.overflow[id].descriptionText}}<br>

@@ -15,6 +15,9 @@ function GainMoney(amount){
 function ClickGainMoney(amount){
     GainMoney(amount);
 }
+function MaxAllInterval(){
+
+}
 var appThis={}
 var app = Vue.createApp({
     data(){
@@ -27,6 +30,11 @@ var app = Vue.createApp({
             visual: {
                 statistics:{},
                 notationArray,
+                overflow_button: {
+                    vue_class: {
+                        "cannot-buy-button": true
+                    }
+                },
                 tabOrder:["autobuyer","overflow","option","statistics"],
                 upgradeOrder: {
                     overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","reduceStartInterval"]
@@ -97,29 +105,6 @@ var app = Vue.createApp({
             this.visual.netMatterPerSecond=FormatValue(variables.netMatterPerSecond);
             this.visual.autobuyerArray=[];
             this.visual.showFormula = true;
-            game.autobuyerArray.forEach((autobuyer, index) => {
-                this.visual.autobuyerArray[index]={}
-                this.visual.autobuyerArray[index].buy={};
-                this.visual.autobuyerArray[index].buy.vue_class={};
-                this.visual.autobuyerArray[index].buy.vue_class["can-buy-button"] = autobuyer.CanBuyOnce();
-                this.visual.autobuyerArray[index].buy.vue_class["cannot-buy-button"] = !autobuyer.CanBuyOnce();
-                this.visual.autobuyerArray[index].interval_buy={};
-                this.visual.autobuyerArray[index].interval_buy.vue_class={};
-                this.visual.autobuyerArray[index].interval_buy.vue_class["can-buy-button"] = autobuyer.CanBuyIntervalOnce();
-                this.visual.autobuyerArray[index].interval_buy.vue_class["cannot-buy-button"] = !autobuyer.CanBuyIntervalOnce();
-
-                this.visual.autobuyerArray[index].cost=FormatValue(autobuyer.cost)+" MT";
-                this.visual.autobuyerArray[index].interval=FormatValue(autobuyer.interval);
-                this.visual.autobuyerArray[index].amount=FormatValue(autobuyer.amountByType["normal"], {smallDec: 0});
-                let showExtraAmount = true;
-                if(!autobuyer.amountByType["startAutoclicker"]) showExtraAmount = false;
-                else if(autobuyer.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
-                this.visual.autobuyerArray[index].showExtraAmount=showExtraAmount;
-                this.visual.autobuyerArray[index].extraAmount=FormatValue(autobuyer.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
-                this.visual.autobuyerArray[index].intervalCost=FormatValue(autobuyer.intervalCost)+" MT";
-                this.visual.autobuyerArray[index].active=String(autobuyer.active)
-                this.visual.autobuyerArray[index].name= (index===0)?"Autoclicker":"Autobuyer "+String(index)
-            });
             this.UpdateStatistics();
             this.UpdateUpgrade();
             this.visual.matter = FormatValue(game?.matter);
@@ -189,7 +174,21 @@ var app = Vue.createApp({
         }
     },
     computed: {
-        
+        canBuyClass(){
+            return {
+                "can-buy-button": true,
+                "cannot-buy-button": false
+            }
+        },
+        cannotBuyClass(){
+            return {
+                "can-buy-button": false,
+                "cannot-buy-button": true
+            }
+        },
+        buyabilityAutobuyerClass(){
+            return {};
+        }
     }
 });
 var triggerObject = {
@@ -289,6 +288,7 @@ function UpdateDependentVariables(){
 }
 function mountApp(){
     try{
+        app.component('Autobuyer', AutobuyerComponent);
         app.mount("#app");
     }
     catch(error){
@@ -322,7 +322,7 @@ setInterval(GameLoop, 50);
 setInterval(save, 10000);
 function keydownEvent(ev){
     if(ev.code==="KeyM"){
-        
+
     }
     if(ev.code==="KeyO"){
         softReset(1);

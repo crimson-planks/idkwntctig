@@ -158,3 +158,81 @@ class Autobuyer{
         }
     }
 }
+
+const AutobuyerComponent = {
+    data(){
+        return {
+            visual: {
+                interval_buy: {
+                    vue_class: {
+                        "can-buy-button": {
+
+                        },
+                        "cannot-buy-button": {
+                            
+                        }
+                    }
+                },
+                buy: {
+                    vue_class: {
+                        "can-buy-button": {
+
+                        },
+                        "cannot-buy-button": {
+                            
+                        }
+                    }
+                },
+                cost: "",
+                interval: "",
+                amount: "",
+                showExtraAmount: false,
+                extraAmount: "",
+                intervalCost: "",
+                active: true,
+                name: ""
+            }
+        };
+    },
+    props: ['object'],
+    created(){
+        console.log(this.object);
+    },
+    template: `
+    <div class="autobuyer-div unselectable">
+        <h4 class="autobuyer-name-div center">{{visual.name}}</h4>
+        <span class="autobuyer-text-div">Amount: {{visual.amount}} <span v-if="object.showExtraAmount">+ {{visual.extraAmount}}</span></span>
+        <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="visual.buy.vue_class" v-on:click="object.BuyOnce()">Cost: {{visual.cost}}</span>
+        <span class="autobuyer-text-div">Interval:&nbsp;{{visual.interval}} ms</span>
+        <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="visual.interval_buy.vue_class" v-on:click="object.BuyInterval(1)">Interval Cost: {{visual.intervalCost}}</span>
+        <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(object)"> Toggle: {{visual.active}}</span>
+    </div>
+    `,
+    methods: {
+        //do something!!!!!!
+        Update(){
+            this.visual.buy.vue_class["can-buy-button"] = object.CanBuyOnce();
+            this.visual.buy.vue_class["cannot-buy-button"] = !object.CanBuyOnce();
+            this.visual.interval_buy.vue_class["can-buy-button"] = object.CanBuyIntervalOnce();
+            this.visual.interval_buy.vue_class["cannot-buy-button"] = !object.CanBuyIntervalOnce();
+
+            this.visual.cost=FormatValue(object.cost)+" MT";
+            this.visual.interval=FormatValue(object.interval);
+            this.visual.amount=FormatValue(object.amountByType["normal"], {smallDec: 0});
+            let showExtraAmount = true;
+            if(!object.amountByType["startAutoclicker"]) showExtraAmount = false;
+            else if(object.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
+            this.visual.showExtraAmount=showExtraAmount;
+            this.visual.extraAmount=FormatValue(object.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
+            this.visual.intervalCost=FormatValue(object.intervalCost)+" MT";
+            this.visual.active=String(object.active);
+            this.visual.name= (index===0)?"Autoclicker":"Autobuyer "+String(index);
+        },
+        ClickBuyButton(){
+
+        },
+        ClickIntervalBuyButton(){
+
+        }
+    }
+}

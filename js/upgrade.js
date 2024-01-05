@@ -1,3 +1,4 @@
+
 /** Class representing an upgrade*/
 class Upgrade {
     /**
@@ -111,5 +112,16 @@ class Upgrade {
     }
     copy(){
         return this.clone();
+    }
+}
+const UpgradeComponent = {
+    props: {
+        id: Number
+    },
+    created(){
+        
+    },
+    computed: {
+
     }
 }

@@ -18,7 +18,8 @@ function ClickGainMoney(amount){
 function MaxAllInterval(){
 
 }
-var appThis={}
+var appThis={};
+var bus={app: appThis, autobuyer: {}};
 var app = Vue.createApp({
     data(){
         appThis=this;
@@ -32,7 +33,8 @@ var app = Vue.createApp({
                 notationArray,
                 overflow_button: {
                     vue_class: {
-                        "cannot-buy-button": true
+                        "cannot-buy-button": true,
+                        "can-buy-button": false
                     }
                 },
                 tabOrder:["autobuyer","overflow","option","statistics"],
@@ -65,7 +67,6 @@ var app = Vue.createApp({
     methods: {
         init(){
             console.log("app init");
-            this.visual.autobuyerArray=[];
             this.visual.statistics={}
             this.visual.version = VERSION;
             this.visual.currentTab = "autobuyer"
@@ -74,6 +75,13 @@ var app = Vue.createApp({
         ClickGainMoney(amount){
             ClickGainMoney(game.clickGain.mul(amount));
             this.Update();
+        },
+        UpdateAutobuyers(){
+            Object.keys(bus.autobuyer).forEach(type=>{
+                Object.keys(bus.autobuyer[type]).forEach(tier=>{
+                    bus.autobuyer[type][tier].Update();
+                });
+            });
         },
         UpdateStatistics(){
             this.visual.statistics.matterProduced = FormatValue(game?.statistics?.matterProduced);
@@ -100,11 +108,11 @@ var app = Vue.createApp({
             //console.log("update")
             UpdateDependentVariables();
             this.game = game;
+            this.UpdateAutobuyers();
+
             this.visual.matterPerSecond=FormatValue(variables.matterPerSecond);
             this.visual.loseMatterPerSecond=FormatValue(variables.loseMatterPerSecond);
             this.visual.netMatterPerSecond=FormatValue(variables.netMatterPerSecond);
-            this.visual.autobuyerArray=[];
-            this.visual.showFormula = true;
             this.UpdateStatistics();
             this.UpdateUpgrade();
             this.visual.matter = FormatValue(game?.matter);
@@ -113,17 +121,19 @@ var app = Vue.createApp({
             this.visual.overflowPoint = game?.overflowPoint;
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
             this.visual.clickGain = game?.clickGain;
-            this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});            
-        },
-        ResetAutobuyerArray(){
-            this.visual.autobuyerArray=[];
+            this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});     
+            
+            this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
+            this.visual.overflow_button.vue_class["cannot-buy-button"] = !this.canSoftReset(1);
         },
         Test(){
             console.log(this)
         },
         MainLoop(){
-            game.autobuyerArray.forEach(autobuyer => {
-                autobuyer.AutoBuyLoop();
+            Object.keys(game.autobuyerObject).forEach(key => {
+                game.autobuyerObject[key].forEach(autobuyer =>{
+                    autobuyer.AutoBuyLoop();
+                });
             });
             game.lastUpdated=Date.now();
         },
@@ -150,7 +160,7 @@ var app = Vue.createApp({
             if(softReset(0)) this.Update();
         },
         ClickSoftReset1Button(){
-            softResetForced(1);
+            softReset(1);
             this.Update();
         },
         ClickBuyUpgradeButton(type, id){
@@ -174,45 +184,30 @@ var app = Vue.createApp({
         }
     },
     computed: {
-        canBuyClass(){
-            return {
-                "can-buy-button": true,
-                "cannot-buy-button": false
-            }
-        },
-        cannotBuyClass(){
-            return {
-                "can-buy-button": false,
-                "cannot-buy-button": true
-            }
-        },
-        buyabilityAutobuyerClass(){
-            return {};
-        }
     }
 });
 var triggerObject = {
     autobuyer0: function(){
         game.trigger.autobuyer[0] = true;
-        game.autobuyerArray[0] = autobuyerArray[0].clone();
-        game.autobuyerArray[0].costIncrease = game.autobuyerArray[0].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[0] = autobuyerObject.matter[0].clone();
+        game.autobuyerObject.matter[0].costIncrease = game.autobuyerObject.matter[0].costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     autobuyer1: function(){
         game.trigger.autobuyer[1] = true;
-        game.autobuyerArray[1] = autobuyerArray[1].clone();
-        game.autobuyerArray[1].costIncrease = game.autobuyerArray[1].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[1] = autobuyerObject.matter[1].clone();
+        game.autobuyerObject.matter[1].costIncrease = game.autobuyerObject.matter[1].costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     autobuyer2: function(){
         game.trigger.autobuyer[2] = true;
-        game.autobuyerArray[2] = autobuyerArray[2].clone();
-        game.autobuyerArray[2].costIncrease = game.autobuyerArray[2].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[2] = autobuyerObject.matter[2].clone();
+        game.autobuyerObject.matter[2].costIncrease = game.autobuyerObject.matter[2].costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     overflowForced: function(){
         game.trigger.overflowForced = true;
-        game.autobuyerArray.forEach((autobuyer,index)=>{
+        game.autobuyerObject.matter.forEach((autobuyer,index)=>{
             autobuyer.active=false;
         })
         appThis.Update();
@@ -275,16 +270,16 @@ function UpdateUpgrade(){
 function UpdateDependentVariables(){
     game.clickGain = new Decimal(1).add(game?.upgrade?.overflow?.matterPerClick?.value);
     variables.matterPerSecond = new Decimal();
-    if(game?.autobuyerArray[0]?.active) variables.matterPerSecond = game.autobuyerArray[0].getPerSecond() ?? new Decimal(0);
+    if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecond = game.autobuyerObject.matter[0].getPerSecond() ?? new Decimal(0);
     let tmp=new Decimal()
-    game.autobuyerArray.forEach((autobuyer) => {
+    game.autobuyerObject.matter.forEach((autobuyer) => {
         autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
     variables.loseMatterPerSecond=tmp;
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
 
-    if(game.autobuyerArray[0]) game.autobuyerArray[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
+    if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }
 function mountApp(){
     try{
@@ -304,8 +299,10 @@ function InputLoop(){
     game.notation = appThis.input.notation;
 }
 function GameLoop(){
-    game.autobuyerArray.forEach(autobuyer => {
-        autobuyer.Loop();
+    Object.keys(game.autobuyerObject).forEach(key => {
+        game.autobuyerObject[key].forEach(autobuyer => {
+            autobuyer.Loop();
+        })
     });
     InputLoop();
     UpdateDependentVariables();
@@ -321,12 +318,16 @@ init();
 setInterval(GameLoop, 50);
 setInterval(save, 10000);
 function keydownEvent(ev){
+    appThis.visual.showFormula=ev.shiftKey;
     if(ev.code==="KeyM"){
-
     }
     if(ev.code==="KeyO"){
-        softReset(1);
+        if(softReset(1)) appThis.Update();
     }
 }
+function keyUpEvent(ev){
+    appThis.visual.showFormula=ev.shiftKey;
+}
 addEventListener("keydown",keydownEvent)
+addEventListener("keyup",keyUpEvent)
 console.log("game start")

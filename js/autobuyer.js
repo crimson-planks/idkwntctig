@@ -23,7 +23,7 @@ class Autobuyer{
                 return true;
             }
             else{
-                return game.autobuyerArray[this.tier-1].CanBuy(amount);
+                return game.autobuyerObject.matter[this.tier-1].CanBuy(amount);
             }
         }
         return false;
@@ -40,9 +40,6 @@ class Autobuyer{
     CanBuyIntervalOnce(){
         return CanBuy(this.intervalCost,game.matter);
     }
-    CanBuyInterval(amount){
-        return costIncrease.sumOfExponential();
-    }
     getPerSecond(){
         let result=this.amount.mul(1000).div(this.interval);
         if(this.type=="matter"&&this.tier==0) return result.mul(game.clickGain);
@@ -50,7 +47,7 @@ class Autobuyer{
     }
     getLosePerSecond(){
         if(this.tier==0) return new Decimal(0);
-        return game.autobuyerArray[this.tier-1].GetBuyCost(this.getPerSecond())
+        return game.autobuyerObject.matter[this.tier-1].GetBuyCost(this.getPerSecond())
         //throw "NotImplemented"
     }
     UpdateAmount(){
@@ -112,7 +109,7 @@ class Autobuyer{
                 ClickGainMoney(this.amount.mul(amount).mul(game.clickGain));
             } 
             else{
-                game.autobuyerArray[this.tier-1].Buy(this.amount.mul(amount));
+                game.autobuyerObject.matter[this.tier-1].Buy(this.amount.mul(amount));
             }
         }
     }
@@ -194,39 +191,63 @@ const AutobuyerComponent = {
             }
         };
     },
-    props: ['object'],
+    props: ['initobject','type','tier'],
     created(){
-        console.log(this.object);
+        this.object = this.initobject;
+        //console.log(this.object);
+        bus.autobuyer[this.object.type] = bus.autobuyer[this.object.type] ?? {};
+        bus.autobuyer[this.object.type][this.object.tier] = this;
+        this.Update();
     },
     template: `
     <div class="autobuyer-div unselectable">
         <h4 class="autobuyer-name-div center">{{visual.name}}</h4>
-        <span class="autobuyer-text-div">Amount: {{visual.amount}} <span v-if="object.showExtraAmount">+ {{visual.extraAmount}}</span></span>
-        <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="visual.buy.vue_class" v-on:click="object.BuyOnce()">Cost: {{visual.cost}}</span>
+        <span class="autobuyer-text-div">Amount: {{visual.amount}} <span v-if="visual.showExtraAmount">+ {{visual.extraAmount}}</span></span>
+        <span class="autobuyer-text-div autobuyer-button autobuyer-buy-button pointer-cursor" :class="visual.buy.vue_class" v-on:click="ClickBuyButton()">Cost: {{visual.cost}}</span>
         <span class="autobuyer-text-div">Interval:&nbsp;{{visual.interval}} ms</span>
-        <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="visual.interval_buy.vue_class" v-on:click="object.BuyInterval(1)">Interval Cost: {{visual.intervalCost}}</span>
-        <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton(object)"> Toggle: {{visual.active}}</span>
+        <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="visual.interval_buy.vue_class" v-on:click="ClickIntervalBuyButton()">Interval Cost: {{visual.intervalCost}}</span>
+        <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton()"> Toggle: {{visual.active}}</span>
     </div>
     `,
     methods: {
         //do something!!!!!!
-        Update(){
-            this.visual.buy.vue_class["can-buy-button"] = object.CanBuyOnce();
-            this.visual.buy.vue_class["cannot-buy-button"] = !object.CanBuyOnce();
-            this.visual.interval_buy.vue_class["can-buy-button"] = object.CanBuyIntervalOnce();
-            this.visual.interval_buy.vue_class["cannot-buy-button"] = !object.CanBuyIntervalOnce();
-
-            this.visual.cost=FormatValue(object.cost)+" MT";
-            this.visual.interval=FormatValue(object.interval);
-            this.visual.amount=FormatValue(object.amountByType["normal"], {smallDec: 0});
-            let showExtraAmount = true;
-            if(!object.amountByType["startAutoclicker"]) showExtraAmount = false;
-            else if(object.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
-            this.visual.showExtraAmount=showExtraAmount;
-            this.visual.extraAmount=FormatValue(object.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
-            this.visual.intervalCost=FormatValue(object.intervalCost)+" MT";
-            this.visual.active=String(object.active);
-            this.visual.name= (index===0)?"Autoclicker":"Autobuyer "+String(index);
+        UpdateObject(){
+            this.object = game.autobuyerObject[this.type][this.tier];
         },
+        Update(){
+            //console.log("autobuyer update")
+            this.UpdateObject();
+            //console.log(this.object)
+            if(this.object===undefined) return;
+            this.visual.buy.vue_class["can-buy-button"] = this.object.CanBuyOnce();
+            this.visual.buy.vue_class["cannot-buy-button"] = !this.object.CanBuyOnce();
+            this.visual.interval_buy.vue_class["can-buy-button"] = this.object.CanBuyIntervalOnce();
+            this.visual.interval_buy.vue_class["cannot-buy-button"] = !this.object.CanBuyIntervalOnce();
+
+            this.visual.cost=FormatValue(this.object.cost)+" MT";
+            this.visual.interval=FormatValue(this.object.interval);
+            this.visual.amount=FormatValue(this.object.amountByType["normal"], {smallDec: 0});
+            let showExtraAmount = true;
+            if(!this.object.amountByType["startAutoclicker"]) showExtraAmount = false;
+            else if(this.object.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
+            this.visual.showExtraAmount=showExtraAmount;
+            this.visual.extraAmount=FormatValue(this.object.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
+            this.visual.intervalCost=FormatValue(this.object.intervalCost)+" MT";
+            //console.log(this.object.active);
+            this.visual.active=String(this.object.active);
+            this.visual.name= (this.object.tier===0) ? "Autoclicker" : "Autobuyer "+String(this.object.tier);
+        },
+        ClickBuyButton(){
+            this.object.BuyOnce();
+            appThis.Update();
+        },
+        ClickIntervalBuyButton(){
+            this.object.BuyInterval(1);
+            appThis.Update();
+        },
+        ClickToggleButton(){
+            this.object.Toggle();
+            appThis.Update();
+        }
     }
 }

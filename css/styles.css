@@ -10,7 +10,7 @@
     -ms-user-select: none;
     user-select: none;
 }
-#news-div{
+#news-ticker{
     border:  solid #8FC0A9;
     border-width: 4px;
     background-color: #C8D5B9;
@@ -36,6 +36,7 @@
 .can-buy-button{
     border: solid #42b153 5px;
     background-color: #6ad47a;
+    cursor: pointer;
 
 }
 .cannot-buy-button{

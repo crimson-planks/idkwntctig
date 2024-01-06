@@ -18,7 +18,9 @@ var game = {
     reducedCost: new Decimal(0),
     clickGain: new Decimal(1),
     deflation: new Decimal(),
-    autobuyerArray: Array(),
+    autobuyerObject: {
+        matter: []
+    },
     upgrade: Object(),
     tab: {
         autobuyer: {
@@ -106,39 +108,40 @@ game.notationOption = {
     }
 };
 var defaultGame = jQuery.extend({},game)
-var autobuyerArray=[
-    new Autobuyer({
-        type: "matter",
-        tier: 0,
-        interval: 1000,
-        cost: new Decimal(10),
-        costIncrease: new Decimal(5),
-        intervalCost: new Decimal("100"),
-        intervalCostIncrease: new Decimal("10"),
-        active: true
-    }),
-    new Autobuyer({
-        type: "matter",
-        tier: 1,
-        interval: 2000,
-        cost: new Decimal(500),
-        costIncrease: new Decimal(100),
-        intervalCost: new Decimal("1000"),
-        intervalCostIncrease: new Decimal("100"),
-        active: true
-    }),
-    new Autobuyer({
-        type: "matter",
-        tier: 2,
-        interval: 4000,
-        cost: new Decimal("1e7"),
-        costIncrease: new Decimal("1e6"),
-        intervalCost: new Decimal("1e8"),
-        intervalCostIncrease: new Decimal("1000"),
-        active: true
-    }),
-
-];
+var autobuyerObject={
+    matter: [
+        new Autobuyer({
+            type: "matter",
+            tier: 0,
+            interval: 1000,
+            cost: new Decimal(10),
+            costIncrease: new Decimal(5),
+            intervalCost: new Decimal("100"),
+            intervalCostIncrease: new Decimal("10"),
+            active: true
+        }),
+        new Autobuyer({
+            type: "matter",
+            tier: 1,
+            interval: 2000,
+            cost: new Decimal(500),
+            costIncrease: new Decimal(100),
+            intervalCost: new Decimal("1000"),
+            intervalCostIncrease: new Decimal("100"),
+            active: true
+        }),
+        new Autobuyer({
+            type: "matter",
+            tier: 2,
+            interval: 4000,
+            cost: new Decimal("1e7"),
+            costIncrease: new Decimal("1e6"),
+            intervalCost: new Decimal("1e8"),
+            intervalCostIncrease: new Decimal("1000"),
+            active: true
+        })
+    ]
+};
 var notationArray = [
     "scientific", "engineering"
 ]

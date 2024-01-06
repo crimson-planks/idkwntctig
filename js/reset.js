@@ -17,10 +17,7 @@ function softReset(level){
 function softResetForced(level){
     //console.log("softResetForced start");
     if(level>=0){
-        game.autobuyerArray = [];
-        //for(let i in autobuyerArray){
-        //    //let autobuyer = autobuyerArray[i];
-        //}
+        game.autobuyerObject.matter = [];
 
         game.matter = game.defaultMatter;
         game.trigger.autobuyer.forEach((value,index)=>{
@@ -32,7 +29,7 @@ function softResetForced(level){
         game.reducedCost = game.reducedCost.add(1);
         game.deflation = game.deflation.add(1)
         game.statistics.deflation = game.statistics.deflation.add(1);
-        if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50")
+        if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50");
         game.lastDeflationTime = Date.now()
     }
     if(level>=1){
@@ -50,7 +47,6 @@ function softResetForced(level){
         game.overflowPoint=game.overflowPoint.add(1).add(game.upgrade?.overflow?.overflowTimeMultiplier?.computedValue ?? 0);
         game.lastOverflowTime = Date.now();
     }
-    appThis.ResetAutobuyerArray();
     GameLoop();
     appThis.Update();
     //console.log("softResetForced end")

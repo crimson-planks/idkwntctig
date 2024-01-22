@@ -2,52 +2,46 @@
  * class representing an autobuyer
  */
 class Autobuyer{
+    /**
+     * 
+     * @param {{cost: Cost,
+     *          intervalCost: Cost}} props 
+     */
     constructor(props){
         this.type = props.type
         this.tier = props.tier;
-        this.interval = new Decimal(props.interval);
-        this.cost = new Decimal(props.cost);
+        this.initialInterval = new Decimal(props.initialInterval);
+        this.interval = new Decimal(props.interval ?? props.initialInterval);
+        this.intervalByType = props.intervalByType ?? {};
+        this.currencyType = props.currencyType;
+        this.cost = props.cost;
         this.amount = new Decimal(props.amount);
         this.amountByType = props.amountByType ?? {};
-        this.costIncrease = new Decimal(props.costIncrease);
-        this.intervalCost = new Decimal(props.intervalCost);
+        this.intervalCost = props.intervalCost;
         this.intervalCostIncrease= new Decimal(props.intervalCostIncrease);
         this.active = props.active ?? true;
+        this.option = props.option ?? {};
 
         //time in milliseconds
         this.timer = props.timer?props.timer:0;
     }
-    CanAutoBuy(amount){
-        if(this.type==="matter"){
-            if(this.tier===0){
-                return true;
-            }
-            else{
-                return game.autobuyerObject.matter[this.tier-1].CanBuy(amount);
-            }
-        }
-        return false;
-    }
     GetBuyCost(amount){
-        return this.cost.mul(amount).plus(this.costIncrease.mul(amount).div(2).mul(Decimal.sub(amount,1)));
-    }
-    CanBuyOnce(){
-        return CanBuy(this.cost, game.matter);
+        return this.cost.GetBuyCost(amount);
     }
     CanBuy(amount){
-        return CanBuy(this.GetBuyCost(amount), game.matter);
+        return this.cost.CanBuy(amount);
     }
-    CanBuyIntervalOnce(){
-        return CanBuy(this.intervalCost,game.matter);
+    CanBuyInterval(amount){
+        return this.intervalCost.CanBuy(amount);
     }
     getPerSecond(){
         let result=this.amount.mul(1000).div(this.interval);
-        if(this.type=="matter"&&this.tier==0) return result.mul(game.clickGain);
+        if(this.type==="matter"&&this.tier===0) return result.mul(game.clickGain);
         return result
     }
     getLosePerSecond(){
         if(this.tier==0) return new Decimal(0);
-        return game.autobuyerObject.matter[this.tier-1].GetBuyCost(this.getPerSecond())
+        return game.autobuyerObject.matter[this.tier-1].GetBuyCost(this.getPerSecond());
         //throw "NotImplemented"
     }
     UpdateAmount(){
@@ -58,46 +52,37 @@ class Autobuyer{
         this.amount=tmp;
         return tmp;
     }
-    GetMaxBuy(money){
-        //quadratic formula breaks when costIncrease==0
-        if(this.costIncrease.eq(0)&&this.cost.gt(0)) return money.div(this.cost).floor();
-        if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
-        let a = this.costIncrease.div(2);
-        let b = this.cost.sub(a);
-        let c = Decimal.neg(money);
-        //quadratic formula
-        return Decimal.neg(b).add(b.pow(2).sub(a.mul(c).mul(4)).pow(0.5)).div(this.costIncrease).floor();
+    UpdateInterval(){
+        let tmp=new Decimal(this.initialInterval);
+        Object.keys(this.intervalByType).forEach((value)=>{
+            tmp=tmp.mul(this.intervalByType[value]);
+        });
+        this.interval=tmp;
+        return tmp;
+    }
+    GetMaxBuy(){
+        return this.cost.GetMaxBuy();
     }
     BuyOnce(type = "normal"){
-        if(!this.CanBuyOnce()) return false;
-        game.matter=game.matter.minus(this.cost);
-        this.cost=this.cost.add(this.costIncrease);
-        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0)).add(1);
-        this.UpdateAmount();
-        return true;
+        return this.Buy(1,type);
     }
-    //TODO: add ForcedBuy and use Buy as a wrapper function
     Buy(amount, type = "normal"){
-        const maxBuy = this.GetMaxBuy(game.matter);
-        if(maxBuy.lt(1)) return false;
-        const buyAmount = Decimal.min(amount,maxBuy);
-        game.matter=game.matter.minus(this.GetBuyCost(buyAmount));
-        this.cost=this.cost.add(this.costIncrease.mul(buyAmount));
-        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0)).add(buyAmount);
+        const buyAmount = this.cost.GetPossibleBuyAmount(amount);
+        if(!this.cost.Buy(amount)) return false;
+        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0))
+                                   .add(buyAmount);
         this.UpdateAmount();
         return true;
     }
-    getBuyIntervalCost(amount){
-        return costIncrease.sumOfExponential(this.intervalCost,this.intervalCostIncrease,amount);
+    getIntervalCost(amount){
+        return this.intervalCost.GetBuyCost(amount);
     }
     BuyInterval(amount){
-        const maxAmount = costIncrease.inverseSumOfExponential(this.intervalCost,this.intervalCostIncrease, game.matter).floor();
-        const buyAmount = Decimal.min(maxAmount,amount);
-        let cost = this.getBuyIntervalCost(buyAmount)
-        if(buyAmount.lte(0)) return false;
-        game.matter=game.matter.minus(cost);
-        this.intervalCost=this.intervalCost.mul(this.intervalCostIncrease.pow(buyAmount));
-        this.interval=this.interval.div(Decimal.pow(2,buyAmount));
+        const buyAmount = this.intervalCost.GetPossibleBuyAmount(amount);
+        if(!this.intervalCost.Buy(amount)) return false;
+        this.intervalByType.normal = (this.intervalByType.normal ?? new Decimal(1))
+                                      .div(Decimal.pow(2,buyAmount));
+        this.UpdateInterval();
         return true;
     }
     Toggle(){
@@ -110,6 +95,16 @@ class Autobuyer{
             } 
             else{
                 game.autobuyerObject.matter[this.tier-1].Buy(this.amount.mul(amount));
+            }
+        }
+        if(this.type==="overflowMisc"){
+            if(this.tier==="metaBuy"){
+                game.autobuyerObject.matter[this.option.buyId].Buy(this.amount.mul(amount));
+            }
+            if(this.tier==="intervalBuy"){
+                game.autobuyerObject.matter.forEach(()=>{
+                    console.warn("add code!!!")
+                })
             }
         }
     }
@@ -129,14 +124,16 @@ class Autobuyer{
         return new Autobuyer({
             type: this.type,
             tier: this.tier,
+            initialInterval: this.initialInterval,
             interval: this.interval,
-            cost: this.cost,
+            intervalByType: jQuery.extend({},this.intervalByType),
+            currencyType: this.currencyType,
+            cost: this.cost.clone(),
             amount: this.amount,
             amountByType: jQuery.extend({},this.amountByType),
-            costIncrease: this.costIncrease,
-            intervalCost: this.intervalCost,
-            intervalCostIncrease: this.intervalCostIncrease,
-            active: this.active
+            intervalCost: this.intervalCost.clone(),
+            active: this.active,
+            option: jQuery.extend({},this.option),
         });
     }
     toStringifiableObject(){
@@ -144,14 +141,16 @@ class Autobuyer{
             _type: "Autobuyer",
             type: this.type,
             tier: this.tier,
+            initialInterval: this.initialInterval,
             interval: new Decimal(this.interval),
-            cost: new Decimal(this.cost),
+            intervalByType: this.intervalByType,
+            currencyType: this.currencyType,
+            cost: this.cost,
             amount: new Decimal(this.amount),
             amountByType: this.amountByType,
-            costIncrease: new Decimal(this.costIncrease),
-            intervalCost: new Decimal(this.intervalCost),
-            intervalCostIncrease: new Decimal(this.intervalCostIncrease),
-            active: this.active
+            intervalCost: this.intervalCost,
+            active: this.active,
+            option: this.option,
         }
     }
 }
@@ -194,7 +193,6 @@ const AutobuyerComponent = {
     props: ['initobject','type','tier'],
     created(){
         this.object = this.initobject;
-        //console.log(this.object);
         bus.autobuyer[this.object.type] = bus.autobuyer[this.object.type] ?? {};
         bus.autobuyer[this.object.type][this.object.tier] = this;
         this.Update();
@@ -217,14 +215,14 @@ const AutobuyerComponent = {
         Update(){
             //console.log("autobuyer update")
             this.UpdateObject();
-            //console.log(this.object)
             if(this.object===undefined) return;
-            this.visual.buy.vue_class["can-buy-button"] = this.object.CanBuyOnce();
-            this.visual.buy.vue_class["cannot-buy-button"] = !this.object.CanBuyOnce();
-            this.visual.interval_buy.vue_class["can-buy-button"] = this.object.CanBuyIntervalOnce();
-            this.visual.interval_buy.vue_class["cannot-buy-button"] = !this.object.CanBuyIntervalOnce();
 
-            this.visual.cost=FormatValue(this.object.cost)+" MT";
+            this.visual.buy.vue_class["can-buy-button"] = this.object.CanBuy(1);
+            this.visual.buy.vue_class["cannot-buy-button"] = !this.object.CanBuy(1);
+            this.visual.interval_buy.vue_class["can-buy-button"] = this.object.CanBuyInterval(1);
+            this.visual.interval_buy.vue_class["cannot-buy-button"] = !this.object.CanBuyInterval(1);
+            
+            this.visual.cost=FormatValue(this.object.cost.cost)+" MT";
             this.visual.interval=FormatValue(this.object.interval);
             this.visual.amount=FormatValue(this.object.amountByType["normal"], {smallDec: 0});
             let showExtraAmount = true;
@@ -232,7 +230,7 @@ const AutobuyerComponent = {
             else if(this.object.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
             this.visual.showExtraAmount=showExtraAmount;
             this.visual.extraAmount=FormatValue(this.object.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
-            this.visual.intervalCost=FormatValue(this.object.intervalCost)+" MT";
+            this.visual.intervalCost=FormatValue(this.object.intervalCost.cost)+" MT";
             //console.log(this.object.active);
             this.visual.active=String(this.object.active);
             this.visual.name= (this.object.tier===0) ? "Autoclicker" : "Autobuyer "+String(this.object.tier);

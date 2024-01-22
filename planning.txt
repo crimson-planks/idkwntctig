@@ -10,4 +10,8 @@ single generator, multiple autobuyers
 Autoclicker Multiplier Upgrade by resetting.
 Deflation: Resets cost of autobuyers by x, but resets your matter & all autobuyers except your last one.
 Overflow:
+Overflow Autobuyer: meta(buys an autobuyer), interval(buys all intervals)
 Extend overflow: extends the overflow limit, gaining more overflow points but losing the ability to overflow at the previous limit.
+
+TODO:
+Add more shortcuts ('m', 'Ctrl+s')

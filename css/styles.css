@@ -39,10 +39,16 @@
     cursor: pointer;
 
 }
+.can-buy-button:hover{
+    background-color: #42b153;
+}
 .cannot-buy-button{
-    border: solid #afafaf 5px;
-    background-color: #9e9e9e;
+    border: solid #9e9e9e 5px;
+    background-color: #afafaf;
     cursor: not-allowed;
+}
+.cannot-buy-button:hover{
+    background-color: #9e9e9e;
 }
 .flex{
     display: flex;
@@ -58,13 +64,10 @@
     margin: 0%;
     border: solid black 1px;
 }
-@keyframes newstext {
-
-}
 #news-text{
-    transition: transform 32s linear 0s;
-    animation-name: newstext;
-    animation-duration: 4s;
+    width: max-content;
+    overflow: visible;
+    transition: transform 2s linear
 }
 .autobuyer-name-div{
     text-align: center;

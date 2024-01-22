@@ -7,7 +7,9 @@ const standardList=["k","M","B","T","Qa","Qt","Sx","Sp","Oc","No"];
 const MAX_ECOUNT_CAL=6;
 const MAX_BRACKET_CAL=12;
 //change this to change dependencies
-const objectThatHasTheNotationOption = game
+function getObjectThatHasTheNotationOption(){
+    return game;
+}
 function RepeatArr(func,n){
     let arr=Array(n)
     for(let i=0;i<n;i++){
@@ -128,15 +130,15 @@ function calEcountAndMnumber(amount,base=10,powMaxExp=new Decimal(1e9)){
 }
 function GetOption(property){
     let notationOption;
-    ({notationOption}=objectThatHasTheNotationOption)
-    const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
+    ({notationOption}=getObjectThatHasTheNotationOption())
+    const tmpOption={...{notation: getObjectThatHasTheNotationOption().notation}, ...property};
     let optionName=tmpOption.notation;
     if(notationOption[optionName]===undefined){
         if(["letters","emoji"].includes(notationOption[optionName])) optionName="letters"
         else optionName="general";
     }
     let option={...(notationOption["general"]), ...(notationOption[optionName]), ...property};
-    if([undefined,"_same"].includes(option.notation)) option.notation=objectThatHasTheNotationOption.notation;
+    if([undefined,"_same"].includes(option.notation)) option.notation=getObjectThatHasTheNotationOption().notation;
     return option;
 }
 function calSubNotation(option){
@@ -231,7 +233,7 @@ function FormatLetter(letterId,str,property){
         if(isSkipped){
             letterId=letterId.div(Decimal.pow(len,skippedAmount)).floor();
             //console.log(n);
-            resultString=`[${FormatValue(skippedAmount, { ...option, notation: option.subNotation, smallDec: 0 })}]`
+            resultString=`[${FormatValue_internal(skippedAmount, { ...option, notation: option.subNotation, smallDec: 0 })}]`
         }
         while(letterId.gt(0)){
             resultString=str[(letterId-1)%len]+resultString;
@@ -242,7 +244,7 @@ function FormatLetter(letterId,str,property){
         return resultString;
     }
     else if(bracketCount<2){
-        return `[${FormatValue(skippedAmount, { ...option, notation: option.subNotation, smallDec: 0 })}]`;
+        return `[${FormatValue_internal(skippedAmount, { ...option, notation: option.subNotation, smallDec: 0 })}]`;
     }
     else if(bracketCount<option.maxNotatedBracketCount){
         let prefix='';
@@ -251,10 +253,10 @@ function FormatLetter(letterId,str,property){
             prefix=prefix.concat('[');
             suffix=suffix.concat(']');
         }
-        return prefix+FormatValue(mNumber, {...option, notation: option.subNotation, smallDec: 0 })+suffix;
+        return prefix+FormatValue_internal(mNumber, {...option, notation: option.subNotation, smallDec: 0 })+suffix;
     }
     else{
-        return `[${FormatValue(mNumber, {...option, notation: option.subNotation, smallDec: 0})}](${FormatValue(bracketCount, {...option, notation: option.subNotation,smallDec: 0})})`; 
+        return `[${FormatValue_internal(mNumber, {...option, notation: option.subNotation, smallDec: 0})}](${FormatValue_internal(bracketCount, {...option, notation: option.subNotation,smallDec: 0})})`; 
     }
     return "Format Error";
 }
@@ -376,13 +378,13 @@ function RomanNumeralsUnit(n,property){
  * @param {Decimal} amount
  * @returns 
  */
-function FormatValue(amount, property={}){
+function FormatValue_internal(amount, property={}){
     let notationOption;
-    ({notationOption}=objectThatHasTheNotationOption);
+    ({notationOption}=getObjectThatHasTheNotationOption());
     if(property.notation===undefined){
-        property.notation=objectThatHasTheNotationOption.notation;
+        property.notation=getObjectThatHasTheNotationOption().notation;
     }
-    const tmpOption={...{notation: objectThatHasTheNotationOption.notation}, ...property};
+    const tmpOption={...{notation: getObjectThatHasTheNotationOption().notation}, ...property};
     let optionName=tmpOption.notation;
     if(notationOption[optionName]===undefined){
         if(["emoji"].includes(notationOption[optionName])) optionName="letters";
@@ -391,16 +393,12 @@ function FormatValue(amount, property={}){
     let option=GetOption(property);
     //if(option.htmlSafe){
     //    throw Error("htmlSafe is not supported");
-    //    return ConvertToHTMLSafe(FormatValue(amount,{...option, htmlSafe: false}));
+    //    return ConvertToHTMLSafe(FormatValue_internal(amount,{...option, htmlSafe: false}));
     //}
 
     //code used by many formats
     let powMaxExp=Decimal.pow(option.base,option.maxExp);
     amount=new Decimal(amount);
-
-    if(!objectThatHasTheNotationOption.isBreakOverflow && amount.gt(2147483647)){
-        return "Error: Overflow"
-    }
     
     if(Decimal.isNaN(amount)){
         return "NaN";
@@ -428,13 +426,13 @@ function FormatValue(amount, property={}){
     let eCount=calResult.eCount;
     let mNumber=calResult.mNumber;
     if(eCount>0){
-        if(option.powerTower) eString=FormatValue(eCount,{...option, notation: option.subNotation, smallDec:0,dec:4,maxBeforeNotate:4})+"PT"
+        if(option.powerTower) eString=FormatValue_internal(eCount,{...option, notation: option.subNotation, smallDec:0,dec:4,maxBeforeNotate:4})+"PT"
         else if(eCount<=option.maxNotatedLayer) for(let i=0;i<eCount;i++) eString+="e";
     }
     
     //console.log("eCount: "+eCount+" mNumber: "+mNumber);
     if(!option.customNegative&&amount.sign===-1){
-        return option.negativeSign+FormatValue(amount.abs(),option);
+        return option.negativeSign+FormatValue_internal(amount.abs(),option);
     }
     //console.log("mNumber: "+mNumber.toString());
     
@@ -459,7 +457,7 @@ function FormatValue(amount, property={}){
 
         if(Decimal.MagAbs(amount).lessThan(Decimal.pow(option.base,powMaxExp))){
             function calExpStr(power){
-                return FormatValue(power,{
+                return FormatValue_internal(power,{
                     ...option,
                     notation: option.subNotation,
                     smallDec: option.expDec,
@@ -502,11 +500,11 @@ function FormatValue(amount, property={}){
             }
         }
         else if(Decimal.MagAbs(amount).lessThan(Decimal.fromComponents(1,option.maxNotatedLayer,powMaxExp))){
-            return eString+FormatValue(mNumber,{...option, notation: option.subNotation,dec: option.expDec});
+            return eString+FormatValue_internal(mNumber,{...option, notation: option.subNotation,dec: option.expDec});
         }
         else{
-            if(notationOption.general.powerTower) return eString+FormatValue(mNumber,{...option, notation: option.subNotation,dec: option.hExpDec});
-            return `(e^${FormatValue(eCount, {...option, notation: option.subNotation,smallDec:0,dec:option.hExpDec})})${FormatValue(mNumber,{...option, notation: option.subNotation, dec:option.expDec})}`;
+            if(notationOption.general.powerTower) return eString+FormatValue_internal(mNumber,{...option, notation: option.subNotation,dec: option.hExpDec});
+            return `(e^${FormatValue_internal(eCount, {...option, notation: option.subNotation,smallDec:0,dec:option.hExpDec})})${FormatValue_internal(mNumber,{...option, notation: option.subNotation, dec:option.expDec})}`;
         }
     }
     if(["letters","emoji"].includes(option.notation)){
@@ -622,17 +620,17 @@ function FormatTime(amount){
         }
     });
     if(amount<10){
-        return `${FormatValue(amount,{dec:3,smallDec:3})} ${wordArr[0]}` 
+        return `${FormatValue_internal(amount,{dec:3,smallDec:3})} ${wordArr[0]}` 
     }
     if(amount<60){
-        return `${FormatValue(amount,{dec:2,smallDec:2})} ${wordArr[0]}`
+        return `${FormatValue_internal(amount,{dec:2,smallDec:2})} ${wordArr[0]}`
     }
     if(amount<60*60){
-        return `${FormatValue(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue(dividedTimeArr[0],{dec:1,smallDec:1})} ${wordArr[0]}`
+        return `${FormatValue_internal(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue_internal(dividedTimeArr[0],{dec:1,smallDec:1})} ${wordArr[0]}`
     }
     if(amount<60*60*24){
-        return `${FormatValue(dividedTimeArr[2],{dec:0,smallDec:0})} ${wordArr[2]}, ${FormatValue(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue(Math.floor(dividedTimeArr[0]),{dec:0,smallDec:0})} ${wordArr[0]}`
+        return `${FormatValue_internal(dividedTimeArr[2],{dec:0,smallDec:0})} ${wordArr[2]}, ${FormatValue_internal(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue_internal(Math.floor(dividedTimeArr[0]),{dec:0,smallDec:0})} ${wordArr[0]}`
     }
     
-    return `${FormatValue(dividedTimeArr[3],{dec:0,smallDec:0})} ${wordArr[3]}, ${FormatValue(dividedTimeArr[2],{dec:0,smallDec:0})} ${wordArr[2]}, ${FormatValue(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue(Math.floor(dividedTimeArr[0]),{dec:0,smallDec:0})} ${wordArr[0]}`
+    return `${FormatValue_internal(dividedTimeArr[3],{dec:0,smallDec:0})} ${wordArr[3]}, ${FormatValue_internal(dividedTimeArr[2],{dec:0,smallDec:0})} ${wordArr[2]}, ${FormatValue_internal(dividedTimeArr[1],{dec:0,smallDec:0})} ${wordArr[1]} and ${FormatValue_internal(Math.floor(dividedTimeArr[0]),{dec:0,smallDec:0})} ${wordArr[0]}`
 }

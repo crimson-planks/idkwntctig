@@ -15,7 +15,7 @@ class Upgrade {
         this.computedValue = props.computedValue;
     }
     GetCostForMultipleBuys(amount){
-        return costIncrease.sumOfLinear(this.cost,this.costIncrease,amount);
+        return sumFunctions.sumOfLinear(this.cost,this.costIncrease,amount);
     }
     CanBuyOnce(money) {
         return this.cost.lte(money)
@@ -35,7 +35,7 @@ class Upgrade {
                     break;
                 case "startAutoclicker":
                     this.value = this.amount.mul(10);
-                    this.computedValue = this.value.mul(game.overflowPoint.add(1));
+                    this.computedValue = this.value;
                     break;
                 case "overflowTimeMultiplier":
                     this.value = this.amount;

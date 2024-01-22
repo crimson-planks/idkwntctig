@@ -20,6 +20,9 @@ function internal_ConvertToStringifiableObject(object){
             mag: internal_ConvertToStringifiableObject(object.mag), 
             layer: internal_ConvertToStringifiableObject(object.layer)}
     }
+    if(object instanceof Cost){
+        return internal_ConvertToStringifiableObject(object.toStringifiableObject());
+    }
     if(object instanceof Autobuyer){
         return internal_ConvertToStringifiableObject(object.toStringifiableObject());
     }
@@ -30,7 +33,7 @@ function internal_ConvertToStringifiableObject(object){
         return object.map(ConvertToStringifiableObject)
     }
     if(object instanceof Function){
-        return {_type: "f", _data: object.toString()}
+        return {_type: "function", _data: object.toString()}
     }
     if(object instanceof Object){
         let newObject = {}
@@ -67,11 +70,12 @@ function internal_ConvertToUsableObject(object){
         if(object._type === "Autobuyer"){
             return new Autobuyer(newObject)
         }
-        if(object._type === "Upgrade") return new Upgrade(newObject)
-        return newObject
+        if(object._type === "Upgrade") return new Upgrade(newObject);
+        if(object._type === "Cost") return new (new Function("return "+object._type2)())(newObject);
+        return newObject;
     }
 
-    return object
+    return object;
 }
 function ConvertToUsableObject(stringifiableObject){
     return internal_ConvertToUsableObject(stringifiableObject);

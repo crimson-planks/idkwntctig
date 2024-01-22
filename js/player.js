@@ -113,31 +113,52 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 0,
-            interval: 1000,
-            cost: new Decimal(10),
-            costIncrease: new Decimal(5),
-            intervalCost: new Decimal("100"),
-            intervalCostIncrease: new Decimal("10"),
+            initialInterval: 1000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal(10),
+                costIncrease: new Decimal(5)
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal(100),
+                costIncrease: new Decimal(10)
+            }),
             active: true
         }),
         new Autobuyer({
             type: "matter",
             tier: 1,
-            interval: 2000,
-            cost: new Decimal(500),
-            costIncrease: new Decimal(100),
-            intervalCost: new Decimal("1000"),
-            intervalCostIncrease: new Decimal("100"),
+            initialInterval: 2000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal(500),
+                costIncrease: new Decimal(100)
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal(1000),
+                costIncrease: new Decimal(100)
+            }),
             active: true
         }),
         new Autobuyer({
             type: "matter",
             tier: 2,
-            interval: 4000,
-            cost: new Decimal("1e7"),
-            costIncrease: new Decimal("1e6"),
-            intervalCost: new Decimal("1e8"),
-            intervalCostIncrease: new Decimal("1000"),
+            initialInterval: 4000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal("1e7"),
+                costIncrease: new Decimal("1e6")
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal("1e8"),
+                costIncrease: new Decimal("1000")
+            }),
             active: true
         })
     ]

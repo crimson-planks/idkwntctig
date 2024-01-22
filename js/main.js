@@ -1,12 +1,46 @@
-
+function FormatValue(amount, property={}){
+    amount=new Decimal(amount);
+    if(!game.isBreakOverflow && amount.abs().gte(OVERFLOW)){
+        return "Error: Overflow"
+    }
+    return FormatValue_internal(amount,property);
+}
+function GetCurrency(type){
+    switch(type){
+        case "matter":
+            return game.matter;
+        case "overflow":
+            return game.overflowPoint;
+        case "dev":
+            return dev.currency;
+        default:
+            console.warn(`No currency: ${type}`)
+    }
+}
+function setCurrency(type,amount){
+    amount = new Decimal(amount);
+    switch(type){
+        case "matter":
+            game.matter=amount;
+            break;
+        case "overflow":
+            game.overflowPoint=amount;
+            break;
+        case "dev":
+            dev.currency=amount;
+            break;
+        default:
+            console.warn(`No currency was spent: ${type}`)
+    }
+}
+function spendCurrency(type,amount){
+    setCurrency(type,GetCurrency(type).minus(amount));
+}
 function ClickAutobuyerBuyButton(autobuyer){
     return autobuyer.BuyOnce();
 };
-function CanBuy(cost,matter){
-    cost = new Decimal(cost);
-    matter = new Decimal(matter);
-    if(cost.gt(matter)) return false;
-    else return true;
+function CanBuy(cost,money){
+    return new Decimal(cost).lte(money);
 }
 function GainMoney(amount){
     game.matter=game.matter.add(amount);
@@ -49,7 +83,7 @@ var app = Vue.createApp({
                         },
                         startAutoclicker:{
                             descriptionText: "Get extra autoclickers",
-                            formulaText: "(amount) * 10 * (overflow points)"
+                            formulaText: "(amount) * 10"
                         },
                         overflowTimeMultiplier:{
                             descriptionText: "Get more overflow points depending of the fastest overflow time (see statistics)",
@@ -190,19 +224,19 @@ var triggerObject = {
     autobuyer0: function(){
         game.trigger.autobuyer[0] = true;
         game.autobuyerObject.matter[0] = autobuyerObject.matter[0].clone();
-        game.autobuyerObject.matter[0].costIncrease = game.autobuyerObject.matter[0].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[0].cost.costIncrease = game.autobuyerObject.matter[0].cost.costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     autobuyer1: function(){
         game.trigger.autobuyer[1] = true;
         game.autobuyerObject.matter[1] = autobuyerObject.matter[1].clone();
-        game.autobuyerObject.matter[1].costIncrease = game.autobuyerObject.matter[1].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[1].cost.costIncrease = game.autobuyerObject.matter[1].cost.costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     autobuyer2: function(){
         game.trigger.autobuyer[2] = true;
         game.autobuyerObject.matter[2] = autobuyerObject.matter[2].clone();
-        game.autobuyerObject.matter[2].costIncrease = game.autobuyerObject.matter[2].costIncrease.minus(game.reducedCost);
+        game.autobuyerObject.matter[2].cost.costIncrease = game.autobuyerObject.matter[2].cost.costIncrease.minus(game.reducedCost);
         appThis.Update();
     },
     overflowForced: function(){
@@ -315,8 +349,8 @@ function GameLoop(){
 }
 mountApp();
 init();
-setInterval(GameLoop, 50);
-setInterval(save, 10000);
+const GameLoopIntervalId = setInterval(GameLoop, 50);
+const saveIntervalId = setInterval(save, 10000);
 function keydownEvent(ev){
     appThis.visual.showFormula=ev.shiftKey;
     if(ev.code==="KeyM"){

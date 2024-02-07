@@ -4,7 +4,7 @@ function canSoftReset(level){
         return game.matter.gte(game.softReset0Cost) && !game.trigger.overflowForced;
     }
     if(level===1){
-        return game.matter.gte(OVERFLOW)
+        return game.matter.gte(game.overflowLimit)
     }
 }
 function softReset(level){
@@ -36,6 +36,7 @@ function softResetForced(level){
         game.softReset0Cost = game.defaultSoftReset0Cost;
         game.deflation = new Decimal(0);
         game.trigger.overflowForced = false;
+        variables.canPress.m=true;
         game.reducedCost = new Decimal(0);
     }
     if(level===1){

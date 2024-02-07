@@ -1,3 +1,5 @@
+https://docs.google.com/document/d/1uxAFl0J-3VlqDo0E5lXi0eSJ8moe6pu0rhAUIQi1sxA/edit
+
 https://coolors.co/2b835d-c8d5b9-8fc0a9-6ad47a-504b43
 Color scheme: #2B835D, C8D5B9, 8FC9A9, #6AD47A, 504B43
 False Infinity
@@ -7,11 +9,20 @@ Infinity (1.8e308)
 Eternity (1e9e15)
 
 single generator, multiple autobuyers
-Autoclicker Multiplier Upgrade by resetting.
-Deflation: Resets cost of autobuyers by x, but resets your matter & all autobuyers except your last one.
+Deflation: Reduces cost of autobuyers by 1, but resets your matter & all autobuyers
 Overflow:
 Overflow Autobuyer: meta(buys an autobuyer), interval(buys all intervals)
 Extend overflow: extends the overflow limit, gaining more overflow points but losing the ability to overflow at the previous limit.
+energy:
+Convert matter to energy by different conversion factors
+Astroids: can buy with 1 mole of matter (6.022e23), generates energy without consuming matter
+
+Notations:
+scientific
+engineering
+alternative engineering
+letters
+emoji
 
 TODO:
 Add more shortcuts ('m', 'Ctrl+s')

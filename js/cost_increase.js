@@ -60,21 +60,38 @@ class Cost{
         this.cost = props.cost;
         this.costIncrease = props.costIncrease;
         this.boughtAmount = props.boughtAmount ?? new Decimal();
+        this.maxPossibleBuy = props.maxPossibleBuy ?? Decimal.dInf;
     }
     /** @abstract Get the cost of buying*/
-    GetBuyCost(amount){throw "NotImplemented"};
+    GetBuyCost_internal(amount){throw "NotImplemented"};
+    GetBuyCost(amount){
+        const willBuyAmount = this.boughtAmount.add(amount);
+        if(willBuyAmount.gt(this.maxPossibleBuy)){return Decimal.dInf}
+        return this.GetBuyCost_internal(amount);
+    }
     /** @abstract Get the maximum buyable with the currency */
-    GetMaxBuy(){throw "NotImplemented"};
+    GetMaxBuy_internal(){throw "NotImplemented"};
+    GetMaxBuy(){
+        return Decimal.min(this.maxPossibleBuy,this.GetMaxBuy_internal());
+    }
     /** @abstract Get the increased cost after buying amount */
-    GetIncreasedCost(amount){throw "NotImplemented"}
+    GetIncreasedCost_internal(amount){throw "NotImplemented"}
+    GetIncreasedCost(amount){
+        const willBuyAmount = this.boughtAmount.add(amount);
+        if(willBuyAmount.gt(this.maxPossibleBuy)) return Decimal.dInf;
+        return this.GetIncreasedCost_internal(amount);
+    }
+    isBoughtMax(){
+        return this.boughtAmount.gte(this.maxPossibleBuy);
+    }
     get currency(){
-        return GetCurrency(this.currencyType);
+        return currencies[this.currencyType].get();
     }
     set currency(amount){
-        setCurrency(this.currencyType,amount);
+        currencies[this.currencyType].set(amount);
     }
     SpendCurrency(amount){
-        spendCurrency(this.currencyType,amount);
+        currencies[this.currencyType].spend(amount);
     }
     CanBuy(amount){
         return CanBuy(this.GetBuyCost(amount),this.currency);
@@ -102,14 +119,15 @@ class Cost{
         return true;
     }
     BuyMax(){
-        this.Buy(this.GetMaxBuy());
+        return this.Buy(this.GetMaxBuy());
     }
     clone(){
         return new this.constructor({
             currencyType: this.currencyType,
             cost: this.cost,
             costIncrease: this.costIncrease,
-            boughtAmount: this.boughtAmount
+            boughtAmount: this.boughtAmount,
+            maxPossibleBuy: this.maxPossibleBuy
         })
     }
     toStringifiableObject(){
@@ -119,7 +137,8 @@ class Cost{
             currencyType: this.currencyType,
             cost: this.cost,
             costIncrease: this.costIncrease,
-            boughtAmount: this.boughtAmount ?? new Decimal()
+            boughtAmount: this.boughtAmount ?? new Decimal(),
+            maxPossibleBuy: this.maxPossibleBuy
         }
     }
 }
@@ -130,11 +149,11 @@ class Cost{
  */
 class LinearCost extends Cost{
     /** @implements */
-    GetBuyCost(amount){
+    GetBuyCost_internal(amount){
         return this.cost.mul(amount).plus(this.costIncrease.mul(amount).div(2).mul(Decimal.sub(amount,1)));
     }
     /** @implements */
-    GetMaxBuy(){
+    GetMaxBuy_internal(){
         //quadratic formula breaks when costIncrease==0 (aka not quadratic)
         if(this.costIncrease.eq(0)&&this.cost.gt(0)) return this.currency.div(this.cost).floor();
         if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
@@ -145,7 +164,7 @@ class LinearCost extends Cost{
         return b.neg().add(b.pow(2).sub(a.mul(c).mul(4)).sqrt()).div(this.costIncrease).floor();
     }
     /** @implements */
-    GetIncreasedCost(amount){
+    GetIncreasedCost_internal(amount){
         return this.cost.add(this.costIncrease.mul(amount));
     }
 }
@@ -161,7 +180,7 @@ class ExponentialCost extends Cost{
     }
     /** @implements */
     GetMaxBuy(){
-        return sumFunctions.inverseSumOfExponential(this.cost,this.costIncrease,this.currency);
+        return sumFunctions.inverseSumOfExponential(this.cost,this.costIncrease,this.currency).floor();
     }
     /** @implements */
     GetIncreasedCost(amount){

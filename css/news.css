@@ -1,0 +1,12 @@
+@keyframes moving-text {
+    from {right: -120%}
+    to {right: 120%}
+}
+#news-text {
+    position: relative;
+    width: max-content;
+    animation-name: moving-text;
+    animation-duration: 25s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}

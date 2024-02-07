@@ -63,6 +63,9 @@ class Autobuyer{
     GetMaxBuy(){
         return this.cost.GetMaxBuy();
     }
+    GetMaxBuyInterval(){
+        return this.intervalCost.GetMaxBuy();
+    }
     BuyOnce(type = "normal"){
         return this.Buy(1,type);
     }
@@ -84,6 +87,9 @@ class Autobuyer{
                                       .div(Decimal.pow(2,buyAmount));
         this.UpdateInterval();
         return true;
+    }
+    BuyMaxInterval(){
+        this.BuyInterval(this.GetMaxBuyInterval());
     }
     Toggle(){
         this.active=!this.active;
@@ -109,6 +115,7 @@ class Autobuyer{
         }
     }
     Loop(){
+        this.UpdateInterval();
         if(!this.active) return;
         if(this.amount<=new Decimal(0)) return;
         this.timer+=Date.now()-game.lastUpdated;
@@ -205,10 +212,10 @@ const AutobuyerComponent = {
         <span class="autobuyer-text-div">Interval:&nbsp;{{visual.interval}} ms</span>
         <span class="autobuyer-text-div autobuyer-button pointer-cursor" :class="visual.interval_buy.vue_class" v-on:click="ClickIntervalBuyButton()">Interval Cost: {{visual.intervalCost}}</span>
         <span class="autobuyer-text-div autobuyer-button pointer-cursor" v-on:click="ClickToggleButton()"> Toggle: {{visual.active}}</span>
+        <span v-if="false"></span>
     </div>
     `,
     methods: {
-        //do something!!!!!!
         UpdateObject(){
             this.object = game.autobuyerObject[this.type][this.tier];
         },
@@ -249,3 +256,58 @@ const AutobuyerComponent = {
         }
     }
 }
+var autobuyerObject={
+    matter: [
+        new Autobuyer({
+            type: "matter",
+            tier: 0,
+            initialInterval: 1000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal(10),
+                costIncrease: new Decimal(5)
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal(100),
+                costIncrease: new Decimal(10)
+            }),
+            active: true
+        }),
+        new Autobuyer({
+            type: "matter",
+            tier: 1,
+            initialInterval: 2000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal(500),
+                costIncrease: new Decimal(100)
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal(1000),
+                costIncrease: new Decimal(100)
+            }),
+            active: true
+        }),
+        new Autobuyer({
+            type: "matter",
+            tier: 2,
+            initialInterval: 4000,
+            currencyType: "matter",
+            cost: new LinearCost({
+                currencyType: "matter",
+                cost: new Decimal("1e7"),
+                costIncrease: new Decimal("1e6")
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "matter",
+                cost: new Decimal("1e8"),
+                costIncrease: new Decimal("1000")
+            }),
+            active: true
+        })
+    ]
+};

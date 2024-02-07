@@ -1,6 +1,6 @@
 function FormatValue(amount, property={}){
     amount=new Decimal(amount);
-    if(!game.isBreakOverflow && amount.abs().gte(OVERFLOW)){
+    if(!game.isBreakOverflow && amount.abs().gte(game.overflowLimit)){
         return "Error: Overflow"
     }
     return FormatValue_internal(amount,property);
@@ -49,9 +49,7 @@ function GainMoney(amount){
 function ClickGainMoney(amount){
     GainMoney(amount);
 }
-function MaxAllInterval(){
 
-}
 var appThis={};
 var bus={app: appThis, autobuyer: {}};
 var app = Vue.createApp({
@@ -60,9 +58,13 @@ var app = Vue.createApp({
         return {
             game,
             input: {
-                notation: "scientific"
+                notation: "scientific",
+                showNews: true
             },
             visual: {
+                news: {
+
+                },
                 statistics:{},
                 notationArray,
                 overflow_button: {
@@ -72,8 +74,14 @@ var app = Vue.createApp({
                     }
                 },
                 tabOrder:["autobuyer","overflow","option","statistics"],
+                tabName: {
+                    autobuyer: "Autobuyers",
+                    overflow: "Overflow",
+                    option: "Options",
+                    statistics: "Statistics",
+                },
                 upgradeOrder: {
-                    overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","reduceStartInterval"]
+                    overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
                 },
                 upgrade: {
                     overflow: {
@@ -89,9 +97,9 @@ var app = Vue.createApp({
                             descriptionText: "Get more overflow points depending of the fastest overflow time (see statistics)",
                             formulaText: "ceil(1e7 / ((fastest overflow time(in milliseconds)) + 1e4))"
                         },
-                        reduceStartInterval:{
+                        startIntervalReducer:{
                             descriptionText: "Reduce the interval of all autobuyers(including autoclickers) that gets weaker as time passes, resetting on overflow",
-                            formulaText: "I haven't come up with a good formula for this, so if you have any suggestions, do a pull request."
+                            formulaText: "..."
                         }
                     }
                 },
@@ -109,6 +117,9 @@ var app = Vue.createApp({
         ClickGainMoney(amount){
             ClickGainMoney(game.clickGain.mul(amount));
             this.Update();
+        },
+        UpdateNews(){
+            
         },
         UpdateAutobuyers(){
             Object.keys(bus.autobuyer).forEach(type=>{
@@ -133,7 +144,8 @@ var app = Vue.createApp({
                 //console.log(game.upgrade.overflow[key]);
                 this.visual.upgrade.overflow[key] = this.visual.upgrade.overflow[key] ?? {};
                 this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
-                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost)+ "OP";
+                this.visual.upgrade.overflow[key].isBoughtMax = game.upgrade.overflow[key].cost.isBoughtMax();
+                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost.cost)+ "OP";
                 this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
                 this.visual.upgrade.overflow[key].computedValue = FormatValue(game.upgrade.overflow[key].computedValue);
             });
@@ -152,9 +164,9 @@ var app = Vue.createApp({
             this.visual.matter = FormatValue(game?.matter);
             this.visual.softReset0Cost = FormatValue(game?.softReset0Cost);
             this.visual.overflowForced = game?.trigger?.overflowForced;
-            this.visual.overflowPoint = game?.overflowPoint;
+            this.visual.overflowPoint = FormatValue(game?.overflowPoint,{smallDec: 0});
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
-            this.visual.clickGain = game?.clickGain;
+            this.visual.clickGain = FormatValue(game?.clickGain, {smallDec: 0});
             this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});     
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
@@ -241,12 +253,14 @@ var triggerObject = {
     },
     overflowForced: function(){
         game.trigger.overflowForced = true;
+        variables.canPress.m=false;
         game.autobuyerObject.matter.forEach((autobuyer,index)=>{
             autobuyer.active=false;
-        })
+        });
         appThis.Update();
     },
     overflowReset(){
+        console.log("overflowReset")
         game.trigger.overflowReset = true;
         game.upgrade.overflow = {};
         Object.keys(upgradeObject.overflow).forEach(key => {
@@ -289,7 +303,7 @@ function TriggerLoop(){
         triggerObject.autobuyer2();
     }
 
-    if(game.matter.gte(OVERFLOW) && !game.isBreakOverflow && !game.trigger.overflowForced){
+    if(game.matter.gte(game.overflowLimit) && !game.isBreakOverflow && !game.trigger.overflowForced){
         triggerObject.overflowForced();
     }
     if(game?.statistics?.overflow?.gte(1) && !game.trigger.overflowReset){
@@ -330,11 +344,15 @@ function mountApp(){
     }
 }
 function InputLoop(){
-    game.notation = appThis.input.notation;
+    if(game.notation !== appThis.input.notation) {
+        game.notation = appThis.input.notation;
+        appThis.Update();
+    }
 }
 function GameLoop(){
     Object.keys(game.autobuyerObject).forEach(key => {
         game.autobuyerObject[key].forEach(autobuyer => {
+            autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
             autobuyer.Loop();
         })
     });
@@ -346,6 +364,8 @@ function GameLoop(){
     variables.deflationTime = game.lastUpdated - game.lastDeflationTime;
     variables.overflowTime = game.lastUpdated - game.lastOverflowTime;
     appThis.UpdateStatistics();
+    appThis.UpdateUpgrade();
+    if(game.upgrade.overflow.startIntervalReducer.amount.gte(0)) appThis.Update();
 }
 mountApp();
 init();
@@ -353,7 +373,12 @@ const GameLoopIntervalId = setInterval(GameLoop, 50);
 const saveIntervalId = setInterval(save, 10000);
 function keydownEvent(ev){
     appThis.visual.showFormula=ev.shiftKey;
-    if(ev.code==="KeyM"){
+    if(ev.code==="KeyM"&&variables.canPress.m){
+        Object.keys(game.autobuyerObject).forEach((value)=>{
+            game.autobuyerObject[value].forEach((value2)=>{
+                value2?.BuyMaxInterval();
+            })
+        })
     }
     if(ev.code==="KeyO"){
         if(softReset(1)) appThis.Update();
@@ -362,6 +387,10 @@ function keydownEvent(ev){
 function keyUpEvent(ev){
     appThis.visual.showFormula=ev.shiftKey;
 }
+function variablesInit(){
+    variables.canPress.m=!game.trigger.overflowForced;
+}
 addEventListener("keydown",keydownEvent)
 addEventListener("keyup",keyUpEvent)
 console.log("game start")
+//11,21,22,33,31,32,42,41,51,62,61,72,71,81,82,73,83,93,92,91,103,102,101,111,123,133,143,151,161,162,171,181,192,191,193,213,214,212,211|0

@@ -2,6 +2,7 @@ const OVERFLOW = new Decimal(Math.pow(2,31));
 const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
 const VERSION = "0.0.3"
+/** variables that aren't saved */
 var variables={
     matterPerSecond: new Decimal(),
     loseMatterPerSecond: new Decimal(),
@@ -9,7 +10,11 @@ var variables={
     playTime: 0,
     deflationTime: 0,
     overflowTime: 0,
+    canPress:{
+        m: true
+    }
 };
+/** variables that are saved */
 var game = {
     matter: new Decimal(0),
     defaultMatter: new Decimal(0),
@@ -21,22 +26,18 @@ var game = {
     autobuyerObject: {
         matter: []
     },
-    upgrade: Object(),
+    upgrade: {},
     tab: {
         autobuyer: {
-            name: "Autobuyers",
             unlocked: true
         },
         overflow: {
-            name: "Overflow",
             unlocked: false
         },
         option: {
-            name: "Options",
             unlocked: true
         },
         statistics: {
-            name: "Statistics",
             unlocked: true
         }
     },
@@ -52,6 +53,7 @@ var game = {
         fastestOverflowTime: Infinity,
     },
     isBreakOverflow: false,
+    overflowLimit: OVERFLOW,
     overflowPoint: new Decimal(),
     notation: "scientific",
     isDevMode: false,
@@ -108,89 +110,6 @@ game.notationOption = {
     }
 };
 var defaultGame = jQuery.extend({},game)
-var autobuyerObject={
-    matter: [
-        new Autobuyer({
-            type: "matter",
-            tier: 0,
-            initialInterval: 1000,
-            currencyType: "matter",
-            cost: new LinearCost({
-                currencyType: "matter",
-                cost: new Decimal(10),
-                costIncrease: new Decimal(5)
-            }),
-            intervalCost: new ExponentialCost({
-                currencyType: "matter",
-                cost: new Decimal(100),
-                costIncrease: new Decimal(10)
-            }),
-            active: true
-        }),
-        new Autobuyer({
-            type: "matter",
-            tier: 1,
-            initialInterval: 2000,
-            currencyType: "matter",
-            cost: new LinearCost({
-                currencyType: "matter",
-                cost: new Decimal(500),
-                costIncrease: new Decimal(100)
-            }),
-            intervalCost: new ExponentialCost({
-                currencyType: "matter",
-                cost: new Decimal(1000),
-                costIncrease: new Decimal(100)
-            }),
-            active: true
-        }),
-        new Autobuyer({
-            type: "matter",
-            tier: 2,
-            initialInterval: 4000,
-            currencyType: "matter",
-            cost: new LinearCost({
-                currencyType: "matter",
-                cost: new Decimal("1e7"),
-                costIncrease: new Decimal("1e6")
-            }),
-            intervalCost: new ExponentialCost({
-                currencyType: "matter",
-                cost: new Decimal("1e8"),
-                costIncrease: new Decimal("1000")
-            }),
-            active: true
-        })
-    ]
-};
-var notationArray = [
-    "scientific", "engineering"
+const notationArray = [
+    "scientific", "engineering", "logarithm", "engineering-alt", "letters","emoji", "inequality"
 ]
-var upgradeObject = {
-    overflow:{
-        matterPerClick: new Upgrade({
-            type: "overflow",
-            id: "matterPerClick",
-            amount: new Decimal(),
-            cost: new Decimal(1),
-            costIncrease: new Decimal(1),
-            value: new Decimal(),
-        }),
-        startAutoclicker: new Upgrade({
-            type: "overflow",
-            id: "startAutoclicker",
-            amount: new Decimal(),
-            cost: new Decimal(1),
-            costIncrease: new Decimal(0),
-            value: new Decimal(),
-        }),
-        overflowTimeMultiplier: new Upgrade({
-            type: "overflow",
-            id: "overflowTimeMultiplier",
-            amount: new Decimal(),
-            cost: new Decimal(2),
-            costIncrease: Decimal.dInf,
-            value: new Decimal(),
-        })
-    }
-}

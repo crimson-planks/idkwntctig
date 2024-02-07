@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>False Infinity</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/news.css">
     <link rel="icon" href="assets/favicon.svg">
 </head>
 <body>
@@ -14,12 +15,12 @@
     </div>
     <div id="app" style="display: none;">
         <header>
-            <div id="news-ticker">
-                <div id="news-text">This is a sample news text. I haven't made the actual code yet. (I could steal it from another game, but that's boring)</div>
+            <div id="news-ticker" v-show="input.showNews">
+                <div id="news-text">This is a sample news text. I haven't made the actual code for generating random news.</div>
             </div>
             <div id="tab-div">
                 <template v-for="id in visual.tabOrder">
-                    <h2 class="tab-button" v-if="game.tab[id].unlocked" v-on:click="ChangeTab(id)">{{game.tab[id].name}}</h2>
+                    <h2 class="tab-button" v-if="game.tab[id].unlocked" v-on:click="ChangeTab(id)">{{visual.tabName[id]}}</h2>
                 </template>
             </div>
         </header>
@@ -49,7 +50,8 @@
                 <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
                     {{visual.upgrade.overflow[id].descriptionText}}<br>
                     Current: {{visual.upgrade.overflow[id].computedValue}}<br>
-                    Cost: {{visual.upgrade.overflow[id].cost}}<br>
+                    <span v-show="!visual.upgrade.overflow[id]?.isBoughtMax">Cost: {{visual.upgrade.overflow[id].cost}}<br></span>
+                    <span v-show="visual.upgrade.overflow[id]?.isBoughtMax">Maxed!<br></span>
                     <span v-show="visual?.showFormula">Formula: {{visual.upgrade.overflow[id].formulaText}}</span>
                 </button>
             </div>
@@ -62,6 +64,8 @@
             <select name="notation" id="notation-select" v-model="input.notation">
                 <option v-for="notation in visual.notationArray" :value="notation">{{notation}}</option>
             </select>
+            <input type="checkbox" id="news-show" v-model="input.showNews"/>
+            <label for="news-show">Show News</label>
         </div>
         <div id="statistics-tab-div" v-show="visual.currentTab==='statistics'">
             <h4>Statistics</h4>
@@ -82,9 +86,10 @@
 <script src="js/libraries/jquery-3.6.1.min.js"></script>
 <script src="js/unit_test.js"></script>
 <script src="js/decimal.js"></script>
+<script src="js/cost_increase.js"></script>
 <script src="js/classes/upgrade.js"></script>
 <script src="js/classes/autobuyer.js"></script>
-<script src="js/cost_increase.js"></script>
+<script src="js/classes/currency.js"></script>
 <script src="js/player.js"></script>
 <script src="js/format.js"></script>
 <script src="js/format.test.js"></script>

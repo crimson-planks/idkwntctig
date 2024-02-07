@@ -11,7 +11,9 @@
     user-select: none;
 }
 #news-ticker{
-    border:  solid #8FC0A9;
+    width: 100%;
+    border-top: solid #8FC0A9;
+    border-bottom: solid #8FC0A9;
     border-width: 4px;
     background-color: #C8D5B9;
 }
@@ -64,11 +66,7 @@
     margin: 0%;
     border: solid black 1px;
 }
-#news-text{
-    width: max-content;
-    overflow: visible;
-    transition: transform 2s linear
-}
+
 .autobuyer-name-div{
     text-align: center;
 }

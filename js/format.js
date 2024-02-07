@@ -11,7 +11,7 @@ function getObjectThatHasTheNotationOption(){
     return game;
 }
 function RepeatArr(func,n){
-    let arr=Array(n)
+    let arr=Array(n).fill(undefined)
     for(let i=0;i<n;i++){
         arr[i]=func(i);
     }

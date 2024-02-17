@@ -19,8 +19,8 @@
                 <div id="news-text">This is a sample news text. I haven't made the actual code for generating random news.</div>
             </div>
             <div id="tab-div">
-                <template v-for="id in visual.tabOrder">
-                    <h2 class="tab-button" v-if="game.tab[id].unlocked" v-on:click="ChangeTab(id)">{{visual.tabName[id]}}</h2>
+                <template v-for="tabId in visual.tabOrder">
+                    <h2 class="tab-button" v-if="game.tab[tabId].unlocked" v-on:click="ChangeTab(tabId)">{{visual.tabName[tabId]}}</h2>
                 </template>
             </div>
         </header>
@@ -28,7 +28,12 @@
         <p>Matter/second: {{visual.matterPerSecond}}</p>
         <p>Lose matter/second: {{visual.loseMatterPerSecond}}</p>
         <p>Net matter/second: {{visual.netMatterPerSecond}}</p>
-        <div id="autobuyer-tab-div" v-show="visual.currentTab==='autobuyer'">
+        <div class="subtab-div" v-for="tabId in visual.tabOrder">
+            <div v-show="visual.currentTab===tabId">
+                <button v-for="subTab in visual.subTabs[tabId]" v-on:click="ChangeSubTab(subTab)">{{visual.subtabName[tabId][subTab]}}</button>
+            </div>
+        </div>
+        <div id="autobuyer-tab-div" v-show="visual.currentSubTab==='matter'">
             <div class="flex" id="pre-overflow-div" v-show="!visual.overflowForced">
                 <div>
                     <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
@@ -46,37 +51,49 @@
         <div id="overflow-tab-div" v-show="visual.currentTab==='overflow'">
             Overflow Points: {{visual.overflowPoint}}
             <button id="overflow-button" :class="visual.overflow_button.vue_class" v-on:click="ClickSoftReset1Button()">Overflow</button>
-            <div id="overflow-upgrade-table-div">
-                <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
-                    {{visual.upgrade.overflow[id].descriptionText}}<br>
-                    Current: {{visual.upgrade.overflow[id].computedValue}}<br>
-                    <span v-show="!visual.upgrade.overflow[id]?.isBoughtMax">Cost: {{visual.upgrade.overflow[id].cost}}<br></span>
-                    <span v-show="visual.upgrade.overflow[id]?.isBoughtMax">Maxed!<br></span>
-                    <span v-show="visual?.showFormula">Formula: {{visual.upgrade.overflow[id].formulaText}}</span>
-                </button>
+            <div v-show="visual.currentSubTab==='upgrade'">
+                <div id="overflow-upgrade-table-div">
+                    <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
+                        {{visual.upgrade.overflow[id].descriptionText}}<br>
+                        Current: {{visual.upgrade.overflow[id].computedValue}}<br>
+                        <span v-show="!visual.upgrade.overflow[id]?.isBoughtMax">Cost: {{visual.upgrade.overflow[id].cost}}<br></span>
+                        <span v-show="visual.upgrade.overflow[id]?.isBoughtMax">Maxed!<br></span>
+                        <span v-show="visual?.showFormula">Formula: {{visual.upgrade.overflow[id].formulaText}}</span>
+                    </button>
+                </div>
+            </div>
+            <div v-show="visual.currentSubTab==='energy'">
+                Energy
+                <button></button>
             </div>
         </div>
-        <div id="option-tab-div" v-show="visual.currentTab==='option'">
+        <div v-show="visual.currentTab==='option'">
             Options
-            <button onclick="save()">Save</button>
-            <button onclick="load()">Load</button>
-            <label for="notation-select">Notation: </label>
-            <select name="notation" id="notation-select" v-model="input.notation">
-                <option v-for="notation in visual.notationArray" :value="notation">{{notation}}</option>
-            </select>
-            <input type="checkbox" id="news-show" v-model="input.showNews"/>
-            <label for="news-show">Show News</label>
+            <div v-show="visual.currentSubTab==='saving'">
+                <button onclick="save()">Save</button>
+                <button onclick="load()">Load</button>
+            </div>
+            <div v-show="visual.currentSubTab==='visual'">
+                <label for="notation-select">Notation: </label>
+                <select name="notation" id="notation-select" v-model="input.notation">
+                    <option v-for="notation in visual.notationArray" :value="notation">{{notation}}</option>
+                </select>
+                <input type="checkbox" id="news-show" v-model="input.showNews"/>
+                <label for="news-show">Show News</label>
+            </div>
         </div>
         <div id="statistics-tab-div" v-show="visual.currentTab==='statistics'">
             <h4>Statistics</h4>
-            Play time: {{visual.statistics?.playTime}}<br>
-            Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
-            Deflation: {{visual.statistics?.deflation}} times<br>
-            <span v-if="visual.statistics?.showOverflow">
-                Current simulation time: {{visual.statistics?.overflowTime}}<br>
-                Overflow: {{visual.statistics?.overflow}} times<br>
-                Fastest overflow time: {{visual.statistics?.fastestOverflowTime}}<br>
-            </span>
+            <div v-show="visual.currentSubTab==='general'">
+                Play time: {{visual.statistics?.playTime}}<br>
+                Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
+                Deflation: {{visual.statistics?.deflation}} times<br>
+                <span v-if="visual.statistics?.showOverflow">
+                    Current simulation time: {{visual.statistics?.overflowTime}}<br>
+                    Overflow: {{visual.statistics?.overflow}} times<br>
+                    Fastest overflow time: {{visual.statistics?.fastestOverflowTime}}<br>
+                </span>
+            </div>
         </div>
         <p id="version-p">Version: {{visual.version}}</p>
     </div>

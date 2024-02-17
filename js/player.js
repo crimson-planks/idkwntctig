@@ -14,6 +14,13 @@ var variables={
         m: true
     }
 };
+const tabs = ["autobuyer","overflow","option","statistics"]
+const subTabs = {
+    "autobuyer": ["matter","overflow"],
+    "overflow": ["upgrade","energy"],
+    "option": ["saving", "visual"],
+    "statistics": ["general"]
+}
 /** variables that are saved */
 var game = {
     matter: new Decimal(0),
@@ -41,6 +48,17 @@ var game = {
             unlocked: true
         }
     },
+    subTab: {
+        autobuyer: {
+
+        },
+        overflow: {
+        },
+        option: {
+        },
+        statistics: {
+        }
+    },
     trigger:{
         autobuyer: Array(3).fill(false),
         overflowForced: false,
@@ -65,6 +83,7 @@ var game = {
     lastSaved: Date.now(),
     lastUpdated: Date.now()
 };
+tabs.forEach((tab)=>{game.subTab[tab]=subTabs[tab]});
 game.notationOption = {
     general: {
         dec: 3,

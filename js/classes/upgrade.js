@@ -117,10 +117,11 @@ var upgradeObject = {
             type: "overflow",
             id: "matterPerClick",
             amount: new Decimal(),
-            cost: new LinearCost({
+            cost: new ExponentialCost({
                 currencyType: "overflow",
                 cost: new Decimal(1),
-                costIncrease: new Decimal(1),
+                costIncrease: new Decimal(2),
+                maxPossibleBuy: Decimal.dInf,
             }),
             value: new Decimal(),
         }),
@@ -128,10 +129,10 @@ var upgradeObject = {
             type: "overflow",
             id: "startAutoclicker",
             amount: new Decimal(),
-            cost: new LinearCost({
+            cost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal(1),
-                costIncrease: new Decimal(1),
+                cost: new Decimal(2),
+                costIncrease: new Decimal(2),
                 maxPossibleBuy: Decimal.dInf,
             }),
             value: new Decimal(),
@@ -152,11 +153,11 @@ var upgradeObject = {
             type: "overflow",
             id: "startIntervalReducer",
             amount: new Decimal(),
-            cost: new LinearCost({
+            cost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal(5),
-                costIncrease: new Decimal(0),
-                maxPossibleBuy: new Decimal(1),
+                cost: new Decimal(13),
+                costIncrease: new Decimal(7),
+                maxPossibleBuy: new Decimal(16),
             }),
             value: new Decimal(),
         })

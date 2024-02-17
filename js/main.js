@@ -65,6 +65,8 @@ var app = Vue.createApp({
                 news: {
 
                 },
+                currentTab: "autobuyer",
+                currentSubTab: "matter",
                 statistics:{},
                 notationArray,
                 overflow_button: {
@@ -73,12 +75,37 @@ var app = Vue.createApp({
                         "can-buy-button": false
                     }
                 },
-                tabOrder:["autobuyer","overflow","option","statistics"],
+                tabs,
+                tabOrder: tabs,
+                subTabs: subTabs,
+                selectedSubTabs: {
+                    autobuyer: "matter",
+                    overflow: "upgrades",
+                    option: "saving",
+                    statistics: "general"
+                }, 
                 tabName: {
                     autobuyer: "Autobuyers",
                     overflow: "Overflow",
                     option: "Options",
                     statistics: "Statistics",
+                },
+                subtabName: {
+                    autobuyer: {
+                        matter: "Matter",
+                        overflow: "Overflow",
+                    },
+                    overflow: {
+                        upgrade: "Upgrade",
+                        energy: "Energy",
+                    },
+                    option: {
+                        saving: "Saving",
+                        visual: "Visual",
+                    },
+                    statistics: {
+                        general: "General",
+                    }
                 },
                 upgradeOrder: {
                     overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
@@ -185,6 +212,11 @@ var app = Vue.createApp({
         },
         ChangeTab(tab){
             this.visual.currentTab=tab;
+            this.visual.currentSubTab=this.visual.selectedSubTabs[tab];
+        },
+        ChangeSubTab(subTab){
+            this.visual.currentSubTab=subTab;
+            this.visual.selectedSubTabs[this.visual.currentTab]=subTab;
         },
         ChangeNotation(notation){
             game.notation=notation;
@@ -378,7 +410,7 @@ function keydownEvent(ev){
             game.autobuyerObject[value].forEach((value2)=>{
                 value2?.BuyMaxInterval();
             })
-        })
+        });
     }
     if(ev.code==="KeyO"){
         if(softReset(1)) appThis.Update();

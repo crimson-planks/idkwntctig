@@ -108,9 +108,9 @@ class Autobuyer{
                 game.autobuyerObject.matter[this.option.buyId].Buy(this.amount.mul(amount));
             }
             if(this.tier==="intervalBuy"){
-                game.autobuyerObject.matter.forEach(()=>{
-                    console.warn("add code!!!")
-                })
+                game.autobuyerObject.matter.forEach((value)=>{
+                    game.autobuyerObject.matter[value].BuyMaxInterval();
+                });
             }
         }
     }

@@ -95,6 +95,7 @@
 .tab-button{
     display: inline;
     cursor: pointer;
+    font-size: large;
 }
 .tab-button:hover{
     text-decoration: underline;

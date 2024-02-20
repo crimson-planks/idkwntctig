@@ -103,9 +103,9 @@ class Autobuyer{
                 game.autobuyerObject.matter[this.tier-1].Buy(this.amount.mul(amount));
             }
         }
-        if(this.type==="overflowMisc"){
+        if(this.type==="overflow"){
             if(this.tier==="metaBuy"){
-                game.autobuyerObject.matter[this.option.buyId].Buy(this.amount.mul(amount));
+                game.autobuyerObject.matter[this.option.buyId]?.Buy(this.amount.mul(amount));
             }
             if(this.tier==="intervalBuy"){
                 game.autobuyerObject.matter.forEach((value)=>{
@@ -202,6 +202,7 @@ const AutobuyerComponent = {
         this.object = this.initobject;
         bus.autobuyer[this.object.type] = bus.autobuyer[this.object.type] ?? {};
         bus.autobuyer[this.object.type][this.object.tier] = this;
+        //console.log(`Autobuyer type: ${this.type}, tier:  ${this.tier}`)
         this.Update();
     },
     template: `
@@ -229,7 +230,7 @@ const AutobuyerComponent = {
             this.visual.interval_buy.vue_class["can-buy-button"] = this.object.CanBuyInterval(1);
             this.visual.interval_buy.vue_class["cannot-buy-button"] = !this.object.CanBuyInterval(1);
             
-            this.visual.cost=FormatValue(this.object.cost.cost)+" MT";
+            this.visual.cost=FormatValue(this.object.cost.cost)+" "+currencies[this.object.cost.currencyType].abbreviation;
             this.visual.interval=FormatValue(this.object.interval);
             this.visual.amount=FormatValue(this.object.amountByType["normal"], {smallDec: 0});
             let showExtraAmount = true;
@@ -237,7 +238,7 @@ const AutobuyerComponent = {
             else if(this.object.amountByType["startAutoclicker"].eq(0)) showExtraAmount = false;
             this.visual.showExtraAmount=showExtraAmount;
             this.visual.extraAmount=FormatValue(this.object.amountByType["startAutoclicker"] ?? 0, {smallDec: 0});
-            this.visual.intervalCost=FormatValue(this.object.intervalCost.cost)+" MT";
+            this.visual.intervalCost=FormatValue(this.object.intervalCost.cost)+" "+currencies[this.object.intervalCost.currencyType].abbreviation;
             //console.log(this.object.active);
             this.visual.active=String(this.object.active);
             this.visual.name= (this.object.tier===0) ? "Autoclicker" : "Autobuyer "+String(this.object.tier);
@@ -261,8 +262,8 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 0,
-            initialInterval: 1000,
             currencyType: "matter",
+            initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "matter",
                 cost: new Decimal(10),
@@ -278,8 +279,8 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 1,
-            initialInterval: 2000,
             currencyType: "matter",
+            initialInterval: 2000,
             cost: new LinearCost({
                 currencyType: "matter",
                 cost: new Decimal(500),
@@ -295,8 +296,8 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 2,
-            initialInterval: 4000,
             currencyType: "matter",
+            initialInterval: 4000,
             cost: new LinearCost({
                 currencyType: "matter",
                 cost: new Decimal("1e7"),
@@ -309,5 +310,44 @@ var autobuyerObject={
             }),
             active: true
         })
-    ]
+    ],
+    overflow: {
+        metaBuy: new Autobuyer({
+            type: "overflow",
+            tier: "metaBuy",
+            currencyType: "overflow",
+            initialInterval: 1000,
+            cost: new LinearCost({
+                currencyType: "overflow",
+                cost: new Decimal("1000"),
+                costIncrease: new Decimal("1000")
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "overflow",
+                cost: new Decimal("10000"),
+                costIncrease: new Decimal("10")
+            }),
+            option: {
+                buyId: 0
+            },
+            active: true
+        }),
+        intervalBuy: new Autobuyer({
+            type: "overflow",
+            tier: "intervalBuy",
+            currencyType: "overflow",
+            initialInterval: 1000,
+            cost: new LinearCost({
+                currencyType: "overflow",
+                cost: new Decimal("1000"),
+                costIncrease: new Decimal("1000")
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "overflow",
+                cost: new Decimal("10000"),
+                costIncrease: new Decimal("10")
+            }),
+            active: true
+        })
+    }
 };

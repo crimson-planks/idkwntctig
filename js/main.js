@@ -108,12 +108,12 @@ var app = Vue.createApp({
                     }
                 },
                 upgradeOrder: {
-                    overflow: ["matterPerClick","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
+                    overflow: ["startMatter","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
                 },
                 upgrade: {
                     overflow: {
-                        matterPerClick:{
-                            descriptionText: "Increase matter per click",
+                        startMatter:{
+                            descriptionText: "Increase the initial matter",
                             formulaText: "(amount)"
                         },
                         startAutoclicker:{
@@ -204,8 +204,8 @@ var app = Vue.createApp({
         },
         MainLoop(){
             Object.keys(game.autobuyerObject).forEach(key => {
-                game.autobuyerObject[key].forEach(autobuyer =>{
-                    autobuyer.AutoBuyLoop();
+                Object.keys(game.autobuyerObject[key]).forEach(index =>{
+                    game.autobuyerObject[key][index].AutoBuyLoop();
                 });
             });
             game.lastUpdated=Date.now();
@@ -298,6 +298,10 @@ var triggerObject = {
         Object.keys(upgradeObject.overflow).forEach(key => {
             game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
         });
+        game.autobuyerObject.overflow={}
+        Object.keys(autobuyerObject.overflow).forEach(key => {
+            game.autobuyerObject.overflow[key] = autobuyerObject.overflow[key].clone();
+        });
         appThis.Update();
     }
 }
@@ -344,11 +348,11 @@ function TriggerLoop(){
 }
 function UpdateUpgrade(){
     Object.keys(game?.upgrade?.overflow ?? {}).forEach(key => {
-        game.upgrade.overflow[key].UpdateValue();
+        game.upgrade.overflow[key]?.UpdateValue();
     });
 }
 function UpdateDependentVariables(){
-    game.clickGain = new Decimal(1).add(game?.upgrade?.overflow?.matterPerClick?.value);
+    game.clickGain = new Decimal(1);
     variables.matterPerSecond = new Decimal();
     if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecond = game.autobuyerObject.matter[0].getPerSecond() ?? new Decimal(0);
     let tmp=new Decimal()
@@ -383,7 +387,8 @@ function InputLoop(){
 }
 function GameLoop(){
     Object.keys(game.autobuyerObject).forEach(key => {
-        game.autobuyerObject[key].forEach(autobuyer => {
+        Object.keys(game.autobuyerObject[key]).forEach(index => {
+            let autobuyer = game.autobuyerObject[key][index];
             autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
             autobuyer.Loop();
         })
@@ -397,7 +402,7 @@ function GameLoop(){
     variables.overflowTime = game.lastUpdated - game.lastOverflowTime;
     appThis.UpdateStatistics();
     appThis.UpdateUpgrade();
-    if(game.upgrade.overflow.startIntervalReducer.amount.gte(0)) appThis.Update();
+    if(game?.upgrade?.overflow?.startIntervalReducer?.amount?.gte(0)) appThis.Update();
 }
 mountApp();
 init();
@@ -406,9 +411,9 @@ const saveIntervalId = setInterval(save, 10000);
 function keydownEvent(ev){
     appThis.visual.showFormula=ev.shiftKey;
     if(ev.code==="KeyM"&&variables.canPress.m){
-        Object.keys(game.autobuyerObject).forEach((value)=>{
-            game.autobuyerObject[value].forEach((value2)=>{
-                value2?.BuyMaxInterval();
+        Object.keys(game.autobuyerObject).forEach((key)=>{
+            Object.keys(game.autobuyerObject[key]).forEach(index=>{
+                game.autobuyerObject[key][index]?.BuyMaxInterval();
             })
         });
     }

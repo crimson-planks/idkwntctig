@@ -38,7 +38,7 @@
                 <div>
                     <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
                     <div id="autobuyer-list-div">
-                        <Autobuyer v-for="(autobuyer, index) in game.autobuyerObject.matter" :initobject="autobuyer" :type="'matter'" :tier="index"></Autobuyer>
+                        <Autobuyer v-for="index in Object.keys(game.autobuyerObject.matter ?? {})" :initobject="game.autobuyerObject.matter[index]" :type="'matter'" :tier="index"></Autobuyer>
                     </div>
                 </div>
                 <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}}</div></button>
@@ -47,6 +47,9 @@
                 <p>The simulation overflowed by the excess of matter</p>
                 <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
             </div>
+        </div>
+        <div v-show="visual.currentSubTab==='overflow'">
+            <Autobuyer v-for="key in Object.keys(game.autobuyerObject.overflow ?? {})" :initobject="game.autobuyerObject.overflow[key]" :type="'overflow'" :tier="key"></Autobuyer>
         </div>
         <div id="overflow-tab-div" v-show="visual.currentTab==='overflow'">
             Overflow Points: {{visual.overflowPoint}}

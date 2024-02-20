@@ -31,7 +31,7 @@ var game = {
     clickGain: new Decimal(1),
     deflation: new Decimal(),
     autobuyerObject: {
-        matter: []
+        matter: [],
     },
     upgrade: {},
     tab: {
@@ -50,11 +50,12 @@ var game = {
     },
     subTab: {
         autobuyer: {
-
+            matter: {unlocked: true},
         },
         overflow: {
         },
         option: {
+            saving: {unlocked: true}
         },
         statistics: {
         }

@@ -32,10 +32,6 @@ class Upgrade {
     UpdateValue() {
         if(this.type==="overflow"){
             switch(this.id){
-                case "matterPerClick":
-                    this.value = this.amount;
-                    this.computedValue = this.value;
-                    break;
                 case "startAutoclicker":
                     this.value = this.amount.mul(10);
                     this.computedValue = this.value;
@@ -113,18 +109,6 @@ const UpgradeComponent = {
 }
 var upgradeObject = {
     overflow:{
-        matterPerClick: new Upgrade({
-            type: "overflow",
-            id: "matterPerClick",
-            amount: new Decimal(),
-            cost: new ExponentialCost({
-                currencyType: "overflow",
-                cost: new Decimal(1),
-                costIncrease: new Decimal(2),
-                maxPossibleBuy: Decimal.dInf,
-            }),
-            value: new Decimal(),
-        }),
         startAutoclicker: new Upgrade({
             type: "overflow",
             id: "startAutoclicker",

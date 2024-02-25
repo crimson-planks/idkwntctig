@@ -266,12 +266,12 @@ var autobuyerObject={
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "matter",
-                cost: new Decimal(10),
+                baseCost: new Decimal(10),
                 costIncrease: new Decimal(5)
             }),
             intervalCost: new ExponentialCost({
                 currencyType: "matter",
-                cost: new Decimal(100),
+                baseCost: new Decimal(100),
                 costIncrease: new Decimal(10)
             }),
             active: true
@@ -283,12 +283,12 @@ var autobuyerObject={
             initialInterval: 2000,
             cost: new LinearCost({
                 currencyType: "matter",
-                cost: new Decimal(500),
+                baseCost: new Decimal(500),
                 costIncrease: new Decimal(100)
             }),
             intervalCost: new ExponentialCost({
                 currencyType: "matter",
-                cost: new Decimal(1000),
+                baseCost: new Decimal(1000),
                 costIncrease: new Decimal(100)
             }),
             active: true
@@ -300,12 +300,12 @@ var autobuyerObject={
             initialInterval: 4000,
             cost: new LinearCost({
                 currencyType: "matter",
-                cost: new Decimal("1e7"),
+                baseCost: new Decimal("1e7"),
                 costIncrease: new Decimal("1e6")
             }),
             intervalCost: new ExponentialCost({
                 currencyType: "matter",
-                cost: new Decimal("1e8"),
+                baseCost: new Decimal("1e8"),
                 costIncrease: new Decimal("1000")
             }),
             active: true
@@ -319,12 +319,12 @@ var autobuyerObject={
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "overflow",
-                cost: new Decimal("1000"),
+                baseCost: new Decimal("1000"),
                 costIncrease: new Decimal("1000")
             }),
             intervalCost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal("10000"),
+                baseCost: new Decimal("10000"),
                 costIncrease: new Decimal("10")
             }),
             option: {
@@ -339,12 +339,12 @@ var autobuyerObject={
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "overflow",
-                cost: new Decimal("1000"),
+                baseCost: new Decimal("1000"),
                 costIncrease: new Decimal("1000")
             }),
             intervalCost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal("10000"),
+                baseCost: new Decimal("10000"),
                 costIncrease: new Decimal("10")
             }),
             active: true

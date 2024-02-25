@@ -16,7 +16,7 @@ var variables={
 };
 const tabs = ["autobuyer","overflow","option","statistics"]
 const subTabs = {
-    "autobuyer": ["matter","overflow"],
+    "autobuyer": ["matter","deflation","overflow"],
     "overflow": ["upgrade","energy"],
     "option": ["saving", "visual"],
     "statistics": ["general"]
@@ -30,9 +30,11 @@ var game = {
     reducedCost: new Decimal(0),
     clickGain: new Decimal(1),
     deflation: new Decimal(),
+    deflationPower: new Decimal(),
     autobuyerObject: {
         matter: [],
     },
+    deflator: new Decimal(),
     upgrade: {},
     tab: {
         autobuyer: {

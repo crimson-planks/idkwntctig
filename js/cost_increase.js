@@ -57,7 +57,10 @@ var sumFunctions={
 class Cost{
     constructor(props){
         this.currencyType = props.currencyType;
-        this.cost = props.cost;
+        this.baseCost = props.baseCost;
+        if([undefined,null].includes(this.baseCost)) throw Error("baseCost is undefined or null");
+        this.initialCost = props.initialCost;
+        this.cost = props.cost ?? props.initialCost;
         this.costIncrease = props.costIncrease;
         this.boughtAmount = props.boughtAmount ?? new Decimal();
         this.maxPossibleBuy = props.maxPossibleBuy ?? Decimal.dInf;
@@ -74,12 +77,18 @@ class Cost{
     GetMaxBuy(){
         return Decimal.min(this.maxPossibleBuy,this.GetMaxBuy_internal());
     }
-    /** @abstract Get the increased cost after buying amount */
-    GetIncreasedCost_internal(amount){throw "NotImplemented"}
+    GetIncreasedCost_internal(amount){
+        return this.GetCostForBoughtAmount(this.boughtAmount.add(amount))
+    }
     GetIncreasedCost(amount){
         const willBuyAmount = this.boughtAmount.add(amount);
         if(willBuyAmount.gt(this.maxPossibleBuy)) return Decimal.dInf;
         return this.GetIncreasedCost_internal(amount);
+    }
+    /** @abstract Get the next cost when boughtAmount is amount */
+    GetCostForBoughtAmount(amount){throw "NotImplemented"}
+    UpdateCost(){
+        this.cost = this.GetCostForBoughtAmount(this.boughtAmount);
     }
     isBoughtMax(){
         return this.boughtAmount.gte(this.maxPossibleBuy);
@@ -124,6 +133,8 @@ class Cost{
     clone(){
         return new this.constructor({
             currencyType: this.currencyType,
+            baseCost: this.baseCost,
+            initialCost: this.initialCost,
             cost: this.cost,
             costIncrease: this.costIncrease,
             boughtAmount: this.boughtAmount,
@@ -135,12 +146,20 @@ class Cost{
             _type: "Cost",
             _type2: this.constructor.name,
             currencyType: this.currencyType,
+            baseCost: this.baseCost,
+            initialCost: this.initialCost,
             cost: this.cost,
             costIncrease: this.costIncrease,
             boughtAmount: this.boughtAmount ?? new Decimal(),
             maxPossibleBuy: this.maxPossibleBuy
         }
     }
+}
+/**
+ * Inspired by SuperSpruce's The Unscaled Incremental, f(n) = cost
+ */
+class ConstantCost extends Cost{
+    
 }
 /**
  * Cost that increases linearly: f(1) = cost, f(n) = f(n-1) + costIncrease
@@ -164,8 +183,8 @@ class LinearCost extends Cost{
         return b.neg().add(b.pow(2).sub(a.mul(c).mul(4)).sqrt()).div(this.costIncrease).floor();
     }
     /** @implements */
-    GetIncreasedCost_internal(amount){
-        return this.cost.add(this.costIncrease.mul(amount));
+    GetCostForBoughtAmount(amount){
+        return this.initialCost.add(this.costIncrease.mul(amount));
     }
 }
 /**
@@ -183,7 +202,7 @@ class ExponentialCost extends Cost{
         return sumFunctions.inverseSumOfExponential(this.cost,this.costIncrease,this.currency).floor();
     }
     /** @implements */
-    GetIncreasedCost(amount){
-        return this.cost.mul(this.costIncrease.pow(amount));
+    GetCostForBoughtAmount(amount){
+        return this.initialCost.mul(this.costIncrease.pow(amount));
     }
 }

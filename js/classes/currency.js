@@ -12,25 +12,38 @@ class Currency {
     spend(amount){
         this.set(this.get().minus(amount));
     }
+    produce(amount){
+        this.set(this.get().add(amount))
+    }
 }
 var currencies = {
     matter: new Currency({
         name: "matter",
         abbreviation: "MT",
-        get: function(){
+        get(){
             return game.matter;
         },
-        set: function(value){
+        set(value){
             game.matter=new Decimal(value);
         }
     }),
+    deflationPower: new Currency({
+        name: "deflation power",
+        abbreviation: "DPW",
+        get(){
+            return game.deflationPower
+        },
+        set(value){
+            game.deflationPower=new Decimal(value);
+        }
+    }),
     overflow: new Currency({
-        name: "overflow",
+        name: "overflow points",
         abbreviation: "OP",
-        get: function(){
+        get(){
             return game.overflowPoint;
         },
-        set: function(value){
+        set(value){
             game.overflowPoint=new Decimal(value);
         }
     })

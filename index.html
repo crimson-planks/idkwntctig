@@ -24,28 +24,39 @@
                 </template>
             </div>
         </header>
-        <p>Matter: {{visual.matter}}</p>
-        <p>Matter/second: {{visual.matterPerSecond}}</p>
-        <p>Lose matter/second: {{visual.loseMatterPerSecond}}</p>
-        <p>Net matter/second: {{visual.netMatterPerSecond}}</p>
+        <p>Matter: <span style="font-size: large">{{visual.matter}}</span></p>
+        <p>Matter/second: <span style="font-size: large;">{{visual.matterPerSecond}}</span></p>
+        <p>Lose matter/second: <span style="font-size: large;">{{visual.loseMatterPerSecond}}</span></p>
+        <p>Net matter/second: <span style="font-size: large;">{{visual.netMatterPerSecond}}</span></p>
         <div class="subtab-div" v-for="tabId in visual.tabOrder">
             <div v-show="visual.currentTab===tabId">
                 <button v-for="subTab in visual.subTabs[tabId]" v-on:click="ChangeSubTab(subTab)">{{visual.subtabName[tabId][subTab]}}</button>
             </div>
         </div>
-        <div id="autobuyer-tab-div" v-show="visual.currentSubTab==='matter'">
-            <div class="flex" id="pre-overflow-div" v-show="!visual.overflowForced">
-                <div>
-                    <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
-                    <div id="autobuyer-list-div">
-                        <Autobuyer v-for="index in Object.keys(game.autobuyerObject.matter ?? {})" :initobject="game.autobuyerObject.matter[index]" :type="'matter'" :tier="index"></Autobuyer>
+        <div v-show="visual.currentTab==='autobuyer'">
+            <div id="autobuyer-tab-div" v-show="visual.currentSubTab==='matter'">
+                <div class="flex" id="pre-overflow-div" v-show="!visual.overflowForced">
+                    <div>
+                        <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
+                        <div id="autobuyer-list-div">
+                            <Autobuyer v-for="index in Object.keys(game.autobuyerObject.matter ?? {})" :initobject="game.autobuyerObject.matter[index]" :type="'matter'" :tier="index"></Autobuyer>
+                        </div>
                     </div>
+                    <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>Reset, but reduce cost increase by 1, and get 1 deflator<div>Cost: {{visual.softReset0Cost}}</div></button>
                 </div>
-                <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()"><h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>Reset, but reduce cost increase by 1<div>Cost: {{visual.softReset0Cost}}</div></button>
+                <div id="overflow-forced-div" v-show="visual.overflowForced">
+                    <p>The simulation overflowed by the excess of matter</p>
+                    <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
+                </div>
             </div>
-            <div id="overflow-forced-div" v-show="visual.overflowForced">
-                <p>The simulation overflowed by the excess of matter</p>
-                <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
+            <div v-show="visual.currentSubTab==='deflation'">
+                <h1 style="color:red">(Not Implemented)</h1>
+                <p>Deflation Power: {{visual.deflationPower}}</p>
+                <p>Your deflation power is decreasing the cost of all matter autobuyers by<br>
+                    NaN
+                </p>
+                <button v-on:click="ClickGainDeflationPower()">Click to get deflation power</button>
+
             </div>
         </div>
         <div v-show="visual.currentSubTab==='overflow'">

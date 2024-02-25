@@ -109,13 +109,13 @@ const UpgradeComponent = {
 }
 var upgradeObject = {
     overflow:{
-        startAutoclicker: new Upgrade({
+        startMatter: new Upgrade({
             type: "overflow",
-            id: "startAutoclicker",
+            id: "startMatter",
             amount: new Decimal(),
             cost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal(2),
+                baseCost: new Decimal(2),
                 costIncrease: new Decimal(2),
                 maxPossibleBuy: Decimal.dInf,
             }),
@@ -127,7 +127,7 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new LinearCost({
                 currencyType: "overflow",
-                cost: new Decimal(2),
+                baseCost: new Decimal(2),
                 costIncrease: new Decimal(),
                 maxPossibleBuy: new Decimal(1),
             }),
@@ -139,7 +139,7 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new ExponentialCost({
                 currencyType: "overflow",
-                cost: new Decimal(13),
+                baseCost: new Decimal(13),
                 costIncrease: new Decimal(7),
                 maxPossibleBuy: new Decimal(16),
             }),

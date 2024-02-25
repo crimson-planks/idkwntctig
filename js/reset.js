@@ -20,6 +20,7 @@ function softResetForced(level){
         game.autobuyerObject.matter = [];
 
         game.matter = game.defaultMatter;
+        game.deflationPower = new Decimal();
         game.trigger.autobuyer.forEach((value,index)=>{
             game.trigger.autobuyer[index]=false;
         });
@@ -27,9 +28,10 @@ function softResetForced(level){
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10)
         game.reducedCost = game.reducedCost.add(1);
-        game.deflation = game.deflation.add(1)
+        game.deflation = game.deflation.add(1);
+        game.deflator = game.deflator.add(1);
         game.statistics.deflation = game.statistics.deflation.add(1);
-        if(game.reducedCost.eq(5)) game.softReset0Cost=new Decimal("1ee50");
+        if(game.reducedCost.eq(4)) game.softReset0Cost=new Decimal("ee50");
         game.lastDeflationTime = Date.now()
     }
     if(level>=1){
@@ -51,4 +53,8 @@ function softResetForced(level){
     GameLoop();
     appThis.Update();
     //console.log("softResetForced end")
+}
+
+function hardReset(){
+    window.alert("don't")
 }

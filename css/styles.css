@@ -3,6 +3,9 @@
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
 }
+h1{
+    font-size: 20px;
+}
 .unselectable{
     -webkit-user-select: none;
     -webkit-touch-callout: none;

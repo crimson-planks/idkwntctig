@@ -1,40 +1,10 @@
 function FormatValue(amount, property={}){
     amount=new Decimal(amount);
+    if(!amount.isFinite()){return "Infinite"}
     if(!game.isBreakOverflow && amount.abs().gte(game.overflowLimit)){
         return "Error: Overflow"
     }
     return FormatValue_internal(amount,property);
-}
-function GetCurrency(type){
-    switch(type){
-        case "matter":
-            return game.matter;
-        case "overflow":
-            return game.overflowPoint;
-        case "dev":
-            return dev.currency;
-        default:
-            console.warn(`No currency: ${type}`)
-    }
-}
-function setCurrency(type,amount){
-    amount = new Decimal(amount);
-    switch(type){
-        case "matter":
-            game.matter=amount;
-            break;
-        case "overflow":
-            game.overflowPoint=amount;
-            break;
-        case "dev":
-            dev.currency=amount;
-            break;
-        default:
-            console.warn(`No currency was spent: ${type}`)
-    }
-}
-function spendCurrency(type,amount){
-    setCurrency(type,GetCurrency(type).minus(amount));
 }
 function ClickAutobuyerBuyButton(autobuyer){
     return autobuyer.BuyOnce();
@@ -93,6 +63,7 @@ var app = Vue.createApp({
                 subtabName: {
                     autobuyer: {
                         matter: "Matter",
+                        deflation: "Deflation",
                         overflow: "Overflow",
                     },
                     overflow: {
@@ -194,7 +165,9 @@ var app = Vue.createApp({
             this.visual.overflowPoint = FormatValue(game?.overflowPoint,{smallDec: 0});
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
             this.visual.clickGain = FormatValue(game?.clickGain, {smallDec: 0});
-            this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});     
+            this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});
+
+            this.visual.deflationPower = FormatValue(game?.deflationPower);
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
             this.visual.overflow_button.vue_class["cannot-buy-button"] = !this.canSoftReset(1);
@@ -231,11 +204,15 @@ var app = Vue.createApp({
             if(autobuyer.BuyInterval(1)) this.Update();
         },
         ClickToggleButton(autobuyer){
-            autobuyer.Toggle()
-            this.Update()
+            autobuyer.Toggle();
+            this.Update();
         },
         ClickSoftReset0Button(){
             if(softReset(0)) this.Update();
+        },
+        ClickGainDeflationPower(){
+            game.deflationPower=game.deflationPower.add(1);
+            this.Update();
         },
         ClickSoftReset1Button(){
             softReset(1);
@@ -269,6 +246,7 @@ var triggerObject = {
         game.trigger.autobuyer[0] = true;
         game.autobuyerObject.matter[0] = autobuyerObject.matter[0].clone();
         game.autobuyerObject.matter[0].cost.costIncrease = game.autobuyerObject.matter[0].cost.costIncrease.minus(game.reducedCost);
+        console.log(game.autobuyerObject.matter)
         appThis.Update();
     },
     autobuyer1: function(){

@@ -7,6 +7,8 @@ var variables={
     matterPerSecond: new Decimal(),
     loseMatterPerSecond: new Decimal(),
     netMatterPerSecond: new Decimal(),
+    deflationPowerStrength: new Decimal(),
+    deflationPowerCap: new Decimal(),
     playTime: 0,
     deflationTime: 0,
     overflowTime: 0,
@@ -40,9 +42,6 @@ var game = {
         autobuyer: {
             unlocked: true
         },
-        overflow: {
-            unlocked: false
-        },
         option: {
             unlocked: true
         },
@@ -50,20 +49,11 @@ var game = {
             unlocked: true
         }
     },
-    subTab: {
-        autobuyer: {
-            matter: {unlocked: true},
-        },
-        overflow: {
-        },
-        option: {
-            saving: {unlocked: true}
-        },
-        statistics: {
-        }
-    },
+    /** 1: deflation, 2: overflow */
+    tabLevel: 0,
     trigger:{
         autobuyer: Array(3).fill(false),
+        deflation: false,
         overflowForced: false,
         overflowReset: false,
     },
@@ -86,7 +76,6 @@ var game = {
     lastSaved: Date.now(),
     lastUpdated: Date.now()
 };
-tabs.forEach((tab)=>{game.subTab[tab]=subTabs[tab]});
 game.notationOption = {
     general: {
         dec: 3,
@@ -133,5 +122,5 @@ game.notationOption = {
 };
 var defaultGame = jQuery.extend({},game)
 const notationArray = [
-    "scientific", "engineering", "logarithm", "engineering-alt", "letters","emoji", "inequality"
+    "scientific", "engineering", "logarithm", "engineering-alt", "letters","emoji", "seximal", "inequality", "standard"
 ]

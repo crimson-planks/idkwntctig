@@ -1,5 +1,5 @@
 function init(){
-    TriggerInit();
+    //TriggerInit();
     load();
     appThis.init();
     variablesInit();

@@ -8,6 +8,7 @@ const dev={
     checkIfMatterIsNegative(){
         if(game.matter.lt(0)) console.log("matter is negative!!!")
     },
+    intervalCheckIfMatterIsNegative: undefined,
     testDate: Date.now(),
     ErrorCheck(){
         try{
@@ -20,20 +21,25 @@ const dev={
     currency: new Decimal(OVERFLOW),
     lc: new LinearCost({
         currencyType: "dev",
-        baseCost: new Decimal(1),
-        costIncrease: new Decimal(1)
+        baseCost: D(1),
+        costIncrease: D(1)
     }),
     ec: new ExponentialCost({
         currencyType: "dev",
-        baseCost: new Decimal(1),
-        costIncrease: new Decimal(2)
+        baseCost: D(1),
+        costIncrease: D(2)
     }),
+    resetAutobuyers(){
+        game?.autobuyerObject?.deflation?.forEach((autobuyer,index)=>{
+            game.autobuyerObject.deflation[index]=autobuyerObject.deflation[index].clone();
+        });
+    },
     /**
      * @param {*} x x
      * @param {*} t the amount of terms
      */
-    sumOfTetrationForTesting(x, t){
-        
+    sumOfTetrationForTesting(x, base, t){
+        iterx=x;
     }
 }
 dev.intervalCheckIfMatterIsNegative=setInterval(this.checkIfMatterIsNegative, 50)

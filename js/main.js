@@ -1,4 +1,4 @@
-function FormatValue(amount, property={}){
+;function FormatValue(amount, property={}){
     amount=new Decimal(amount);
     if(!amount.isFinite()){return "Infinite"}
     if(!game.isBreakOverflow && amount.abs().gte(game.overflowLimit)){
@@ -13,8 +13,11 @@ function CanBuy(cost,money){
     return new Decimal(cost).lte(money);
 }
 function GainMoney(amount){
-    game.matter=game.matter.add(amount);
+    currencies.matter.produce(amount);
     game.statistics.matterProduced = (game?.statistics?.matterProduced ?? new Decimal(0)).add(amount);
+}
+function GainDeflationPower(amount){
+    currencies.deflationPower.set(game.deflationPower.add(amount).min(variables.deflationPowerCap));
 }
 function ClickGainMoney(amount){
     GainMoney(amount);
@@ -27,6 +30,7 @@ var app = Vue.createApp({
         appThis=this;
         return {
             game,
+            variables,
             input: {
                 notation: "scientific",
                 showNews: true
@@ -60,11 +64,38 @@ var app = Vue.createApp({
                     option: "Options",
                     statistics: "Statistics",
                 },
-                subtabName: {
+                subTabName: {
                     autobuyer: {
                         matter: "Matter",
                         deflation: "Deflation",
                         overflow: "Overflow",
+                    },
+                    overflow: {
+                        upgrade: "Upgrade",
+                        energy: "Energy"
+                    },
+                    option: {
+                        saving: "Saving",
+                        visual: "Visual"
+                    },
+                    statistics: {
+                        general: "General"
+                    }
+                },
+                subtabProperties: {
+                    autobuyer: {
+                        matter: {
+                            name: "Matter",
+                            visible: true,
+                        },
+                        deflation: {
+                            name: "Deflation",
+                            visible: false,
+                        },
+                        overflow: {
+                            name: "Overflow",
+                            visible: false,
+                        }
                     },
                     overflow: {
                         upgrade: "Upgrade",
@@ -78,6 +109,11 @@ var app = Vue.createApp({
                         general: "General",
                     }
                 },
+                deflationSubtext: "",
+                deflationSubtextList:[
+                    "Reset, but reduce cost increase by 1, and get 1 deflator",
+                    "Reset, but get 1 deflator"
+                ],
                 upgradeOrder: {
                     overflow: ["startMatter","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
                 },
@@ -165,9 +201,13 @@ var app = Vue.createApp({
             this.visual.overflowPoint = FormatValue(game?.overflowPoint,{smallDec: 0});
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
             this.visual.clickGain = FormatValue(game?.clickGain, {smallDec: 0});
+            this.visual.deflationSubtext = this.visual.deflationSubtextList[+game?.deflation.gte(4)];
             this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});
 
+            this.visual.deflator = FormatValue(game?.deflator);
             this.visual.deflationPower = FormatValue(game?.deflationPower);
+            this.visual.deflationPowerStrength = FormatValue(variables?.deflationPowerStrength);
+            this.visual.deflationPowerCap = FormatValue(variables?.deflationPowerCap);
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
             this.visual.overflow_button.vue_class["cannot-buy-button"] = !this.canSoftReset(1);
@@ -211,7 +251,8 @@ var app = Vue.createApp({
             if(softReset(0)) this.Update();
         },
         ClickGainDeflationPower(){
-            game.deflationPower=game.deflationPower.add(1);
+            GainDeflationPower(1);
+            GameLoop();
             this.Update();
         },
         ClickSoftReset1Button(){
@@ -244,21 +285,31 @@ var app = Vue.createApp({
 var triggerObject = {
     autobuyer0: function(){
         game.trigger.autobuyer[0] = true;
+        game.autobuyerObject.matter = [];
         game.autobuyerObject.matter[0] = autobuyerObject.matter[0].clone();
         game.autobuyerObject.matter[0].cost.costIncrease = game.autobuyerObject.matter[0].cost.costIncrease.minus(game.reducedCost);
-        console.log(game.autobuyerObject.matter)
+        GameLoop();
         appThis.Update();
     },
     autobuyer1: function(){
         game.trigger.autobuyer[1] = true;
         game.autobuyerObject.matter[1] = autobuyerObject.matter[1].clone();
         game.autobuyerObject.matter[1].cost.costIncrease = game.autobuyerObject.matter[1].cost.costIncrease.minus(game.reducedCost);
+        GameLoop();
         appThis.Update();
     },
     autobuyer2: function(){
         game.trigger.autobuyer[2] = true;
         game.autobuyerObject.matter[2] = autobuyerObject.matter[2].clone();
         game.autobuyerObject.matter[2].cost.costIncrease = game.autobuyerObject.matter[2].cost.costIncrease.minus(game.reducedCost);
+        GameLoop();
+        appThis.Update();
+    },
+    deflation: function(){
+        game.trigger.deflation = true;
+        game.autobuyerObject.deflation = [];
+        game.autobuyerObject.deflation[0] = autobuyerObject.deflation[0].clone();
+        GameLoop();
         appThis.Update();
     },
     overflowForced: function(){
@@ -267,19 +318,21 @@ var triggerObject = {
         game.autobuyerObject.matter.forEach((autobuyer,index)=>{
             autobuyer.active=false;
         });
+        GameLoop();
         appThis.Update();
     },
     overflowReset(){
-        console.log("overflowReset")
+        console.log("overflowReset");
         game.trigger.overflowReset = true;
         game.upgrade.overflow = {};
         Object.keys(upgradeObject.overflow).forEach(key => {
             game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
         });
-        game.autobuyerObject.overflow={}
+        game.autobuyerObject.overflow={};
         Object.keys(autobuyerObject.overflow).forEach(key => {
             game.autobuyerObject.overflow[key] = autobuyerObject.overflow[key].clone();
         });
+        GameLoop();
         appThis.Update();
     }
 }
@@ -294,6 +347,10 @@ function TriggerInit(){
 
     if(game.trigger.autobuyer[2]){
         triggerObject.autobuyer2();
+    }
+
+    if(game.trigger.deflation){
+        triggerObject.deflation();
     }
 
     if(game.trigger.overflowForced){
@@ -316,11 +373,13 @@ function TriggerLoop(){
     if(game.matter.gte("1e7") && !game.trigger.autobuyer[2]){
         triggerObject.autobuyer2();
     }
-
+    if(game?.statistics?.deflation?.gt(0) && !game.trigger.deflation){
+        triggerObject.deflation();
+    }
     if(game.matter.gte(game.overflowLimit) && !game.isBreakOverflow && !game.trigger.overflowForced){
         triggerObject.overflowForced();
     }
-    if(game?.statistics?.overflow?.gte(1) && !game.trigger.overflowReset){
+    if(game?.statistics?.overflow?.gt(0) && !game.trigger.overflowReset){
         triggerObject.overflowReset();
     }
 }
@@ -331,16 +390,19 @@ function UpdateUpgrade(){
 }
 function UpdateDependentVariables(){
     game.clickGain = new Decimal(1);
-    variables.matterPerSecond = new Decimal();
+    variables.matterPerSecond = Decimal.dZero;
     if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecond = game.autobuyerObject.matter[0].getPerSecond() ?? new Decimal(0);
-    let tmp=new Decimal()
+    let tmp=Decimal.dZero;
     game.autobuyerObject.matter.forEach((autobuyer) => {
         autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
     variables.loseMatterPerSecond=tmp;
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
+    variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
+    variables.deflationPowerStrength=game.deflationPower.div(4);
+    game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }
 function mountApp(){
@@ -364,6 +426,11 @@ function InputLoop(){
     }
 }
 function GameLoop(){
+    UpdateDependentVariables();
+    game.autobuyerObject.matter.forEach(autobuyer=>{
+        autobuyer.cost.initialCost=autobuyer.cost.baseCost.minus(variables.deflationPowerStrength);
+        autobuyer.cost.UpdateCost();
+    });
     Object.keys(game.autobuyerObject).forEach(key => {
         Object.keys(game.autobuyerObject[key]).forEach(index => {
             let autobuyer = game.autobuyerObject[key][index];

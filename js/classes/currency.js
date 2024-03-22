@@ -24,27 +24,37 @@ var currencies = {
             return game.matter;
         },
         set(value){
-            game.matter=new Decimal(value);
+            game.matter=D(value);
         }
     }),
     deflationPower: new Currency({
         name: "deflation power",
         abbreviation: "DPW",
         get(){
-            return game.deflationPower
+            return game.deflationPower;
         },
         set(value){
-            game.deflationPower=new Decimal(value);
+            game.deflationPower=D(value);
+        }
+    }),
+    deflator: new Currency({
+        name: "deflator",
+        abbreviation: "DF",
+        get(){
+            return game.deflator;
+        },
+        set(value){
+            game.deflator = D(value);
         }
     }),
     overflow: new Currency({
         name: "overflow points",
-        abbreviation: "OP",
+        abbreviation: "[redacted]",
         get(){
             return game.overflowPoint;
         },
         set(value){
-            game.overflowPoint=new Decimal(value);
+            game.overflowPoint=D(value);
         }
     })
 }

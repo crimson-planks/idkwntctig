@@ -25,26 +25,47 @@ const calLetterId = function(n,property){
     let power=n.abs().log(option.base).abs().div(3).floor().mul(3);
     return power.mul(power.sign).div(3).floor();
 }
-
+const standardPrefixes=[
+    {
+        small: ["k","M","B"],
+        primary: ["","U","D","T","Qa","Qi","Sx","Sp","O","N"],
+        secondary: ["","Dc","Vg","Tg","Qg","Qq","Sg","Spg","Og","Ng"],
+        tertiary: ["","Ce","Duc","Tc","Qc","Qic","Sc","Spe","Oge","Nge"]
+    },
+    {
+        small: ["","Mi","Mc","Na","Pc","Fm","At","Zp","Yc","Rt","Qc","Me","Due","Tr","Tt","Pt","Hx","Hp","Ote","En"],
+        primary:["","Me","Due","Tr","Tt","Pt","Hx","Hp","Ote","En"],
+        secondary: ["","","Ic","Trc","Ttc","Ptc","Hxc","Hpc","Otc","Enc"],
+        tertiary: ["","Hc","Dh","Trh","Tth","Ph","Hxh","Hph","Oth","Enh"]
+    }
+]
+const getStandardPart=function(n,tier,isUseSmall=true,isUseUnit=true){
+    let prefixes = standardPrefixes[tier];
+    if(!(0<=n&&n<=999)) throw RangeError("must be 0<=n<=999");
+    if(isUseSmall&&n<prefixes.small.length) return prefixes.small[n];
+    if(!isUseUnit &&n ===0) return "";
+    return prefixes.primary[n%10]+prefixes.secondary[Math.floor(n/10)%10]+prefixes.tertiary[Math.floor(n/100)%10];
+}
 const getStandardUnit=function(n,isPart=false,isNoThousand=false){
-    const smallArr=["k","M","B","T","Qa","Qt","Sx","Sp","Oc","No"];
+    const smallArr=["k","M","B","T","Qa","Qi","Sx","Sp","Oc","No"];
     if(isNoThousand){
         smallArr[0]='';
     }
     const standardArr=[
-        ["","U","D","T","Qa","Qt","Sx","Sp","O","N"],
-        ["","Dc","Vg","Tg","Qg","Qq","Sg","St","Og","Ng"],
-        ["","Ce","Du","Tc","Qd","Qn","Sc","Sn","Ot","Nt"]
+        ["","U","D","T","Qa","Qi","Sx","Sp","O","N"],
+        ["","Dc","Vg","Tg","Qg","Qq","Sg","Spg","Og","Ng"],
+        ["","Ce","Duc","Tc","Qc","Qic","Sc","Spe","Oge","Nge"]
     ]
     if(!(0<=n&&n<=999)) throw RangeError("must be 0<=n<=999");
     if(!isPart&&n<10) return smallArr[n];
     return standardArr[0][n%10]+standardArr[1][Math.floor(n/10)%10]+standardArr[2][Math.floor(n/100)%10];
 }
 const getStandardClass2=function(n){
-    const smallArr=["","Mi","Mc","Na","Pc","Fm","At","Zp","Yc","Xn","Vc"]
+    //changed due to changes to SI prefixes in 2022
+    const smallArr=["","Mi","Mc","Na","Pc","Fm","At","Zp","Yc","Rt","Qc"];
     const standardArr=[
         ["","Me","Due","Tr","Tt","Pt","Hx","Hp","Ote","En"],
-        ["","","Ic","Trc","Ttc","Ptc","Hxc","Hpc","Otc","Enc"],
+        ["","Dk","Ic","Trc","Ttc","Ptc","Hxc","Hpc","Otc","Enc"],
         ["","Hc","Dh","Trh","Tth","Ph","Hxh","Hph","Oth","Enh"]
     ]
     if(!(0<=n&&n<=999)) throw RangeError("must be 0<=n<=999");
@@ -55,10 +76,15 @@ const getStandardClass2=function(n){
     }
     return oneStr+standardArr[1][Math.floor(n/10)%10]+standardArr[2][Math.floor(n/100)%10];
 }
+const getStandardClass3=function(n){
+    const smallArr=[];
+    const standardArr=[];
+}
 const FormatStandard=function(n,property){
     let option=GetOption(property);
     n=new Decimal(n).floor();
     if(n.lte(999)) return getStandardUnit(n);
+    //current limit
     if(n.gte("1e2999")) return "Format Error";
     let rsltStr="";
     let maxShow;
@@ -306,7 +332,7 @@ function NumberToBaseArr(n,base=10,digits=20,minDigit,chrArr){
     let maxRemainder=Math.pow(base,digits);
     let whole=Math.floor(n);
     let remainder=Math.floor((n-whole)*Math.pow(base,digits+1));
-    let tmpArr=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] //len:20
+    let tmpArr=Array(20).fill(0)
     remainder=Math.round(remainder/base);
     if(remainder>=maxRemainder){
         whole+=remainder/maxRemainder;
@@ -469,7 +495,7 @@ function FormatValue_internal(amount, property={}){
             if(option.notation==="scientific"){
                 power=power.floor();
                 if(power.lt(0)){
-                    power=power.add(-1);
+                    //power=power.add(-1);
                 }
                 
                 let mantissa=amount.div(Decimal.pow(option.base,power));

@@ -13,7 +13,6 @@ class Autobuyer{
         this.initialInterval = new Decimal(props.initialInterval);
         this.interval = new Decimal(props.interval ?? props.initialInterval);
         this.intervalByType = props.intervalByType ?? {};
-        this.currencyType = props.currencyType;
         this.cost = props.cost;
         this.amount = new Decimal(props.amount);
         this.amountByType = props.amountByType ?? {};
@@ -103,13 +102,19 @@ class Autobuyer{
                 game.autobuyerObject.matter[this.tier-1].Buy(this.amount.mul(amount));
             }
         }
+        if(this.type==="deflation"){
+            if(this.tier===0){
+                GainDeflationPower(this.amount.mul(amount));
+                UpdateDependentVariables();
+            }
+        }
         if(this.type==="overflow"){
             if(this.tier==="metaBuy"){
                 game.autobuyerObject.matter[this.option.buyId]?.Buy(this.amount.mul(amount));
             }
             if(this.tier==="intervalBuy"){
-                game.autobuyerObject.matter.forEach((value)=>{
-                    game.autobuyerObject.matter[value].BuyMaxInterval();
+                game.autobuyerObject.matter.forEach((autobuyer)=>{
+                    autobuyer.BuyMaxInterval();
                 });
             }
         }
@@ -134,7 +139,6 @@ class Autobuyer{
             initialInterval: this.initialInterval,
             interval: this.interval,
             intervalByType: jQuery.extend({},this.intervalByType),
-            currencyType: this.currencyType,
             cost: this.cost.clone(),
             amount: this.amount,
             amountByType: jQuery.extend({},this.amountByType),
@@ -151,7 +155,6 @@ class Autobuyer{
             initialInterval: this.initialInterval,
             interval: new Decimal(this.interval),
             intervalByType: this.intervalByType,
-            currencyType: this.currencyType,
             cost: this.cost,
             amount: new Decimal(this.amount),
             amountByType: this.amountByType,
@@ -262,7 +265,6 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 0,
-            currencyType: "matter",
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "matter",
@@ -279,7 +281,6 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 1,
-            currencyType: "matter",
             initialInterval: 2000,
             cost: new LinearCost({
                 currencyType: "matter",
@@ -296,7 +297,6 @@ var autobuyerObject={
         new Autobuyer({
             type: "matter",
             tier: 2,
-            currencyType: "matter",
             initialInterval: 4000,
             cost: new LinearCost({
                 currencyType: "matter",
@@ -311,11 +311,27 @@ var autobuyerObject={
             active: true
         })
     ],
+    deflation: [
+        new Autobuyer({
+            type: "deflation",
+            tier: 0,
+            initialInterval: 500,
+            cost: new ConstantCost({
+                currencyType: "deflator",
+                baseCost: new Decimal(1),
+                costIncrease: new Decimal(0),
+            }),
+            intervalCost: new ExponentialCost({
+                currencyType: "deflator",
+                baseCost: new Decimal(1),
+                costIncrease: new Decimal(2)
+            })
+        })
+    ],
     overflow: {
         metaBuy: new Autobuyer({
             type: "overflow",
             tier: "metaBuy",
-            currencyType: "overflow",
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "overflow",
@@ -335,7 +351,6 @@ var autobuyerObject={
         intervalBuy: new Autobuyer({
             type: "overflow",
             tier: "intervalBuy",
-            currencyType: "overflow",
             initialInterval: 1000,
             cost: new LinearCost({
                 currencyType: "overflow",

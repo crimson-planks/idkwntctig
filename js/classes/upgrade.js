@@ -32,6 +32,11 @@ class Upgrade {
     UpdateValue() {
         if(this.type==="overflow"){
             switch(this.id){
+                case "startMatter":
+                    this.value = this.amount;
+                    if(this.value.eq(0)) this.computedValue=Decimal.dZero;
+                    else this.computedValue = D(50).mul(Decimal.dTwo.pow(this.value));
+                    break;
                 case "startAutoclicker":
                     this.value = this.amount.mul(10);
                     this.computedValue = this.value;
@@ -46,7 +51,7 @@ class Upgrade {
                     break;
                 case "startIntervalReducer":
                     this.value = this.amount.div(8);
-                    if(this.value.eq(0)) this.computedValue=new Decimal(1)
+                    if(this.value.eq(0)) this.computedValue=new Decimal(1);
                     else this.computedValue = Decimal.pow(2,Decimal.div(new Decimal(1).add(this.value),Decimal.max(Decimal.recip(4),Decimal.div(variables.overflowTime,1000).sub(1).div(64).div(this.value).add(Decimal.div(1,4)))));
                     break;
             }
@@ -117,7 +122,7 @@ var upgradeObject = {
                 currencyType: "overflow",
                 baseCost: new Decimal(2),
                 costIncrease: new Decimal(2),
-                maxPossibleBuy: Decimal.dInf,
+                maxPossibleBuy: Decimal.dTen,
             }),
             value: new Decimal(),
         }),

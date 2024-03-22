@@ -1,4 +1,4 @@
-
+;
 /** 
  * object containing various summation functions
 */
@@ -59,10 +59,10 @@ class Cost{
         this.currencyType = props.currencyType;
         this.baseCost = props.baseCost;
         if([undefined,null].includes(this.baseCost)) throw Error("baseCost is undefined or null");
-        this.initialCost = props.initialCost;
+        this.initialCost = props.initialCost ?? props.baseCost;
         this.cost = props.cost ?? props.initialCost;
         this.costIncrease = props.costIncrease;
-        this.boughtAmount = props.boughtAmount ?? new Decimal();
+        this.boughtAmount = props.boughtAmount ?? Decimal.dZero;
         this.maxPossibleBuy = props.maxPossibleBuy ?? Decimal.dInf;
     }
     /** @abstract Get the cost of buying*/
@@ -159,7 +159,18 @@ class Cost{
  * Inspired by SuperSpruce's The Unscaled Incremental, f(n) = cost
  */
 class ConstantCost extends Cost{
-    
+    /** @implements */
+    GetBuyCost_internal(amount){
+        return this.cost.mul(amount);
+    }
+    /** @implements */
+    GetMaxBuy_internal(){
+        return this.currency.div(this.cost).floor();
+    }
+    /** @implements */
+    GetCostForBoughtAmount(){
+        return this.cost;
+    }
 }
 /**
  * Cost that increases linearly: f(1) = cost, f(n) = f(n-1) + costIncrease
@@ -173,7 +184,7 @@ class LinearCost extends Cost{
     }
     /** @implements */
     GetMaxBuy_internal(){
-        //quadratic formula breaks when costIncrease==0 (aka not quadratic)
+        //quadratic formula breaks when costIncrease==0
         if(this.costIncrease.eq(0)&&this.cost.gt(0)) return this.currency.div(this.cost).floor();
         if(this.costIncrease.lte(0)&&this.cost.lte(0)) return Decimal.dInf;
         //quadratic formula (see https://en.wikipedia.org/wiki/Quadratic_formula)

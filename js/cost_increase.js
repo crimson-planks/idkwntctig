@@ -60,7 +60,7 @@ class Cost{
         this.baseCost = props.baseCost;
         if([undefined,null].includes(this.baseCost)) throw Error("baseCost is undefined or null");
         this.initialCost = props.initialCost ?? props.baseCost;
-        this.cost = props.cost ?? props.initialCost;
+        this.cost = props.cost ?? this.initialCost;
         this.costIncrease = props.costIncrease;
         this.boughtAmount = props.boughtAmount ?? Decimal.dZero;
         this.maxPossibleBuy = props.maxPossibleBuy ?? Decimal.dInf;

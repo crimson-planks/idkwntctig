@@ -27,8 +27,8 @@ function softResetForced(level){
     }
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10);
-        if(game.deflation.lte(4)) game.reducedCost = game.reducedCost.add(1);
         game.deflation = game.deflation.add(1);
+        if(game.deflation.lte(4)) game.reducedCost = game.reducedCost.add(1);
         game.deflator = game.deflator.add(1);
         game.statistics.deflation = game.statistics.deflation.add(1);
 

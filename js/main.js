@@ -17,7 +17,8 @@ function GainMoney(amount){
     game.statistics.matterProduced = (game?.statistics?.matterProduced ?? new Decimal(0)).add(amount);
 }
 function GainDeflationPower(amount){
-    currencies.deflationPower.set(game.deflationPower.add(amount).min(variables.deflationPowerCap));
+    currencies.deflationPower.set(game.deflationPower.add(amount));
+   //currencies.deflationPower.set(game.deflationPower.add(amount).min(variables.deflationPowerCap));
 }
 function ClickGainMoney(amount){
     GainMoney(amount);
@@ -204,7 +205,7 @@ var app = Vue.createApp({
             this.visual.deflator = FormatValue(game?.deflator);
             this.visual.deflationPower = FormatValue(game?.deflationPower);
             this.visual.deflationPowerStrength = FormatValue(variables?.deflationPowerStrength);
-            this.visual.deflationPowerCap = FormatValue(variables?.deflationPowerCap);
+            //this.visual.deflationPowerCap = FormatValue(variables?.deflationPowerCap);
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
             this.visual.overflow_button.vue_class["cannot-buy-button"] = !this.canSoftReset(1);

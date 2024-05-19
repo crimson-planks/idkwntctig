@@ -109,13 +109,9 @@ var app = Vue.createApp({
                         general: "General",
                     }
                 },
-                deflationSubtext: "",
-                deflationSubtextList:[
-                    "Reset, but reduce cost increase by 1, and get 1 deflator",
-                    "Reset, but get 1 deflator"
-                ],
+                altDeflationSubtext: false,
                 upgradeOrder: {
-                    overflow: ["startMatter","startAutoclicker","overflowTimeMultiplier","startIntervalReducer"]
+                    overflow: ["startMatter","overflowTimeMultiplier","startIntervalReducer"]
                 },
                 upgrade: {
                     overflow: {
@@ -201,7 +197,8 @@ var app = Vue.createApp({
             this.visual.overflowPoint = FormatValue(game?.overflowPoint,{smallDec: 0});
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
             this.visual.clickGain = FormatValue(game?.clickGain, {smallDec: 0});
-            this.visual.deflationSubtext = this.visual.deflationSubtextList[+game?.deflation.gte(4)];
+            this.visual.altDeflationSubtext = game?.deflation.gte(4);
+            this.visual.deflatorGain = FormatValue(variables.deflatorGain, {smallDec: 0})
             this.visual.deflation = FormatValue(game?.deflation, {smallDec: 0});
 
             this.visual.deflator = FormatValue(game?.deflator);
@@ -428,13 +425,13 @@ function InputLoop(){
 function GameLoop(){
     UpdateDependentVariables();
     game.autobuyerObject.matter.forEach(autobuyer=>{
+        autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
         autobuyer.cost.initialCost=autobuyer.cost.baseCost.minus(variables.deflationPowerStrength);
         autobuyer.cost.UpdateCost();
     });
     Object.keys(game.autobuyerObject).forEach(key => {
         Object.keys(game.autobuyerObject[key]).forEach(index => {
             let autobuyer = game.autobuyerObject[key][index];
-            autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
             autobuyer.Loop();
         })
     });
@@ -470,6 +467,7 @@ function keyUpEvent(ev){
     appThis.visual.showFormula=ev.shiftKey;
 }
 function variablesInit(){
+    variables.deflatorGain = game.deflation.add(1);
     variables.canPress.m=!game.trigger.overflowForced;
 }
 addEventListener("keydown",keydownEvent)

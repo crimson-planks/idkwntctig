@@ -24,12 +24,13 @@ function softResetForced(level){
         game.trigger.autobuyer.forEach((value,index)=>{
             game.trigger.autobuyer[index]=false;
         });
+        variables.deflatorGain = game.deflation.add(1);
     }
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10);
         game.deflation = game.deflation.add(1);
         if(game.deflation.lte(4)) game.reducedCost = game.reducedCost.add(1);
-        game.deflator = game.deflator.add(1);
+        game.deflator = game.deflator.add(variables.deflatorGain);
         game.statistics.deflation = game.statistics.deflation.add(1);
 
         game.lastDeflationTime = Date.now();
@@ -60,5 +61,5 @@ function softResetForced(level){
 }
 
 function hardReset(){
-    window.alert("don't")
+    window.alert("don't you dare")
 }

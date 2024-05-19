@@ -1,1 +1,2 @@
 https://docs.google.com/document/d/1uxAFl0J-3VlqDo0E5lXi0eSJ8moe6pu0rhAUIQi1sxA/edit
+Rewrite format.js because right now it is a mess to follow

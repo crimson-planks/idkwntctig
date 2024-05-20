@@ -37,9 +37,10 @@ class Upgrade {
                     if(this.value.eq(0)) this.computedValue=Decimal.dZero;
                     else this.computedValue = D(50).mul(Decimal.dTwo.pow(this.value));
                     break;
-                case "startAutoclicker":
-                    this.value = this.amount.mul(10);
+                case "halveIntervalDivider":
+                    this.value = this.amount.mul(0.1);
                     this.computedValue = this.value;
+                    UpdateDependentVariables();
                     break;
                 case "overflowTimeMultiplier":
                     this.value = this.amount;
@@ -137,6 +138,17 @@ var upgradeObject = {
                 maxPossibleBuy: new Decimal(1),
             }),
             value: new Decimal(),
+        }),
+        halveIntervalDivider: new Upgrade({
+            type: "overflow",
+            id: "halveIntervalDivider",
+            amount: new Decimal(),
+            cost: new ExponentialCost({
+                currencyType: "overflow",
+                baseCost: new Decimal(10),
+                costIncrease: new Decimal(10),
+                maxPossibleBuy: new Decimal(20),
+            })
         }),
         startIntervalReducer: new Upgrade({
             type: "overflow",

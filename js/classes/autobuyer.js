@@ -79,11 +79,15 @@ class Autobuyer{
     getIntervalCost(amount){
         return this.intervalCost.GetBuyCost(amount);
     }
+    UpdateNormalInterval(){
+        this.intervalByType.normal = Decimal.pow(variables.intervalDivide,this.intervalCost.boughtAmount).recip();
+    }
     BuyInterval(amount){
         const buyAmount = this.intervalCost.GetPossibleBuyAmount(amount);
         if(!this.intervalCost.Buy(amount)) return false;
-        this.intervalByType.normal = (this.intervalByType.normal ?? new Decimal(1))
-                                      .div(Decimal.pow(2,buyAmount));
+        //this.intervalByType.normal = (this.intervalByType.normal ?? new Decimal(1))
+        //                              .div(Decimal.pow(2,buyAmount));
+        this.UpdateNormalInterval();
         this.UpdateInterval();
         return true;
     }

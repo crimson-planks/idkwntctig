@@ -112,7 +112,7 @@ var app = Vue.createApp({
                 },
                 altDeflationSubtext: false,
                 upgradeOrder: {
-                    overflow: ["startMatter","overflowTimeMultiplier","startIntervalReducer"]
+                    overflow: ["startMatter","overflowTimeMultiplier","halveIntervalDivider","startIntervalReducer"]
                 },
                 upgrade: {
                     overflow: {
@@ -120,9 +120,9 @@ var app = Vue.createApp({
                             descriptionText: "Increase the initial matter",
                             formulaText: "(amount)"
                         },
-                        startAutoclicker:{
-                            descriptionText: "Get extra autoclickers",
-                            formulaText: "(amount) * 10"
+                        halveIntervalDivider:{
+                            descriptionText: "Upgrading the interval divides it more",
+                            formulaText: "(amount) * 0.1"
                         },
                         overflowTimeMultiplier:{
                             descriptionText: "Get more overflow points depending of the fastest overflow time (see statistics)",
@@ -176,7 +176,7 @@ var app = Vue.createApp({
                 this.visual.upgrade.overflow[key] = this.visual.upgrade.overflow[key] ?? {};
                 this.visual.upgrade.overflow[key].amount = FormatValue(game.upgrade.overflow[key].amount);
                 this.visual.upgrade.overflow[key].isBoughtMax = game.upgrade.overflow[key].cost.isBoughtMax();
-                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost.cost)+ "OP";
+                this.visual.upgrade.overflow[key].cost = FormatValue(game.upgrade.overflow[key].cost.cost)+ " OP";
                 this.visual.upgrade.overflow[key].value = FormatValue(game.upgrade.overflow[key].value);
                 this.visual.upgrade.overflow[key].computedValue = FormatValue(game.upgrade.overflow[key].computedValue);
             });
@@ -391,7 +391,9 @@ function UpdateDependentVariables(){
     variables.matterPerSecond = Decimal.dZero;
     if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecond = game.autobuyerObject.matter[0].getPerSecond() ?? new Decimal(0);
     let tmp=Decimal.dZero;
+    variables.intervalDivide = new Decimal(2).add(game.upgrade?.overflow?.halveIntervalDivider?.computedValue)
     game.autobuyerObject.matter.forEach((autobuyer) => {
+        autobuyer.UpdateNormalInterval();
         autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
@@ -399,7 +401,7 @@ function UpdateDependentVariables(){
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
     variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
-    variables.deflationPowerStrength=game.deflationPower.div(4);
+    variables.deflationPowerStrength=game.deflationPower.pow(0.5);
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }

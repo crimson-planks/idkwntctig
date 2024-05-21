@@ -2,11 +2,16 @@
     from {right: -120%}
     to {right: 120%}
 }
-#news-text {
+#news-text-legacy {
     position: relative;
     width: max-content;
     animation-name: moving-text;
-    animation-duration: 25s;
+    animation-duration: 10s;
     animation-timing-function: linear;
-    animation-iteration-count: infinite;
+    animation-iteration-count: 1;
+    animation-fill-mode: backwards;
+}
+.news-text {
+    transform: translateX(100px);
+    transition: transform 5s linear 0s;
 }

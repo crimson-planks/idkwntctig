@@ -401,13 +401,14 @@ function UpdateDependentVariables(){
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
     variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
-    variables.deflationPowerStrength=game.deflationPower.pow(0.5);
+    variables.deflationPowerStrength=game.deflationPower.pow(0.5).mul(16);
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }
 function mountApp(){
     try{
         app.component('Autobuyer', AutobuyerComponent);
+        app.component('News', NewsComponent);
         app.mount("#app");
     }
     catch(error){

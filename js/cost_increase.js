@@ -122,10 +122,12 @@ class Cost{
         return Decimal.min(amount,this.GetMaxBuy());
     }
     Buy(amount){
+        if(Decimal.eq(amount,1)){
+            return this.BuyStrict(amount);
+        }
         const buyAmount = this.GetPossibleBuyAmount(amount);
         if(this.GetMaxBuy().lt(1)) return false;
-        this.BuyStrict(buyAmount);
-        return true;
+        return this.BuyStrict(buyAmount);
     }
     BuyMax(){
         return this.Buy(this.GetMaxBuy());

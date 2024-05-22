@@ -20,104 +20,108 @@
             </div>
             <div id="tab-div">
                 <template v-for="tabId in visual.tabOrder">
-                    <h2 class="tab-button" v-if="game?.tab[tabId]?.unlocked" v-on:click="ChangeTab(tabId)">{{visual.tabName[tabId]}}</h2>
+                    <h2 class="tab-button" v-if="visual.tabProperties[tabId].visible" v-on:click="ChangeTab(tabId)">{{visual.tabProperties[tabId].name}}</h2>
                 </template>
             </div>
         </header>
-        <p>Matter: <span style="font-size: large">{{visual.matter}}</span></p>
-        <p>Matter/second: <span style="font-size: large;">{{visual.matterPerSecond}}</span></p>
-        <p>Lose matter/second: <span style="font-size: large;">{{visual.loseMatterPerSecond}}</span></p>
-        <p>Net matter/second: <span style="font-size: large;">{{visual.netMatterPerSecond}}</span></p>
-        <div class="subtab-div" v-for="tabId in visual.tabOrder">
-            <div v-show="visual.currentTab===tabId">
-                <button v-for="subTab in visual.subTabs[tabId]" v-on:click="ChangeSubTab(subTab)">{{visual.subTabName[tabId][subTab]}}</button>
+        <div id="main">
+            <p>Matter: <span style="font-size: large">{{visual.matter}}</span></p>
+            <p>Matter/second: <span style="font-size: large;">{{visual.matterPerSecond}}</span></p>
+            <p>Lose matter/second: <span style="font-size: large;">{{visual.loseMatterPerSecond}}</span></p>
+            <p>Net matter/second: <span style="font-size: large;">{{visual.netMatterPerSecond}}</span></p>
+            <div class="subtab-div" v-for="tabId in visual.tabOrder">
+                <div v-show="visual.currentTab===tabId">
+                    <template v-for="subTab in visual.subTabs[tabId]">
+                        <button v-if="visual?.subtabProperties[tabId][subTab]?.visible" v-on:click="ChangeSubTab(subTab)">{{visual.subtabProperties[tabId][subTab].name}}</button>
+                    </template>
+                </div>
             </div>
-        </div>
-        <div v-show="visual.currentTab==='autobuyer'">
-            <div id="autobuyer-tab-div" v-show="visual.currentSubTab==='matter'">
-                <div class="flex" id="pre-overflow-div" v-show="!visual.overflowForced">
-                    <div>
-                        <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
-                        <div id="autobuyer-list-div">
-                            <Autobuyer v-for="index in Object.keys(game.autobuyerObject.matter ?? {})" :initobject="game.autobuyerObject.matter[index]" :type="'matter'" :tier="index"></Autobuyer>
+            <div v-show="visual.currentTab==='autobuyer'">
+                <div id="autobuyer-tab-div" v-show="visual.currentSubTab==='matter'">
+                    <div class="flex" id="pre-overflow-div" v-show="!visual.overflowForced">
+                        <div>
+                            <button v-on:click="ClickGainMoney(1)">Click to get {{visual.clickGain}} matter</button>
+                            <div id="autobuyer-list-div">
+                                <Autobuyer v-for="index in Object.keys(game.autobuyerObject.matter ?? {})" :initobject="game.autobuyerObject.matter[index]" :type="'matter'" :tier="index"></Autobuyer>
+                            </div>
                         </div>
+                        <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()">
+                            <h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>
+                            <span id="deflation-subtext" v-if="!visual.altDeflationSubtext">Reset, but reduce cost increase by 1, and get {{visual.deflatorGain}} deflator(s)</span>
+                            <span id="deflation-subtext2" v-if="visual.altDeflationSubtext">Reset, but get {{visual.deflatorGain}} deflator(s)</span>
+                            <div>Cost: {{visual.softReset0Cost}}</div></button>
                     </div>
-                    <button id="soft-reset-0-button" :class="{ 'can-buy-button': canSoftReset(0), 'cannot-buy-button': !canSoftReset(0)}" v-on:click="ClickSoftReset0Button()">
-                        <h4 style="margin:0%;">Deflation ({{visual.deflation}})</h4>
-                        <span id="deflation-subtext" v-if="!visual.altDeflationSubtext">Reset, but reduce cost increase by 1, and get {{visual.deflatorGain}} deflator(s)</span>
-                        <span id="deflation-subtext2" v-if="visual.altDeflationSubtext">Reset, but get {{visual.deflatorGain}} deflator(s)</span>
-                        <div>Cost: {{visual.softReset0Cost}}</div></button>
+                    <div id="overflow-forced-div" v-show="visual.overflowForced">
+                        <p>The simulation overflowed by the excess of matter</p>
+                        <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
+                    </div>
                 </div>
-                <div id="overflow-forced-div" v-show="visual.overflowForced">
-                    <p>The simulation overflowed by the excess of matter</p>
-                    <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
-                </div>
-            </div>
-            <div v-show="visual.currentSubTab==='deflation'">
-                <h1 style="color:red">(Not Implemented)</h1>
-                <p>Deflation Power: {{visual.deflationPower}}</p>
-                <p>Your deflation power is decreasing the cost of all matter autobuyers by<br>
-                    {{visual.deflationPowerStrength}},
-                </p>
+                <div v-show="visual.currentSubTab==='deflation'">
+                    <h1 style="color:red">(Not Implemented)</h1>
+                    <p>Deflation Power: {{visual.deflationPower}}</p>
+                    <p>Your deflation power is decreasing the cost of all matter autobuyers by<br>
+                        {{visual.deflationPowerStrength}},
+                    </p>
 
-                <p>Deflator: {{visual.deflator}}</p>
-                <button v-on:click="ClickGainDeflationPower()">Click to get deflation power</button>
+                    <p>Deflator: {{visual.deflator}}</p>
+                    <button v-on:click="ClickGainDeflationPower()">Click to get deflation power</button>
 
-                <Autobuyer v-for="index in Object.keys(game.autobuyerObject.deflation ?? {})" :initobject="game.autobuyerObject.deflation[index]" :type="'deflation'" :tier="index"></Autobuyer>
+                    <Autobuyer v-for="index in Object.keys(game.autobuyerObject.deflation ?? {})" :initobject="game.autobuyerObject.deflation[index]" :type="'deflation'" :tier="index"></Autobuyer>
 
-            </div>
-        </div>
-        <div v-show="visual.currentSubTab==='overflow'">
-            <Autobuyer v-for="key in Object.keys(game.autobuyerObject.overflow ?? {})" :initobject="game.autobuyerObject.overflow[key]" :type="'overflow'" :tier="key"></Autobuyer>
-        </div>
-        <div id="overflow-tab-div" v-show="visual.currentTab==='overflow'">
-            Overflow Points: {{visual.overflowPoint}}
-            <button id="overflow-button" :class="visual.overflow_button.vue_class" v-on:click="ClickSoftReset1Button()">Overflow</button>
-            <div v-show="visual.currentSubTab==='upgrade'">
-                <div id="overflow-upgrade-table-div">
-                    <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
-                        {{visual.upgrade.overflow[id].descriptionText}}<br>
-                        Current: {{visual.upgrade.overflow[id].computedValue}}<br>
-                        <span v-show="!visual.upgrade.overflow[id]?.isBoughtMax">Cost: {{visual.upgrade.overflow[id].cost}}<br></span>
-                        <span v-show="visual.upgrade.overflow[id]?.isBoughtMax">Maxed!<br></span>
-                        <span v-show="visual?.showFormula">Formula: {{visual.upgrade.overflow[id].formulaText}}</span>
-                    </button>
                 </div>
             </div>
-            <div v-show="visual.currentSubTab==='energy'">
-                Energy
-                <button></button>
+            <div v-show="visual.currentSubTab==='overflow'">
+                <Autobuyer v-for="key in Object.keys(game.autobuyerObject.overflow ?? {})" :initobject="game.autobuyerObject.overflow[key]" :type="'overflow'" :tier="key"></Autobuyer>
             </div>
+            <div id="overflow-tab-div" v-show="visual.currentTab==='overflow'">
+                Overflow Points: {{visual.overflowPoint}}
+                <button id="overflow-button" :class="visual.overflow_button.vue_class" v-on:click="ClickSoftReset1Button()">Overflow</button>
+                <div v-show="visual.currentSubTab==='upgrade'">
+                    <div id="overflow-upgrade-table-div">
+                        <button v-for="id in visual?.upgradeOrder?.overflow" v-on:click="ClickBuyUpgradeButton('overflow',id)">
+                            {{visual.upgrade.overflow[id].descriptionText}}<br>
+                            Current: {{visual.upgrade.overflow[id].computedValue}}<br>
+                            <span v-show="!visual.upgrade.overflow[id]?.isBoughtMax">Cost: {{visual.upgrade.overflow[id].cost}}<br></span>
+                            <span v-show="visual.upgrade.overflow[id]?.isBoughtMax">Maxed!<br></span>
+                            <span v-show="visual?.showFormula">Formula: {{visual.upgrade.overflow[id].formulaText}}</span>
+                        </button>
+                    </div>
+                </div>
+                <div v-show="visual.currentSubTab==='energy'">
+                    Energy
+                    <button></button>
+                </div>
+            </div>
+            <div v-show="visual.currentTab==='option'">
+                Options
+                <div v-show="visual.currentSubTab==='saving'">
+                    <button onclick="save()">Save</button>
+                    <button onclick="load()">Load</button>
+                </div>
+                <div v-show="visual.currentSubTab==='visual'">
+                    <label for="notation-select">Notation: </label>
+                    <select name="notation" id="notation-select" v-model="input.notation">
+                        <option v-for="notation in visual.notationArray" :value="notation">{{notation}}</option>
+                    </select>
+                    <input type="checkbox" id="news-show" v-model="input.showNews"/>
+                    <label for="news-show">Show News</label>
+                </div>
+            </div>
+            <div id="statistics-tab-div" v-show="visual.currentTab==='statistics'">
+                <h4>Statistics</h4>
+                <div v-show="visual.currentSubTab==='general'">
+                    Play time: {{visual.statistics?.playTime}}<br>
+                    Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
+                    Deflation: {{visual.statistics?.deflation}} times<br>
+                    <span v-if="visual.statistics?.showOverflow">
+                        Current simulation time: {{visual.statistics?.overflowTime}}<br>
+                        Overflow: {{visual.statistics?.overflow}} times<br>
+                        Fastest overflow time: {{visual.statistics?.fastestOverflowTime}}<br>
+                    </span>
+                </div>
+            </div>
+            <p id="version-p">Version: {{visual.version}}</p>
         </div>
-        <div v-show="visual.currentTab==='option'">
-            Options
-            <div v-show="visual.currentSubTab==='saving'">
-                <button onclick="save()">Save</button>
-                <button onclick="load()">Load</button>
-            </div>
-            <div v-show="visual.currentSubTab==='visual'">
-                <label for="notation-select">Notation: </label>
-                <select name="notation" id="notation-select" v-model="input.notation">
-                    <option v-for="notation in visual.notationArray" :value="notation">{{notation}}</option>
-                </select>
-                <input type="checkbox" id="news-show" v-model="input.showNews"/>
-                <label for="news-show">Show News</label>
-            </div>
-        </div>
-        <div id="statistics-tab-div" v-show="visual.currentTab==='statistics'">
-            <h4>Statistics</h4>
-            <div v-show="visual.currentSubTab==='general'">
-                Play time: {{visual.statistics?.playTime}}<br>
-                Total Matter Produced: {{visual.statistics?.matterProduced}}<br>
-                Deflation: {{visual.statistics?.deflation}} times<br>
-                <span v-if="visual.statistics?.showOverflow">
-                    Current simulation time: {{visual.statistics?.overflowTime}}<br>
-                    Overflow: {{visual.statistics?.overflow}} times<br>
-                    Fastest overflow time: {{visual.statistics?.fastestOverflowTime}}<br>
-                </span>
-            </div>
-        </div>
-        <p id="version-p">Version: {{visual.version}}</p>
     </div>
 </body>
 <script src="js/libraries/vue.global.js"></script>

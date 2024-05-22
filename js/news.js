@@ -1,36 +1,56 @@
 const newsArray = [
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    "Sample news 1",
-    "Sample news 2",
-    "Sample news 1e308",
-    "Sample news 10^^100",
-    ()=>{return Math.round(Math.random()*1000).toString()}
-]
-
+    "This is a news ticker, or is it?",
+    ()=>{return Math.round(Math.random()*1000000).toString()}
+];
+()=>{return Math.round(Math.random()*1000000).toString()}
 const NewsComponent = {
     props: [],
     data(){
         return {
-            newsText: "Default News 2"
+            newsText: "a b c",
+            moving: true,
+            travelDistance: 0,
+            travelTime: 0,
+            styleObject: {
+                'animation-duration': "5s"
+            },
+            classObject: {
+                'news-text': true,
+                'news-text-moving': true
+            }
         }
+    },
+    computed: {
     },
     created(){
         this.newsArray=newsArray;
+        this.RestartNews();
     },
     template: `
-    <div class="news-text" v-on:animationend="RestartNews()">{{newsText}}</div>
+    <div :class="classObject" :style="styleObject" v-on:animationend="RestartNews()">{{newsText}}</div>
     `
     ,
     methods: {
         RandomizeText(){
             let newsText;
-            let news = newsArray[Math.round(Math.random()*newsArray.length)];
+            let news = newsArray[Math.round(Math.random()*(newsArray.length-1))];
             if(news instanceof Function) newsText=news();
-            if(news instanceof String) newsText=news;
+            else newsText=news;
             this.newsText=newsText;
         },
-        RestartNews(){
+        async RestartNews(){
             this.RandomizeText();
+            this.classObject['news-text-moving']=false;
+            //wait for class to be deleted
+            await Vue.nextTick();
+            var el = this.$el;
+            el.style.animation = "none";
+            this.travelDistance = window.innerWidth + el.offsetWidth;
+            this.travelTime = this.travelDistance / 150; //pixels per second
+            this.styleObject['animation-duration']= this.travelTime + "s";
+            el.style.animation = "";
+            this.classObject['news-text-moving']=true;
+            console.log("RestartNews called" + this.offsetwidth);
         }
     }
 }

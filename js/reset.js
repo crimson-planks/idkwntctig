@@ -29,6 +29,7 @@ function softResetForced(level){
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10);
         game.deflation = game.deflation.add(1);
+        if(game.tabLevel<1) game.tabLevel = 1;
         if(game.deflation.lte(4)) game.reducedCost = game.reducedCost.add(1);
         game.deflator = game.deflator.add(variables.deflatorGain);
         game.statistics.deflation = game.statistics.deflation.add(1);
@@ -47,8 +48,7 @@ function softResetForced(level){
     }
     if(level===1){
         game.statistics.overflow = game.statistics.overflow.add(1);
-        game.tab.overflow={};
-        game.tab.overflow.unlocked = true;
+        if(game.tabLevel<2) game.tabLevel = 2;
         if(game.lastUpdated - game.lastOverflowTime < game.statistics.fastestOverflowTime) {
             game.statistics.fastestOverflowTime = game.lastUpdated - game.lastOverflowTime;
         }

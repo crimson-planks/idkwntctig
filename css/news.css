@@ -1,17 +1,17 @@
-@keyframes moving-text {
-    from {right: -120%}
-    to {right: 120%}
-}
-#news-text-legacy {
-    position: relative;
-    width: max-content;
-    animation-name: moving-text;
-    animation-duration: 10s;
-    animation-timing-function: linear;
-    animation-iteration-count: 1;
-    animation-fill-mode: backwards;
+@keyframes moving-text{
+    from{
+        transform: translate(100vw, 0);
+    }
+    to{
+        transform: translate(-100%, 0);
+    }
 }
 .news-text {
-    transform: translateX(100px);
-    transition: transform 5s linear 0s;
+    position: relative;
+    width: max-content;
+}
+.news-text-moving {
+    animation-name: moving-text;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
 }

@@ -3,8 +3,15 @@
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
 }
+body{
+    margin-left: 0px;
+    margin-right: 0px;
+}
 h1{
     font-size: 20px;
+}
+#main{
+    margin:10px;
 }
 .unselectable{
     -webkit-user-select: none;

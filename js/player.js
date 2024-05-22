@@ -2,6 +2,8 @@ const OVERFLOW = new Decimal(Math.pow(2,31));
 const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
 const VERSION = "0.0.3"
+
+const require=function(){}
 /** variables that aren't saved */
 var variables={
     matterPerSecond: new Decimal(),
@@ -49,6 +51,11 @@ var game = {
         statistics: {
             unlocked: true
         }
+    },
+    subTab: {
+        autobuyer: ["matter"],
+        option: ["saving", "visual"],
+        statistics: ["general"],
     },
     /** 1: deflation, 2: overflow */
     tabLevel: 0,

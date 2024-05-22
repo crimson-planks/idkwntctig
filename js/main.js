@@ -65,23 +65,23 @@ var app = Vue.createApp({
                     option: "Options",
                     statistics: "Statistics",
                 },
-                subTabName: {
+                tabProperties: {
                     autobuyer: {
-                        matter: "Matter",
-                        deflation: "Deflation",
-                        overflow: "Overflow",
+                        name: "Autobuyer",
+                        visible: true
                     },
                     overflow: {
-                        upgrade: "Upgrade",
-                        energy: "Energy"
+                        name: "Autobuyer",
+                        visible: false
                     },
                     option: {
-                        saving: "Saving",
-                        visual: "Visual"
+                        name: "Autobuyer",
+                        visible: true
                     },
                     statistics: {
-                        general: "General"
-                    }
+                        name: "Autobuyer",
+                        visible: true
+                    },
                 },
                 subtabProperties: {
                     autobuyer: {
@@ -99,15 +99,30 @@ var app = Vue.createApp({
                         }
                     },
                     overflow: {
-                        upgrade: "Upgrade",
-                        energy: "Energy",
+                        upgrade: {
+                            name: "Upgrade",
+                            visible: true,
+                        },
+                        energy: {
+                            name: "Energy",
+                            visible: true,
+                        },
                     },
                     option: {
-                        saving: "Saving",
-                        visual: "Visual",
+                        saving: {
+                            name: "Saving",
+                            visible: true,
+                        },
+                        visual: {
+                            name: "Visual",
+                            visible: true,
+                        },
                     },
                     statistics: {
-                        general: "General",
+                        general: {
+                            name: "General",
+                            visible: true,
+                        },
                     }
                 },
                 altDeflationSubtext: false,
@@ -181,12 +196,44 @@ var app = Vue.createApp({
                 this.visual.upgrade.overflow[key].computedValue = FormatValue(game.upgrade.overflow[key].computedValue);
             });
         },
+        UpdateTab(){
+            let tp = this.visual.tabProperties;
+            let stp = this.visual.subtabProperties;
+
+            //global
+            tp.option.visible=true;
+            tp.statistics.visible=true;
+
+            if(game.tabLevel===0){
+                tp.autobuyer.visible=true;
+                tp.overflow.visible=false;
+                stp.autobuyer.matter.visible=true;
+                stp.autobuyer.deflation.visible=false;
+                stp.autobuyer.overflow.visible=false;
+            }
+            if(game.tabLevel===1){
+                tp.autobuyer.visible=true;
+                tp.overflow.visible=false;
+                stp.autobuyer.matter.visible=true;
+                stp.autobuyer.deflation.visible=true;
+                stp.autobuyer.overflow.visible=false;
+            }
+            if(game.tabLevel===2){
+                tp.autobuyer.visible=true;
+                tp.overflow.visible=true;
+                stp.autobuyer.matter.visible=true;
+                stp.autobuyer.deflation.visible=true;
+                stp.autobuyer.overflow.visible=true;
+            }
+
+        },
         Update(){
             //console.log("update")
             UpdateDependentVariables();
             this.game = game;
             this.UpdateAutobuyers();
 
+            this.UpdateTab();
             this.visual.matterPerSecond=FormatValue(variables.matterPerSecond);
             this.visual.loseMatterPerSecond=FormatValue(variables.loseMatterPerSecond);
             this.visual.netMatterPerSecond=FormatValue(variables.netMatterPerSecond);
@@ -401,7 +448,7 @@ function UpdateDependentVariables(){
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
     variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
-    variables.deflationPowerStrength=game.deflationPower.pow(0.5).mul(16);
+    variables.deflationPowerStrength=game.deflationPower.pow(0.5).mul(2);
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
 }

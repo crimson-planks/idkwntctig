@@ -71,15 +71,15 @@ var app = Vue.createApp({
                         visible: true
                     },
                     overflow: {
-                        name: "Autobuyer",
+                        name: "Overflow",
                         visible: false
                     },
                     option: {
-                        name: "Autobuyer",
+                        name: "Option",
                         visible: true
                     },
                     statistics: {
-                        name: "Autobuyer",
+                        name: "Statistics",
                         visible: true
                     },
                 },
@@ -127,7 +127,7 @@ var app = Vue.createApp({
                 },
                 altDeflationSubtext: false,
                 upgradeOrder: {
-                    overflow: ["startMatter","overflowTimeMultiplier","halveIntervalDivider","startIntervalReducer"]
+                    overflow: ["startMatter","overflowTimeMultiplier","halveIntervalDivider","deflationPowerExponent","startIntervalReducer"]
                 },
                 upgrade: {
                     overflow: {
@@ -137,6 +137,10 @@ var app = Vue.createApp({
                         },
                         halveIntervalDivider:{
                             descriptionText: "Upgrading the interval divides it more",
+                            formulaText: "(amount) * 0.1"
+                        },
+                        deflationPowerExponent:{
+                            descriptionText: "Increase the exponent of the translated deflation power",
                             formulaText: "(amount) * 0.1"
                         },
                         overflowTimeMultiplier:{
@@ -251,7 +255,7 @@ var app = Vue.createApp({
 
             this.visual.deflator = FormatValue(game?.deflator);
             this.visual.deflationPower = FormatValue(game?.deflationPower);
-            this.visual.deflationPowerStrength = FormatValue(variables?.deflationPowerStrength);
+            this.visual.deflationPowerTranslation = FormatValue(variables?.deflationPowerTranslation);
             //this.visual.deflationPowerCap = FormatValue(variables?.deflationPowerCap);
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
@@ -448,9 +452,9 @@ function UpdateDependentVariables(){
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
     variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
-    variables.deflationPowerStrength=game.deflationPower.pow(0.5).mul(2);
+    variables.deflationPowerTranslation=game.deflationPower.pow(D(0.5).add(game?.upgrade?.overflow?.deflationPowerExponent?.computedValue)).mul(2);
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
-    if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? new Decimal(0);
+    if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? D(0);
 }
 function mountApp(){
     try{
@@ -477,7 +481,7 @@ function GameLoop(){
     UpdateDependentVariables();
     game.autobuyerObject.matter.forEach(autobuyer=>{
         autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
-        autobuyer.cost.initialCost=autobuyer.cost.baseCost.minus(variables.deflationPowerStrength);
+        autobuyer.cost.initialCost=autobuyer.cost.baseCost.minus(variables.deflationPowerTranslation);
         autobuyer.cost.UpdateCost();
     });
     Object.keys(game.autobuyerObject).forEach(key => {

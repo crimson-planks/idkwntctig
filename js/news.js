@@ -45,6 +45,7 @@ const NewsComponent = {
             await Vue.nextTick();
             var el = this.$el;
             el.style.animation = "none";
+            //triggers reflow
             this.travelDistance = window.innerWidth + el.offsetWidth;
             this.travelTime = this.travelDistance / 150; //pixels per second
             this.styleObject['animation-duration']= this.travelTime + "s";

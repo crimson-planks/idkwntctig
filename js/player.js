@@ -9,7 +9,7 @@ var variables={
     matterPerSecond: new Decimal(),
     loseMatterPerSecond: new Decimal(),
     netMatterPerSecond: new Decimal(),
-    deflationPowerStrength: new Decimal(),
+    deflationPowerTranslation: new Decimal(),
     deflationPowerCap: new Decimal(),
     intervalDivide: new Decimal(2),
     playTime: 0,

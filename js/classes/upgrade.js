@@ -26,8 +26,9 @@ class Upgrade {
     CanBuy(amount) {
         return this.cost.CanBuy(amount);
     }
-    UpdateAmount() {
-        throw "NotImplemented"
+    SyncAmount() {
+        this.cost.boughtAmount = this.amount;
+        this.cost.UpdateCost();
     }
     UpdateValue() {
         if(this.type==="overflow"){
@@ -49,6 +50,11 @@ class Upgrade {
                         break;
                     }
                     this.computedValue = this.value.mul(Decimal.div(1e7,Decimal.add(1e4,game.statistics.fastestOverflowTime))).ceil();
+                    break;
+                case "deflationPowerExponent":
+                    this.value = this.amount.mul(0.1);
+                    this.computedValue = this.value;
+                    UpdateDependentVariables();
                     break;
                 case "startIntervalReducer":
                     this.value = this.amount.div(8);
@@ -133,7 +139,7 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new LinearCost({
                 currencyType: "overflow",
-                baseCost: new Decimal(2),
+                baseCost: new Decimal(1),
                 costIncrease: new Decimal(),
                 maxPossibleBuy: new Decimal(1),
             }),
@@ -145,7 +151,7 @@ var upgradeObject = {
             amount: new Decimal(),
             cost: new ExponentialCost({
                 currencyType: "overflow",
-                baseCost: new Decimal(10),
+                baseCost: new Decimal(1),
                 costIncrease: new Decimal(10),
                 maxPossibleBuy: new Decimal(20),
             })
@@ -159,6 +165,18 @@ var upgradeObject = {
                 baseCost: new Decimal(13),
                 costIncrease: new Decimal(7),
                 maxPossibleBuy: new Decimal(16),
+            }),
+            value: new Decimal(),
+        }),
+        deflationPowerExponent: new Upgrade({
+            type: "overflow",
+            id: "deflationPowerExponent",
+            amount: new Decimal(),
+            cost: new ExponentialCost({
+                currencyType: "overflow",
+                baseCost: new Decimal(1),
+                costIncrease: new Decimal(5),
+                maxPossibleBuy: new Decimal(5),
             }),
             value: new Decimal(),
         })

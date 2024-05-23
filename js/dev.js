@@ -34,6 +34,19 @@ const dev={
             game.autobuyerObject.deflation[index]=autobuyerObject.deflation[index].clone();
         });
     },
+    cloneUpgradesWithoutResetting(){
+        Object.keys(upgradeObject.overflow).forEach(key => {
+            if(!(key in game.upgrade.overflow)) {
+                game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
+            }
+            else {
+                game.upgrade.overflow[key].cost.baseCost = upgradeObject.overflow[key].cost.baseCost;
+                game.upgrade.overflow[key].cost.initialCost = upgradeObject.overflow[key].cost.initialCost;
+                game.upgrade.overflow[key].cost.maxPossibleBuy = upgradeObject.overflow[key].cost.maxPossibleBuy;
+                game.upgrade.overflow[key].SyncAmount();
+            }
+        });
+    },
     /**
      * @param {*} x x
      * @param {*} t the amount of terms

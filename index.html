@@ -53,18 +53,18 @@
                     </div>
                     <div id="overflow-forced-div" v-show="visual.overflowForced">
                         <p>The simulation overflowed by the excess of matter</p>
-                        <button v-on:click="ClickSoftReset1Button()">Make a new simulation</button>
+                        <button v-on:click="ClickSoftResetForced1Button()">Make a new simulation</button>
                     </div>
                 </div>
                 <div v-show="visual.currentSubTab==='deflation'">
-                    <h1 style="color:red">(Not Implemented)</h1>
+                    <h1 style="color:red">You can only access this feature once you've deflated once!</h1>
                     <p>Deflation Power: {{visual.deflationPower}}</p>
                     <p>Your deflation power is decreasing the cost of all matter autobuyers by<br>
                         {{visual.deflationPowerTranslation}},
                     </p>
 
                     <p>Deflator: {{visual.deflator}}</p>
-                    <button v-on:click="ClickGainDeflationPower()">Click to get deflation power</button>
+                    <button v-show="visual.canProduceDeflationPower" v-on:click="ClickGainDeflationPower()">Click to get deflation power</button>
 
                     <Autobuyer v-for="index in Object.keys(game.autobuyerObject.deflation ?? {})" :initobject="game.autobuyerObject.deflation[index]" :type="'deflation'" :tier="index"></Autobuyer>
 
@@ -88,8 +88,12 @@
                     </div>
                 </div>
                 <div v-show="visual.currentSubTab==='energy'">
-                    Energy
-                    <button></button>
+                    Energy: {{visual.energy}}<br>
+                    <label for="energy-convert-input">Amount to convert: </label>
+                    <br>
+                    This translates into dividing the interval of matter autobuyers by {{visual.energyTranslation}}<br>
+                    <input id="energy-convert-input" type="text" v-model="input.energyConvertAmount" @change="ChangeEnergyConvertAmount()">
+                    <button @click="ClickConvertEnergyButton">Click to turn matter into energy ({{visual.energyConvertAmount}} -> {{visual.energyConvertToAmount}} J)</button>
                 </div>
             </div>
             <div v-show="visual.currentTab==='option'">

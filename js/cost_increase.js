@@ -103,6 +103,8 @@ class Cost{
         currencies[this.currencyType].spend(amount);
     }
     CanBuy(amount){
+        const willBuyAmount = this.boughtAmount.add(amount);
+        if(willBuyAmount.gt(this.maxPossibleBuy)) return false;
         return CanBuy(this.GetBuyCost(amount),this.currency);
     }
     IncreaseCost(amount){
@@ -211,7 +213,7 @@ class ExponentialCost extends Cost{
         return sumFunctions.sumOfExponential(this.cost,this.costIncrease,amount);
     }
     /** @implements */
-    GetMaxBuy(){
+    GetMaxBuy_internal(){
         return sumFunctions.inverseSumOfExponential(this.cost,this.costIncrease,this.currency).floor();
     }
     /** @implements */

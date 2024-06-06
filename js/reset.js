@@ -15,6 +15,7 @@ function softReset(level){
     return false;
 }
 function softResetForced(level){
+    if([undefined,null].includes(level)) throw TypeError("level is undefined or null");
     //console.log("softResetForced start");
     if(level>=0){
         game.autobuyerObject.matter = [];
@@ -24,14 +25,15 @@ function softResetForced(level){
         game.trigger.autobuyer.forEach((value,index)=>{
             game.trigger.autobuyer[index]=false;
         });
-        variables.deflatorGain = game.deflation.add(1);
+        //variables.deflatorGain = game.deflation.add(1);
     }
     if(level===0){
         game.softReset0Cost=game.softReset0Cost.mul(10);
-        game.deflation = game.deflation.add(1);
+        
         if(game.tabLevel<1) game.tabLevel = 1;
-        if(game.deflation.lte(4)) game.reducedCost = game.reducedCost.add(1);
+        if(game.deflation.lt(4)) game.reducedCost = game.reducedCost.add(1);
         game.deflator = game.deflator.add(variables.deflatorGain);
+        game.deflation = game.deflation.add(1);
         game.statistics.deflation = game.statistics.deflation.add(1);
 
         game.lastDeflationTime = Date.now();

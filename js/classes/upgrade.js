@@ -49,6 +49,10 @@ class Upgrade {
                         this.computedValue = new Decimal(1e7);
                         break;
                     }
+                    if(game.statistics.fastestOverflowTime===Infinity){
+                        this.computedValue = D(1);
+                        break;
+                    }
                     this.computedValue = this.value.mul(Decimal.div(1e7,Decimal.add(1e4,game.statistics.fastestOverflowTime))).ceil();
                     break;
                 case "deflationPowerExponent":
@@ -59,7 +63,7 @@ class Upgrade {
                 case "startIntervalReducer":
                     this.value = this.amount.div(8);
                     if(this.value.eq(0)) this.computedValue=new Decimal(1);
-                    else this.computedValue = Decimal.pow(2,Decimal.div(new Decimal(1).add(this.value),Decimal.max(Decimal.recip(4),Decimal.div(variables.overflowTime,1000).sub(1).div(64).div(this.value).add(Decimal.div(1,4)))));
+                    else this.computedValue = Decimal.pow(2,Decimal.div(new Decimal(1).add(this.value),Decimal.max(Decimal.recip(4),Decimal.div(variables.overflowTime,1000).sub(1).div(1024).div(this.value).add(Decimal.div(1,4)))));
                     break;
             }
         }

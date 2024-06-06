@@ -34,6 +34,11 @@ const dev={
             game.autobuyerObject.deflation[index]=autobuyerObject.deflation[index].clone();
         });
     },
+    resetUpgrades(){
+        Object.keys(upgradeObject.overflow).forEach(key => {
+            game.upgrade.overflow[key] = upgradeObject.overflow[key].clone();
+        });
+    },
     cloneUpgradesWithoutResetting(){
         Object.keys(upgradeObject.overflow).forEach(key => {
             if(!(key in game.upgrade.overflow)) {

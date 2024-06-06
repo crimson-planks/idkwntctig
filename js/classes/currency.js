@@ -56,5 +56,15 @@ var currencies = {
         set(value){
             game.overflowPoint=D(value);
         }
+    }),
+    energy: new Currency({
+        name: "joules",
+        "abbreviation": "J",
+        get(){
+            return game.energy;
+        },
+        set(value){
+            game.energy=D(value);
+        }
     })
 }

@@ -24,6 +24,14 @@ function ClickGainMoney(amount){
     GainMoney(amount);
 }
 
+function UpdateEnergyConvertAmount(){
+    variables.energyConvertToAmount = variables.energyConvertAmount.mul(1.602176634e-19);
+}
+function ConvertEnergy(amount){
+    let effectiveAmount = Decimal.min(amount,currencies.matter.get())
+    currencies.matter.spend(effectiveAmount);
+    currencies.energy.produce(effectiveAmount.mul(1.602176634e-19));
+}
 var appThis={};
 var bus={app: appThis, autobuyer: {}};
 var app = Vue.createApp({
@@ -34,6 +42,7 @@ var app = Vue.createApp({
             variables,
             input: {
                 notation: "scientific",
+                energyConvertAmount: "0",
                 showNews: true
             },
             visual: {
@@ -43,6 +52,7 @@ var app = Vue.createApp({
                 currentTab: "autobuyer",
                 currentSubTab: "matter",
                 statistics:{},
+                canProduceDeflationPower: false,
                 notationArray,
                 overflow_button: {
                     vue_class: {
@@ -59,12 +69,6 @@ var app = Vue.createApp({
                     option: "saving",
                     statistics: "general"
                 }, 
-                tabName: {
-                    autobuyer: "Autobuyers",
-                    overflow: "Overflow",
-                    option: "Options",
-                    statistics: "Statistics",
-                },
                 tabProperties: {
                     autobuyer: {
                         name: "Autobuyer",
@@ -107,6 +111,10 @@ var app = Vue.createApp({
                             name: "Energy",
                             visible: true,
                         },
+                        extend: {
+                            name: "Extend Overflow",
+                            visible: true,
+                        }
                     },
                     option: {
                         saving: {
@@ -153,6 +161,7 @@ var app = Vue.createApp({
                         }
                     }
                 },
+                energy: "",
             }
         };
     },
@@ -162,6 +171,7 @@ var app = Vue.createApp({
             this.visual.statistics={}
             this.visual.version = VERSION;
             this.visual.currentTab = "autobuyer"
+            this.ChangeEnergyConvertAmount();
             this.Update();
         },
         ClickGainMoney(amount){
@@ -248,6 +258,7 @@ var app = Vue.createApp({
             this.visual.overflowForced = game?.trigger?.overflowForced;
             this.visual.overflowPoint = FormatValue(game?.overflowPoint,{smallDec: 0});
             this.visual.isOverflowed = game?.statistics?.overflow?.gt(0);
+            this.visual.canProduceDeflationPower = game.deflation.gte(1);
             this.visual.clickGain = FormatValue(game?.clickGain, {smallDec: 0});
             this.visual.altDeflationSubtext = game?.deflation.gte(4);
             this.visual.deflatorGain = FormatValue(variables.deflatorGain, {smallDec: 0})
@@ -256,6 +267,9 @@ var app = Vue.createApp({
             this.visual.deflator = FormatValue(game?.deflator);
             this.visual.deflationPower = FormatValue(game?.deflationPower);
             this.visual.deflationPowerTranslation = FormatValue(variables?.deflationPowerTranslation);
+
+            this.visual.energy = FormatValue(game?.energy)+ " " + currencies.energy.abbreviation;
+            this.visual.energyTranslation = FormatValue(variables.energyTranslation);
             //this.visual.deflationPowerCap = FormatValue(variables?.deflationPowerCap);
             
             this.visual.overflow_button.vue_class["can-buy-button"] = this.canSoftReset(1);
@@ -300,8 +314,13 @@ var app = Vue.createApp({
             if(softReset(0)) this.Update();
         },
         ClickGainDeflationPower(){
+            if(game.deflation.lt(1)) return;
             GainDeflationPower(1);
             GameLoop();
+            this.Update();
+        },
+        ClickSoftResetForced1Button(){
+            softResetForced(1);
             this.Update();
         },
         ClickSoftReset1Button(){
@@ -314,6 +333,18 @@ var app = Vue.createApp({
             }
             this.Update();
 
+        },
+        ChangeEnergyConvertAmount(){
+            variables.energyConvertAmount = D(this.input.energyConvertAmount);
+            UpdateEnergyConvertAmount();
+            this.visual.energyConvertAmount = FormatValue(variables.energyConvertAmount);
+            this.visual.energyConvertToAmount = FormatValue(variables.energyConvertToAmount);
+            this.Update();
+
+        },
+        ClickConvertEnergyButton(){
+            ConvertEnergy(variables.energyConvertAmount);
+            this.Update();
         },
         mounted(){
             this.init();
@@ -448,11 +479,17 @@ function UpdateDependentVariables(){
         autobuyer.UpdateAmount();
         if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
     });
+
+    variables.deflatorGain = game.deflation.add(1);
+
     variables.loseMatterPerSecond=tmp;
     variables.netMatterPerSecond=variables.matterPerSecond.sub(tmp);
     variables.deflationPowerCap = game?.autobuyerObject?.matter[0]?.amountByType?.normal?.mul(5)?.add(10).mul(4);
 
     variables.deflationPowerTranslation=game.deflationPower.pow(D(0.5).add(game?.upgrade?.overflow?.deflationPowerExponent?.computedValue)).mul(2);
+    
+    variables.energyTranslation = game.energy.max(1e-20).absLog10().add(20).div(4).pow(2).add(1);
+    
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? D(0);
 }
@@ -476,11 +513,14 @@ function InputLoop(){
         game.notation = appThis.input.notation;
         appThis.Update();
     }
+    
 }
 function GameLoop(){
     UpdateDependentVariables();
     game.autobuyerObject.matter.forEach(autobuyer=>{
-        autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
+        autobuyer.intervalByType.normal = Decimal.pow(variables.intervalDivide,autobuyer.intervalCost.boughtAmount).recip();
+        if(game.trigger.overflowReset) autobuyer.intervalByType.startIntervalReducer = game?.upgrade?.overflow?.startIntervalReducer?.computedValue?.recip() ?? new Decimal(1);
+        if(game.trigger.overflowReset) autobuyer.intervalByType.energy = variables.energyTranslation.recip();
         autobuyer.cost.initialCost=autobuyer.cost.baseCost.minus(variables.deflationPowerTranslation);
         autobuyer.cost.UpdateCost();
     });

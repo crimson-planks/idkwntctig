@@ -1,5 +1,8 @@
 const newsArray = [
     "This is a news ticker, or is it?",
+    "Do you want something worse than emoji notation? Try the inequality notation!",
+    "Man",
+    "This won't be released soon",
     ()=>{return Math.round(Math.random()*1000000).toString()}
 ];
 ()=>{return Math.round(Math.random()*1000000).toString()}
@@ -51,7 +54,6 @@ const NewsComponent = {
             this.styleObject['animation-duration']= this.travelTime + "s";
             el.style.animation = "";
             this.classObject['news-text-moving']=true;
-            console.log("RestartNews called" + this.offsetwidth);
         }
     }
 }

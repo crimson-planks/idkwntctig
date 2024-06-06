@@ -80,7 +80,8 @@ class Autobuyer{
         return this.intervalCost.GetBuyCost(amount);
     }
     UpdateNormalInterval(){
-        this.intervalByType.normal = Decimal.pow(variables.intervalDivide,this.intervalCost.boughtAmount).recip();
+        if(this.type==="matter") this.intervalByType.normal = Decimal.pow(variables.intervalDivide,this.intervalCost.boughtAmount).recip();
+        else this.intervalByType.normal = Decimal.pow(2,this.intervalCost.boughtAmount).recip();
     }
     BuyInterval(amount){
         const buyAmount = this.intervalCost.GetPossibleBuyAmount(amount);
@@ -89,6 +90,7 @@ class Autobuyer{
         //                              .div(Decimal.pow(2,buyAmount));
         this.UpdateNormalInterval();
         this.UpdateInterval();
+        UpdateDependentVariables();
         return true;
     }
     BuyMaxInterval(){

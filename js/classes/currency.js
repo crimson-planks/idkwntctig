@@ -17,6 +17,16 @@ class Currency {
     }
 }
 var currencies = {
+    dev: new Currency({
+        name: "dev currency",
+        abbreviation: "DEV",
+        get(){
+            return dev.currency;
+        },
+        set(value){
+            dev.currency=D(value);
+        }
+    }),
     matter: new Currency({
         name: "matter",
         abbreviation: "MT",
@@ -49,7 +59,7 @@ var currencies = {
     }),
     overflow: new Currency({
         name: "overflow points",
-        abbreviation: "[redacted]",
+        abbreviation: "OP",
         get(){
             return game.overflowPoint;
         },

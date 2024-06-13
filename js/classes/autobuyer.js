@@ -68,13 +68,22 @@ class Autobuyer{
     BuyOnce(type = "normal"){
         return this.Buy(1,type);
     }
+    BuyForced(amount, type="normal"){
+        this.cost.BuyForced(amount);
+        this.amountByType[type] = (this.amountByType[type] ?? D(0))
+                                   .add(amount);
+        this.UpdateAmount();
+    }
+    BuyStrict(amount, type="normal"){
+        if(!this.CanBuy(amount)) return false;
+        this.BuyForced(amount, type);
+        return true;
+    }
     Buy(amount, type = "normal"){
         const buyAmount = this.cost.GetPossibleBuyAmount(amount);
-        if(!this.cost.Buy(amount)) return false;
-        this.amountByType[type] = (this.amountByType[type] ?? new Decimal(0))
-                                   .add(buyAmount);
-        this.UpdateAmount();
-        return true;
+        //console.log(`buyAmount: ${buyAmount}`)
+        if(buyAmount.lt(1)) return false;
+        return this.BuyStrict(buyAmount, type);
     }
     getIntervalCost(amount){
         return this.intervalCost.GetBuyCost(amount);

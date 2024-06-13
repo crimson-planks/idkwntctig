@@ -1,7 +1,7 @@
 ;function FormatValue(amount, property={}){
     amount=new Decimal(amount);
     if(!amount.isFinite()){return "Infinite"}
-    if(!game.isBreakOverflow && amount.abs().gte(game.overflowLimit)){
+    if(!game.isBreakOverflow && amount.abs().gte(variables.overflowLimit)){
         return "Error: Overflow"
     }
     return FormatValue_internal(amount,property);
@@ -111,7 +111,7 @@ var app = Vue.createApp({
                             name: "Energy",
                             visible: true,
                         },
-                        extend: {
+                        extend_overflow: {
                             name: "Extend Overflow",
                             visible: true,
                         }
@@ -301,7 +301,7 @@ var app = Vue.createApp({
             return canSoftReset(level);
         },
         ClickAutobuyerBuyButton(autobuyer){
-            if(ClickAutobuyerBuyButton(autobuyer)) this.Update();
+            if(autobuyer.BuyOnce()) this.Update();
         },
         ClickIntervalUpgradeButton(autobuyer){
             if(autobuyer.BuyInterval(1)) this.Update();
@@ -456,7 +456,7 @@ function TriggerLoop(){
     if(game?.statistics?.deflation?.gt(0) && !game.trigger.deflation){
         triggerObject.deflation();
     }
-    if(game.matter.gte(game.overflowLimit) && !game.isBreakOverflow && !game.trigger.overflowForced){
+    if(game.matter.gte(variables.overflowLimit) && !game.isBreakOverflow && !game.trigger.overflowForced){
         triggerObject.overflowForced();
     }
     if(game?.statistics?.overflow?.gt(0) && !game.trigger.overflowReset){
@@ -470,14 +470,21 @@ function UpdateUpgrade(){
 }
 function UpdateDependentVariables(){
     game.clickGain = new Decimal(1);
-    variables.matterPerSecond = Decimal.dZero;
-    if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecond = game.autobuyerObject.matter[0].getPerSecond() ?? new Decimal(0);
+
+    if(game?.autobuyerObject.matter[0]?.active) variables.matterPerSecondSource.autoclicker = game?.autobuyerObject?.matter[0]?.getPerSecond() ?? D(0);
+    variables.matterPerSecond=variables.matterPerSecondSource.autoclicker;
+
+    variables.intervalDivide = new Decimal(2).add(game.upgrade?.overflow?.halveIntervalDivider?.computedValue);
+    
     let tmp=Decimal.dZero;
-    variables.intervalDivide = new Decimal(2).add(game.upgrade?.overflow?.halveIntervalDivider?.computedValue)
     game.autobuyerObject.matter.forEach((autobuyer) => {
         autobuyer.UpdateNormalInterval();
         autobuyer.UpdateAmount();
-        if(autobuyer.active) tmp=tmp.add(autobuyer.getLosePerSecond());
+        if(autobuyer.active){
+            let lps = autobuyer.getLosePerSecond();
+            tmp=tmp.add(lps);
+            variables.loseMatterPerSecondSource.autobuyers[autobuyer.tier]=lps;
+        }
     });
 
     variables.deflatorGain = game.deflation.add(1);
@@ -488,7 +495,7 @@ function UpdateDependentVariables(){
 
     variables.deflationPowerTranslation=game.deflationPower.pow(D(0.5).add(game?.upgrade?.overflow?.deflationPowerExponent?.computedValue)).mul(2);
     
-    variables.energyTranslation = game.energy.max(1e-20).absLog10().add(20).div(4).pow(2).add(1);
+    variables.energyTranslation = game.energy.max(1e-20).absLog10().add(20).div(4).pow(3).add(1);
     
     game.defaultMatter = Decimal.dZero.add(game?.upgrade?.overflow?.startMatter?.computedValue);
     if(game.autobuyerObject.matter[0]) game.autobuyerObject.matter[0].amountByType["startAutoclicker"] = game?.upgrade?.overflow?.startAutoclicker?.computedValue ?? D(0);

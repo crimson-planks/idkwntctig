@@ -3,7 +3,7 @@ const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
 const VERSION = "0.0.3"
 
-const require=function(){throw "required called!!!"}
+//const require=function(){throw "required called!!!"}
 /** variables that aren't saved */
 var variables={
     matterPerSecondSource: {
@@ -11,7 +11,9 @@ var variables={
     },
     loseMatterPerSecondSource: {
         autobuyers: [
-
+            D(),
+            D(),
+            D()
         ]
     },
     matterPerSecond: new Decimal(),
@@ -23,6 +25,7 @@ var variables={
     energyConvertAmount: D(),
     energyConvertToAmount: D(),
     energyTranslation: D(1),
+    overflowLimit: OVERFLOW,
     playTime: 0,
     deflationTime: 0,
     overflowTime: 0,
@@ -33,7 +36,7 @@ var variables={
 const tabs = ["autobuyer","overflow","option","statistics"]
 const subTabs = {
     "autobuyer": ["matter","deflation","overflow"],
-    "overflow": ["upgrade","energy","extend"],
+    "overflow": ["upgrade","energy","extend_overflow"],
     "option": ["saving", "visual"],
     "statistics": ["general"]
 }
@@ -83,7 +86,7 @@ var game = {
         fastestOverflowTime: Infinity,
     },
     isBreakOverflow: false,
-    overflowLimit: OVERFLOW,
+    extensionLevel: D(0),
     overflowPoint: D(),
     energy: D(),
     notation: "scientific",

@@ -1,7 +1,7 @@
 const OVERFLOW = new Decimal(Math.pow(2,31));
 const INFINITY = new Decimal(Number.MAX_VALUE)
 const ETERNITY  = new Decimal("1e9e15")
-const VERSION = "0.0.3"
+const VERSION = "0.0.4"
 
 //const require=function(){throw "required called!!!"}
 /** variables that aren't saved */
@@ -10,11 +10,13 @@ var variables={
         autoclicker: D(),
     },
     loseMatterPerSecondSource: {
-        autobuyers: [
-            D(),
-            D(),
-            D()
-        ]
+        autobuyers: {
+            matter: [
+                D(),
+                D(),
+                D()
+            ]
+        }
     },
     matterPerSecond: new Decimal(),
     loseMatterPerSecond: new Decimal(),
@@ -22,6 +24,8 @@ var variables={
     deflationPowerTranslation: new Decimal(),
     deflationPowerCap: new Decimal(),
     intervalDivide: new Decimal(2),
+    extensionOverflowPointMultiplier: D(1),
+    overflowPointGain: D(1),
     energyConvertAmount: D(),
     energyConvertToAmount: D(),
     energyTranslation: D(1),
@@ -70,6 +74,26 @@ var game = {
         autobuyer: ["matter"],
         option: ["saving", "visual"],
         statistics: ["general"],
+    },
+    extensionCost: {
+        matter: new ExponentialCost({
+            currencyType: "matter",
+            baseCost: new Decimal(1e9),
+            costIncrease: new Decimal(10),
+            maxPossibleBuy: Decimal.dInf,
+        }),
+        deflationPower: new ExponentialCost({
+            currencyType: "deflationPower",
+            baseCost: new Decimal(10),
+            costIncrease: new Decimal(5),
+            maxPossibleBuy: Decimal.dInf,
+        }),
+        overflow: new ExponentialCost({
+            currencyType: "overflow",
+            baseCost: new Decimal(1),
+            costIncrease: new Decimal(2),
+            maxPossibleBuy: Decimal.dInf,
+        }),
     },
     /** 1: deflation, 2: overflow */
     tabLevel: 0,

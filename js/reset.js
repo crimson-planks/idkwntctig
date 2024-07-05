@@ -4,7 +4,7 @@ function canSoftReset(level){
         return game.matter.gte(game.softReset0Cost) && !game.trigger.overflowForced;
     }
     if(level===1){
-        return game.matter.gte(game.variables)
+        return game.matter.gte(variables.overflowLimit)
     }
 }
 function softReset(level){
@@ -56,7 +56,8 @@ function softResetForced(level){
         }
         game.lastOverflowTime = Date.now();
         game?.upgrade?.overflow?.overflowTimeMultiplier?.UpdateValue();
-        game.overflowPoint=game.overflowPoint.add(1).add(game.upgrade?.overflow?.overflowTimeMultiplier?.computedValue ?? 0);
+
+        game.overflowPoint=game.overflowPoint.add(variables.overflowPointGain);
         
     }
     GameLoop();

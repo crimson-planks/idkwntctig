@@ -39,7 +39,7 @@ class Upgrade {
                     else this.computedValue = D(50).mul(Decimal.dTwo.pow(this.value));
                     break;
                 case "halveIntervalDivider":
-                    this.value = this.amount.mul(0.1);
+                    this.value = this.amount.mul(0.2);
                     this.computedValue = this.value;
                     UpdateDependentVariables();
                     break;
@@ -157,7 +157,7 @@ var upgradeObject = {
                 currencyType: "overflow",
                 baseCost: new Decimal(1),
                 costIncrease: new Decimal(10),
-                maxPossibleBuy: new Decimal(20),
+                maxPossibleBuy: new Decimal(5),
             })
         }),
         startIntervalReducer: new Upgrade({
@@ -180,7 +180,7 @@ var upgradeObject = {
                 currencyType: "overflow",
                 baseCost: new Decimal(1),
                 costIncrease: new Decimal(5),
-                maxPossibleBuy: new Decimal(5),
+                maxPossibleBuy: Decimal.dInf,
             }),
             value: new Decimal(),
         })

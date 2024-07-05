@@ -40,6 +40,9 @@ class Autobuyer{
     }
     getLosePerSecond(){
         if(this.tier==0) return new Decimal(0);
+        if(this.type==="overflow" && this.tier==="metaBuy"){
+            return game?.autobuyerObject?.matter[this.option.buyId]?.GetBuyCost(this.getPerSecond()) ?? D(0);
+        }
         return game.autobuyerObject.matter[this.tier-1].GetBuyCost(this.getPerSecond());
         //throw "NotImplemented"
     }
@@ -139,9 +142,9 @@ class Autobuyer{
         if(!this.active) return;
         if(this.amount<=new Decimal(0)) return;
         this.timer+=Date.now()-game.lastUpdated;
-        if(this.timer>=this.interval){
+        if(D(this.timer).gte(this.interval)){
             let amount = Decimal.floor(Decimal.div(this.timer,this.interval));
-            this.timer = this.timer%this.interval;
+            this.timer = D(this.timer).mod(this.interval).toNumber();
             
             this.AutoBuy(amount);
             appThis.Update();

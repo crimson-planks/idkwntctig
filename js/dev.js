@@ -48,6 +48,8 @@ const dev={
                 game.upgrade.overflow[key].cost.baseCost = upgradeObject.overflow[key].cost.baseCost;
                 game.upgrade.overflow[key].cost.initialCost = upgradeObject.overflow[key].cost.initialCost;
                 game.upgrade.overflow[key].cost.maxPossibleBuy = upgradeObject.overflow[key].cost.maxPossibleBuy;
+                game.upgrade.overflow[key].amount = upgradeObject.overflow[key].cost.maxPossibleBuy
+                                                         .min(game.upgrade.overflow[key].amount);
                 game.upgrade.overflow[key].SyncAmount();
             }
         });

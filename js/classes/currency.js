@@ -1,24 +1,30 @@
 class Currency {
     /**
      * 
-     * @param {{name: string,abbreviation: string, get: Function,set: Function}} props 
+     * @param {{displayName: string,abbreviation: string, get: Function, set: Function, spend: Function, produce: Function}} props 
      */
     constructor(props){
         this.name = props.name;
+        this.displayName = props.displayName;
         this.abbreviation = props.abbreviation;
         this.get = props.get;
         this.set = props.set;
+        this.spendExtra = props.spendExtra ?? ((amount)=>{});
+        this.produceExtra = props.produceExtra ?? ((amount)=>{});
     }
     spend(amount){
         this.set(this.get().minus(amount));
+        this.spendExtra(amount);
     }
     produce(amount){
-        this.set(this.get().add(amount))
+        this.set(this.get().add(amount));
+        this.produceExtra(amount);
     }
 }
 var currencies = {
     dev: new Currency({
-        name: "dev currency",
+        name: "dev",
+        displayName: "dev currency",
         abbreviation: "DEV",
         get(){
             return dev.currency;
@@ -28,17 +34,20 @@ var currencies = {
         }
     }),
     matter: new Currency({
-        name: "matter",
+        displayName: "matter",
         abbreviation: "MT",
         get(){
             return game.matter;
         },
         set(value){
             game.matter=D(value);
+        },
+        produceExtra(amount){
+            game.statistics.matterProduced=game.statistics.matterProduced.add(amount);
         }
     }),
     deflationPower: new Currency({
-        name: "deflation power",
+        displayName: "deflation power",
         abbreviation: "DPW",
         get(){
             return game.deflationPower;
@@ -48,7 +57,7 @@ var currencies = {
         }
     }),
     deflator: new Currency({
-        name: "deflator",
+        displayName: "deflator",
         abbreviation: "DF",
         get(){
             return game.deflator;
@@ -58,7 +67,7 @@ var currencies = {
         }
     }),
     overflow: new Currency({
-        name: "overflow points",
+        displayName: "overflow points",
         abbreviation: "OP",
         get(){
             return game.overflowPoint;
@@ -68,7 +77,7 @@ var currencies = {
         }
     }),
     energy: new Currency({
-        name: "joules",
+        displayName: "joules",
         "abbreviation": "J",
         get(){
             return game.energy;

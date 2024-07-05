@@ -91,15 +91,16 @@
                     Energy: {{visual.energy}}<br>
                     <label for="energy-convert-input">Amount to convert: </label>
                     <br>
-                    This translates into dividing the interval of matter autobuyers by {{visual.energyTranslation}}<br>
+                    This translates into dividing the interval of the matter autoclicker by {{visual.energyTranslation}}<br>
                     <input id="energy-convert-input" type="text" v-model="input.energyConvertAmount" @change="ChangeEnergyConvertAmount()">
                     <button @click="ClickConvertEnergyButton">Click to turn matter into energy ({{visual.energyConvertAmount}} -> {{visual.energyConvertToAmount}} J)</button>
                 </div>
                 <div v-show="visual.currentSubTab==='extend_overflow'">
-                    Extension Level: 0
-                    <button @click="console.log(1)">Spend 1 matter</button>
-                    <button @click="console.log(2)">Spend 1 deflation power</button>
-                    <button @click="console.log(3)">Spend 1 overflow point</button>
+                    Extension Level: {{visual.extensionLevel}}<br>
+                    Extending the overflow limit to {{visual.overflowLimit}}, and multiplying overflow point gain by {{visual.extensionOverflowPointMultiplier}}<br>
+                    <button @click="ClickConvertExtensionLevel('matter')">Spend {{visual.extensionCost.matter}} matter</button>
+                    <button @click="ClickConvertExtensionLevel('deflationPower')">Spend {{visual.extensionCost.deflationPower}} deflation power</button>
+                    <button @click="ClickConvertExtensionLevel('overflow')">Spend {{visual.extensionCost.overflow}} overflow point</button>
                 </div>
             </div>
             <div v-show="visual.currentTab==='option'">
